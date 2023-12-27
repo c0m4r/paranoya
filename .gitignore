@@ -4,5 +4,6 @@
 /lib/python3.11/
 /lib64
 /loki.pid
+/loki-upgrade.log
 /pyvenv.cfg
 /signature-base
