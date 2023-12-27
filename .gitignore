@@ -3,5 +3,6 @@
 /lib/__pycache__/
 /lib/python3.11/
 /lib64
+/loki.pid
 /pyvenv.cfg
 /signature-base
