@@ -38,6 +38,8 @@ Start as a daemon and bind on default localhost:1337
 python3 loki.py -s 20000 -d --noprocscan --noindicator --dontwait --intense --csv --nolog --force
 ```
 
+You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
+
 #### Client
 
 ```
