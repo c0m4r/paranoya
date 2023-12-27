@@ -4,7 +4,7 @@ A fork of [Loki](https://github.com/Neo23x0/Loki), modified to support single fi
 
 The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. This way, we can use Loki to scan, for example, files uploaded to the server.
 
-Modifications aims to preserve original functionality (although I only care about Linux, so I do not guarantee compatibility with other platforms).
+Modifications tries to preserve original functionalit, although I only care about Linux, so I do not guarantee compatibility with other platforms.
 
 ## Installation
 
