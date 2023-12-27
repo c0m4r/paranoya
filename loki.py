@@ -491,10 +491,13 @@ class Loki(object):
                     # Now print the total result
                     if total_score >= args.a:
                         message_type = "ALERT"
+                        threading.current_thread().message = "ALERT"
                     elif total_score >= args.w:
                         message_type = "WARNING"
+                        threading.current_thread().message = "WARNING"
                     elif total_score >= args.n:
                         message_type = "NOTICE"
+                        threading.current_thread().message = "NOTICE"
 
                     if total_score < args.n:
                         continue
@@ -1665,25 +1668,27 @@ if __name__ == '__main__':
                size = 1024
                while True:
                    try:
+                       threading.current_thread().message = ''
                        data = client_socket.recv(size)
                        print('Received: ' + data.decode() + ' from: ' + str(address[0]) + ':' + str(address[1]))
                        loki.scan_path(data.decode())
                        # Result ----------------------------------------------------------
                        logger.log("NOTICE", "Results", "Results: {0} alerts, {1} warnings, {2} notices".format(logger.alerts, logger.warnings, logger.notices))
-                       if logger.alerts:
+                       if threading.current_thread().message == 'ALERT':
                            logger.log("RESULT", "Results", "Indicators detected!")
                            logger.log("RESULT", "Results", "Loki recommends checking the elements on virustotal.com or Google and triage with a "
                                                 "professional tool like THOR https://nextron-systems.com/thor in corporate networks.")
                            client_socket.send('RESULT: Indicators detected!'.encode())
-                           logger.alerts = 0
-                       elif logger.warnings:
+                           #logger.alerts = 0
+                       elif threading.current_thread().message == 'WARNING':
                            logger.log("RESULT", "Results", "Suspicious objects detected!")
                            logger.log("RESULT", "Results", "Loki recommends a deeper analysis of the suspicious objects.")
                            client_socket.send('RESULT: Suspicious objects detected!'.encode())
-                           logger.warnings = 0
+                           #logger.warnings = 0
                        else:
                            logger.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN.")
                            client_socket.send('RESULT: SYSTEM SEEMS TO BE CLEAN.'.encode())
+                           #logger.notices = 0
 
                        logger.log("INFO", "Results", "Please report false positives via https://github.com/Neo23x0/signature-base")
                        logger.log("NOTICE", "Results", "Finished LOKI Scan SYSTEM: %s TIME: %s" % (getHostname(os_platform), getSyslogTimestamp()))
@@ -1696,7 +1701,7 @@ if __name__ == '__main__':
            print('Listening...')
            while True:
                client, addr = server.accept()
-               Thread(target=handle_client, args=(client, addr)).start()
+               Thread(target=handle_client, args=(client, addr), name=str(addr[0]) + ":" + str(addr[1])).start()
 
         else:
            loki.scan_path(defaultPath)
