@@ -43,8 +43,8 @@ python3 loki_client.py /path/to/scan
 Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 
 ```diff
---- loki.py.original	2023-12-27 15:10:45.935734777 +0100
-+++ loki.py	2023-12-27 10:25:00.047296255 +0100
+--- loki.py.original	2023-12-27 18:24:21.888708331 +0100
++++ loki.py	2023-12-27 18:19:09.527285982 +0100
 @@ -48,6 +48,10 @@
  from lib.doublepulsar import DoublePulsar
  from lib.vuln_checker import VulnChecker
@@ -95,7 +95,22 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
              # Loop through files
              for filename in files:
                  try:
-@@ -1468,6 +1484,9 @@
+@@ -1452,6 +1468,14 @@
+         print('LOKI\'s work has been interrupted by a human. Returning to Asgard.')
+     sys.exit(0)
+ 
++def signal_handler_term(signal_name, frame):
++    try:
++        os.remove("loki.pid")
++    except:
++        pass
++    print('SIGTERM')
++    sys.exit(0)
++
+ def main():
+     """
+     Argument parsing function
+@@ -1468,6 +1492,9 @@
      parser.add_argument('-a', help='Alert score', metavar='alert-level', default=100)
      parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
      parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
@@ -105,7 +120,25 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
      parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
      parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
      parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
-@@ -1619,6 +1638,50 @@
+@@ -1532,9 +1559,17 @@
+     # Signal handler for CTRL+C
+     signal_module.signal(signal_module.SIGINT, signal_handler)
+ 
++    # Signal handler for SIGTERM
++    signal_module.signal(signal_module.SIGTERM, signal_handler_term)
++
+     # Argument parsing
+     args = main()
+ 
++    # Save pidfile
++    if args.d == True:
++        with open('loki.pid', 'w', encoding='utf-8') as f:
++            f.write(str(os.getpid()))
++
+     # Remove old log file
+     if os.path.exists(args.l):
+         os.remove(args.l)
+@@ -1619,6 +1654,50 @@
                  loki.scan_path(defaultPath)
  
          # Linux & macOS
