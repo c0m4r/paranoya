@@ -18,6 +18,16 @@ pip3 install -r requirements.txt
 deactivate
 ```
 
+## Patch file
+
+To apply a patch file using original Loki repo you have to convert original loki.py before and after due to DOS line-ending characters used by original author:
+
+```
+dos2unix loki.py
+patch < loki-daemonized.patch
+unix2dos loki.py
+```
+
 ## Usage
 
 #### Daemon (server)
