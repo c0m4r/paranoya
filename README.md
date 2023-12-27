@@ -36,10 +36,11 @@ python3 loki_client.py /path/to/scan
 
 ## Changes
 
+* Focuses on Linux
 * Single file scan if given path is a file
 * Daemon mode (-d) with listening socket (--listen-host, --listen-port) accepting scans requested from loki_client.py
 
-loki.py.original: https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
+Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 
 ```diff
 --- loki.py.original	2023-12-27 15:10:45.935734777 +0100
