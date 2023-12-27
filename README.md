@@ -1,4 +1,4 @@
-## Loki (daemonized) - Simple IOC and YARA Scanner (fork)
+## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
 A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner.
 
@@ -203,4 +203,4 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 ---
 ## Licensed under GPL 3.0
 * Loki - Simple IOC Scanner Copyright (c) 2015 Florian Roth
-* Modifications by c0m4r 2023
+* Loki (daemonized) - Simple IOC and YARA Scanner fork (c) 2023 c0m4r
