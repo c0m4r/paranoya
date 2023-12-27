@@ -1,6 +1,6 @@
-## Loki (daemonized) - Simple IOC and YARA Scanner fork
+## Loki (daemonized) - Simple IOC and YARA Scanner (fork)
 
-A fork of [Loki](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner.
+A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner.
 
 The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. This way, we can use Loki to scan, for example, files uploaded to the server.
 
