@@ -1468,6 +1468,14 @@ def signal_handler(signal_name, frame):
         print('LOKI\'s work has been interrupted by a human. Returning to Asgard.')
     sys.exit(0)
 
+def signal_handler_term(signal_name, frame):
+    try:
+        os.remove("loki.pid")
+    except:
+        pass
+    print('SIGTERM')
+    sys.exit(0)
+
 def main():
     """
     Argument parsing function
@@ -1551,8 +1559,16 @@ if __name__ == '__main__':
     # Signal handler for CTRL+C
     signal_module.signal(signal_module.SIGINT, signal_handler)
 
+    # Signal handler for SIGTERM
+    signal_module.signal(signal_module.SIGTERM, signal_handler_term)
+
     # Argument parsing
     args = main()
+
+    # Save pidfile
+    if args.d == True:
+        with open('loki.pid', 'w', encoding='utf-8') as f:
+            f.write(str(os.getpid()))
 
     # Remove old log file
     if os.path.exists(args.l):
