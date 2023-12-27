@@ -56,7 +56,7 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 
 ```diff
 --- loki.py.original	2023-12-27 18:24:21.888708331 +0100
-+++ loki.py	2023-12-27 18:19:09.527285982 +0100
++++ loki.py	2023-12-28 00:38:34.014950186 +0100
 @@ -48,6 +48,10 @@
  from lib.doublepulsar import DoublePulsar
  from lib.vuln_checker import VulnChecker
@@ -107,7 +107,21 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
              # Loop through files
              for filename in files:
                  try:
-@@ -1452,6 +1468,14 @@
+@@ -475,10 +491,13 @@
+                     # Now print the total result
+                     if total_score >= args.a:
+                         message_type = "ALERT"
++                        threading.current_thread().message = "ALERT"
+                     elif total_score >= args.w:
+                         message_type = "WARNING"
++                        threading.current_thread().message = "WARNING"
+                     elif total_score >= args.n:
+                         message_type = "NOTICE"
++                        threading.current_thread().message = "NOTICE"
+ 
+                     if total_score < args.n:
+                         continue
+@@ -1452,6 +1471,14 @@
          print('LOKI\'s work has been interrupted by a human. Returning to Asgard.')
      sys.exit(0)
  
@@ -122,7 +136,7 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
  def main():
      """
      Argument parsing function
-@@ -1468,6 +1492,9 @@
+@@ -1468,6 +1495,9 @@
      parser.add_argument('-a', help='Alert score', metavar='alert-level', default=100)
      parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
      parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
@@ -132,7 +146,7 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
      parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
      parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
      parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
-@@ -1532,9 +1559,17 @@
+@@ -1532,9 +1562,17 @@
      # Signal handler for CTRL+C
      signal_module.signal(signal_module.SIGINT, signal_handler)
  
@@ -150,7 +164,7 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
      # Remove old log file
      if os.path.exists(args.l):
          os.remove(args.l)
-@@ -1619,6 +1654,50 @@
+@@ -1619,6 +1657,52 @@
                  loki.scan_path(defaultPath)
  
          # Linux & macOS
@@ -165,25 +179,27 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 +               size = 1024
 +               while True:
 +                   try:
++                       threading.current_thread().message = ''
 +                       data = client_socket.recv(size)
 +                       print('Received: ' + data.decode() + ' from: ' + str(address[0]) + ':' + str(address[1]))
 +                       loki.scan_path(data.decode())
 +                       # Result ----------------------------------------------------------
 +                       logger.log("NOTICE", "Results", "Results: {0} alerts, {1} warnings, {2} notices".format(logger.alerts, logger.warnings, logger.notices))
-+                       if logger.alerts:
++                       if threading.current_thread().message == 'ALERT':
 +                           logger.log("RESULT", "Results", "Indicators detected!")
 +                           logger.log("RESULT", "Results", "Loki recommends checking the elements on virustotal.com or Google and triage with a "
 +                                                "professional tool like THOR https://nextron-systems.com/thor in corporate networks.")
 +                           client_socket.send('RESULT: Indicators detected!'.encode())
-+                           logger.alerts = 0
-+                       elif logger.warnings:
++                           #logger.alerts = 0
++                       elif threading.current_thread().message == 'WARNING':
 +                           logger.log("RESULT", "Results", "Suspicious objects detected!")
 +                           logger.log("RESULT", "Results", "Loki recommends a deeper analysis of the suspicious objects.")
 +                           client_socket.send('RESULT: Suspicious objects detected!'.encode())
-+                           logger.warnings = 0
++                           #logger.warnings = 0
 +                       else:
 +                           logger.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN.")
 +                           client_socket.send('RESULT: SYSTEM SEEMS TO BE CLEAN.'.encode())
++                           #logger.notices = 0
 +
 +                       logger.log("INFO", "Results", "Please report false positives via https://github.com/Neo23x0/signature-base")
 +                       logger.log("NOTICE", "Results", "Finished LOKI Scan SYSTEM: %s TIME: %s" % (getHostname(os_platform), getSyslogTimestamp()))
@@ -196,10 +212,11 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 +           print('Listening...')
 +           while True:
 +               client, addr = server.accept()
-+               Thread(target=handle_client, args=(client, addr)).start()
++               Thread(target=handle_client, args=(client, addr), name=str(addr[0]) + ":" + str(addr[1])).start()
 +
          else:
             loki.scan_path(defaultPath)
+ 
 ```
 
 ---
