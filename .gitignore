@@ -1,5 +1,7 @@
+/*.cache
 /bin/
 /lib/__pycache__/
 /lib/python3.11/
 /lib64
 /pyvenv.cfg
+/signature-base

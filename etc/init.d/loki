@@ -34,7 +34,7 @@ update() {
 	cd $workdir
 	stop
 	. bin/activate
-	./loki-upgrader.py
+	./loki-upgrader.py --sigsonly --nolog
 	deactivate
 	start
 }
