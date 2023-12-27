@@ -9,7 +9,7 @@ Modifications aims to preserve original functionality (although I only care abou
 ## Installation
 
 ```
-git clone https://github.com/c0m4r/Loki.git
+git clone https://github.com/c0m4r/Loki-daemonized.git Loki
 cd Loki
 python3 -m venv .
 . bin/activate
