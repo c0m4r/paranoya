@@ -24,6 +24,12 @@ Modifications tries to preserve original functionality, although I only care abo
 apk add bash python3 python3-dev py3-pip gcc musl-dev linux-headers openssl-dev
 ```
 
+#### Debian / Ubuntu
+
+```
+apt -y install bash python3 python3-dev python3-pip python3-venv libssl-dev
+```
+
 ## Installation
 
 ```bash
