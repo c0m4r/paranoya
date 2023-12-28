@@ -6,7 +6,7 @@ extra_started_commands="update"
 workdir=/opt/Loki-daemonized
 pidfile=${workdir}/loki.pid
 command=/usr/bin/env
-command_args="python3 loki.py -s 20000 -d --noindicator --csv --nolog --intense"
+command_args="python3 loki.py --listen-host localhost --listen-port 1337 -d -s 20000 --noindicator --csv --nolog --intense --force"
 
 depend() {
 	need net
