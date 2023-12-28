@@ -27,7 +27,8 @@ cd Loki-daemonized
 python3 -m venv .
 . bin/activate
 pip3 install -r requirements.txt
-./loki-upgrader.py
+./loki-upgrader.py --sigsonly
+python3 loki.py -d --nolog --intense
 deactivate
 ```
 
