@@ -1,5 +1,5 @@
---- loki.py.original	2023-12-28 14:31:22.375121479 +0100
-+++ loki.py	2023-12-28 14:31:51.105255142 +0100
+--- loki.py.original	2023-12-28 15:01:41.183574782 +0100
++++ loki.py	2023-12-28 21:41:23.125650006 +0100
 @@ -48,6 +48,10 @@
  from lib.doublepulsar import DoublePulsar
  from lib.vuln_checker import VulnChecker
@@ -79,17 +79,18 @@
  def main():
      """
      Argument parsing function
-@@ -1468,6 +1495,9 @@
+@@ -1468,6 +1495,10 @@
      parser.add_argument('-a', help='Alert score', metavar='alert-level', default=100)
      parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
      parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
 +    parser.add_argument('-d', help='Run as a daemon', action='store_true', default=False)
-+    parser.add_argument('--listen-host', help='Listen host for daemon mode', metavar='listen-host', default='localhost')
-+    parser.add_argument('--listen-port', help='Listen port for daemon mode', metavar='listen-port', type=int, default=1337)
++    parser.add_argument('--listen-host', help='Listen host for daemon mode (default: localhost)', default='localhost')
++    parser.add_argument('--listen-port', help='Listen port for daemon mode (default: 1337)', type=int, default=1337)
++    parser.add_argument('--auth', help='Auth key, only in daemon mode', default='')
      parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
      parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
      parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
-@@ -1532,9 +1562,17 @@
+@@ -1532,9 +1563,17 @@
      # Signal handler for CTRL+C
      signal_module.signal(signal_module.SIGINT, signal_handler)
  
@@ -107,7 +108,7 @@
      # Remove old log file
      if os.path.exists(args.l):
          os.remove(args.l)
-@@ -1553,8 +1591,17 @@
+@@ -1553,8 +1592,17 @@
          updateLoki(sigsOnly=False)
          sys.exit(0)
  
@@ -126,7 +127,7 @@
  
      # Loki
      loki = Loki(args.intense)
-@@ -1619,6 +1666,45 @@
+@@ -1619,6 +1667,63 @@
                  loki.scan_path(defaultPath)
  
          # Linux & macOS
@@ -138,14 +139,32 @@
 +           server.listen(5)
 +           
 +           def handle_client(client_socket, address):
-+               size = 1024
++               size = 2048
 +               while True:
 +                   try:
 +                       clientid = threading.current_thread().name
 +                       threading.current_thread().message = ''
 +                       data = client_socket.recv(size)
++                       scan_path = data.decode().split(" ")[0]
++                       if args.auth:
++                           server_authkey = args.auth
++                           try:
++                               client_authkey = data.decode().split(" ")[1]
++                           except:
++                               logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " no valid authorization")
++                               client_socket.send('authorization required'.encode())
++                               client_socket.close()
++                               return False
++
++                           if client_authkey == server_authkey:
++                               logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " accepted")
++                           else:
++                               logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " unauthorized")
++                               client_socket.send('unauthorized'.encode())
++                               client_socket.close()
++                               return False
 +                       logger.log("INFO", "Init", "Received: " + data.decode() + " from: " + str(address[0]) + ":" + str(address[1]))
-+                       loki.scan_path(data.decode())
++                       loki.scan_path(scan_path)
 +                       # Result ----------------------------------------------------------
 +                       if threading.current_thread().message == 'ALERT':
 +                           logger.log("RESULT", "Results", "Indicators detected! (Client: " + clientid + ")")
