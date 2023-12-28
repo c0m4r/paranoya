@@ -28,8 +28,7 @@ python3 -m venv .
 . bin/activate
 pip3 install -r requirements.txt
 ./loki-upgrader.py --sigsonly --nolog
-# just to test first run it once in foreground
-python3 loki.py -d -s 20000 --nolog --intense --force
+python3 loki.py --nolog --intense --force -p ./test
 deactivate
 ```
 
