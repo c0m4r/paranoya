@@ -1668,37 +1668,30 @@ if __name__ == '__main__':
                size = 1024
                while True:
                    try:
+                       clientid = threading.current_thread().name
                        threading.current_thread().message = ''
                        data = client_socket.recv(size)
-                       print('Received: ' + data.decode() + ' from: ' + str(address[0]) + ':' + str(address[1]))
+                       logger.log("INFO", "Init", "Received: " + data.decode() + " from: " + str(address[0]) + ":" + str(address[1]))
                        loki.scan_path(data.decode())
                        # Result ----------------------------------------------------------
-                       logger.log("NOTICE", "Results", "Results: {0} alerts, {1} warnings, {2} notices".format(logger.alerts, logger.warnings, logger.notices))
                        if threading.current_thread().message == 'ALERT':
-                           logger.log("RESULT", "Results", "Indicators detected!")
-                           logger.log("RESULT", "Results", "Loki recommends checking the elements on virustotal.com or Google and triage with a "
-                                                "professional tool like THOR https://nextron-systems.com/thor in corporate networks.")
+                           logger.log("RESULT", "Results", "Indicators detected! (Client: " + clientid + ")")
                            client_socket.send('RESULT: Indicators detected!'.encode())
-                           #logger.alerts = 0
                        elif threading.current_thread().message == 'WARNING':
-                           logger.log("RESULT", "Results", "Suspicious objects detected!")
-                           logger.log("RESULT", "Results", "Loki recommends a deeper analysis of the suspicious objects.")
+                           logger.log("RESULT", "Results", "Suspicious objects detected! (Client: " + clientid + ")")
                            client_socket.send('RESULT: Suspicious objects detected!'.encode())
-                           #logger.warnings = 0
                        else:
-                           logger.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN.")
+                           logger.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN. (Client: " + clientid + ")")
                            client_socket.send('RESULT: SYSTEM SEEMS TO BE CLEAN.'.encode())
-                           #logger.notices = 0
 
-                       logger.log("INFO", "Results", "Please report false positives via https://github.com/Neo23x0/signature-base")
-                       logger.log("NOTICE", "Results", "Finished LOKI Scan SYSTEM: %s TIME: %s" % (getHostname(os_platform), getSyslogTimestamp()))
+                       logger.log("NOTICE", "Results", "Finished LOKI Scan CLIENT: %s SYSTEM: %s TIME: %s" % (clientid, getHostname(os_platform), getSyslogTimestamp()))
                        client_socket.close()
                        return False
                    except socket.error:
                        client_socket.close()
                        return False
 
-           print('Listening...')
+           logger.log("INFO", "Init", "Listening on " + args.listen_host + ":" + str(args.listen_port))
            while True:
                client, addr = server.accept()
                Thread(target=handle_client, args=(client, addr), name=str(addr[0]) + ":" + str(addr[1])).start()
