@@ -18,6 +18,12 @@ Modifications tries to preserve original functionality, although I only care abo
   * [rfc5424-logging-handler](https://pypi.org/project/rfc5424-logging-handler/)
   * [yara-python](https://pypi.org/project/yara-python/)
 
+#### Alpine Linux
+
+```
+apk add bash python3 python3-dev py3-pip gcc musl-dev linux-headers openssl-dev
+```
+
 ## Installation
 
 ```bash
