@@ -1,3 +1,5 @@
+![loki-daemonized-icon.png](loki-daemonized-icon.png)
+
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
 A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner.
