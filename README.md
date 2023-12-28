@@ -32,9 +32,12 @@ deactivate
 
 ## Patch file
 
-To apply a patch file using original Loki repo you have to convert original loki.py before and after due to DOS line-ending characters used by original author:
+Patch file contains changes made to original loki.py.
+
+To apply the patch on original Loki you have to convert loki.py before and after due to DOS line-ending characters used by original author, which the patch does not have.
 
 ```
+wget https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 dos2unix loki.py
 patch < loki-daemonized.patch
 unix2dos loki.py
