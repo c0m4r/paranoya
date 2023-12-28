@@ -73,6 +73,7 @@ python3 loki_client.py /path/to/scan
 * Focuses on Linux
 * Single file scan if given path is a file
 * Daemon mode (-d) with listening socket (--listen-host, --listen-port) accepting scans requested from loki_client.py
+* Optional auth key (--auth) in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
 
 Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 
