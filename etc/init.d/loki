@@ -3,10 +3,10 @@ description="Loki (daemonized) Simple IOC And Yara Scanner (fork)"
 extra_commands=""
 extra_started_commands="update"
 
-workdir=/opt/Loki
+workdir=/opt/Loki-daemonized
 pidfile=${workdir}/loki.pid
 command=/usr/bin/env
-command_args="python3 loki.py -s 20000 -d --noprocscan --noindicator --dontwait --intense --csv --nolog --force"
+command_args="python3 loki.py -s 20000 -d --noindicator --csv --nolog --intense"
 
 depend() {
 	need net
