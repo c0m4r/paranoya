@@ -27,8 +27,8 @@ cd Loki-daemonized
 python3 -m venv .
 . bin/activate
 pip3 install -r requirements.txt
-./loki-upgrader.py --sigsonly
-python3 loki.py -d --nolog --intense
+./loki-upgrader.py --sigsonly --nolog
+python3 loki.py -d -s 20000 --nolog --intense
 deactivate
 ```
 
@@ -52,7 +52,7 @@ unix2dos loki.py
 Start as a daemon and bind on default localhost:1337
 
 ```
-python3 loki.py -s 20000 -d --noindicator --csv --nolog --force --intense
+python3 loki.py -d -s 20000 --noindicator --csv --nolog --intense &> /dev/null &
 ```
 
 You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
