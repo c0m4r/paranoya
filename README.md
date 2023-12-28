@@ -20,7 +20,7 @@ Modifications tries to preserve original functionality, although I only care abo
 
 ## Installation
 
-```
+```bash
 cd /opt
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
@@ -28,7 +28,8 @@ python3 -m venv .
 . bin/activate
 pip3 install -r requirements.txt
 ./loki-upgrader.py --sigsonly --nolog
-python3 loki.py -d -s 20000 --nolog --intense
+# just to test first run it once in foreground
+python3 loki.py -d -s 20000 --nolog --intense --force
 deactivate
 ```
 
@@ -38,7 +39,7 @@ Patch file contains changes made to original loki.py.
 
 To apply the patch on original Loki you have to convert loki.py before and after due to DOS line-ending characters used by original author, which the patch does not have.
 
-```
+```bash
 wget https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 dos2unix loki.py
 patch < loki-daemonized.patch
@@ -51,14 +52,16 @@ unix2dos loki.py
 
 Start as a daemon and bind on default localhost:1337
 
-```
+```bash
 cd Loki-daemonized
 . bin/activate
-python3 loki.py -d -s 20000 --noindicator --csv --nolog --intense &> /dev/null &
+python3 loki.py -d -s 20000 --noindicator --csv --nolog --intense --force &> /dev/null &
 deactivate
 ```
 
 You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
+
+Check example [/etc/init.d/loki](/etc/init.d/loki) for OpenRC integration.
 
 #### Client
 
