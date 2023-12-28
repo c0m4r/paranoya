@@ -1,4 +1,4 @@
-![loki-daemonized-icon.png](loki-daemonized-icon.png)
+![img/loki-daemonized-icon.png](img/loki-daemonized-icon.png)
 
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
@@ -79,65 +79,11 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 
 Diff: [loki-daemonized.patch](loki-daemonized.patch)
 
-## Usage
+## Screenshots
 
-```
-usage: loki.py [-h] [-p path] [-s kilobyte] [-l log-file] [-r remote-loghost] [-t remote-syslog-port] [-a alert-level] [-w warning-level] [-n notice-level] [-d] [--listen-host LISTEN_HOST]
-               [--listen-port LISTEN_PORT] [--auth AUTH] [--allhds] [--alldrives] [--printall] [--allreasons] [--noprocscan] [--nofilescan] [--vulnchecks] [--nolevcheck] [--scriptanalysis] [--rootkit]
-               [--noindicator] [--dontwait] [--intense] [--csv] [--onlyrelevant] [--nolog] [--update] [--debug] [--maxworkingset MAXWORKINGSET] [--syslogtcp] [--logfolder log-folder] [--nopesieve]
-               [--pesieveshellc] [--python PYTHON] [--nolisten] [--excludeprocess EXCLUDEPROCESS] [--force] [--version]
+![img/loki-daemonized-screen1.png](img/loki-daemonized-screen1.png)
 
-Loki - Simple IOC Scanner
-
-options:
-  -h, --help            show this help message and exit
-  -p path               Path to scan
-  -s kilobyte           Maximum file size to check in KB (default 5000 KB)
-  -l log-file           Log file
-  -r remote-loghost     Remote syslog system
-  -t remote-syslog-port
-                        Remote syslog port
-  -a alert-level        Alert score
-  -w warning-level      Warning score
-  -n notice-level       Notice score
-  -d                    Run as a daemon
-  --listen-host LISTEN_HOST
-                        Listen host for daemon mode (default: localhost)
-  --listen-port LISTEN_PORT
-                        Listen port for daemon mode (default: 1337)
-  --auth AUTH           Auth key, only in daemon mode
-  --allhds              Scan all local hard drives (Windows only)
-  --alldrives           Scan all drives (including network drives and removable media)
-  --printall            Print all files that are scanned
-  --allreasons          Print all reasons that caused the score
-  --noprocscan          Skip the process scan
-  --nofilescan          Skip the file scan
-  --vulnchecks          Run the vulnerability checks
-  --nolevcheck          Skip the Levenshtein distance check
-  --scriptanalysis      Statistical analysis for scripts to detect obfuscated code (beta)
-  --rootkit             Skip the rootkit check
-  --noindicator         Do not show a progress indicator
-  --dontwait            Do not wait on exit
-  --intense             Intense scan mode (also scan unknown file types and all extensions)
-  --csv                 Write CSV log format to STDOUT (machine processing)
-  --onlyrelevant        Only print warnings or alerts
-  --nolog               Don't write a local log file
-  --update              Update the signatures from the "signature-base" sub repository
-  --debug               Debug output
-  --maxworkingset MAXWORKINGSET
-                        Maximum working set size of processes to scan (in MB, default 100 MB)
-  --syslogtcp           Use TCP instead of UDP for syslog logging
-  --logfolder log-folder
-                        Folder to use for logging when log file is not specified
-  --nopesieve           Do not perform pe-sieve scans
-  --pesieveshellc       Perform pe-sieve shellcode scan
-  --python PYTHON       Override default python path
-  --nolisten            Dot not show listening connections
-  --excludeprocess EXCLUDEPROCESS
-                        Specify an executable name to exclude from scans, can be used multiple times
-  --force               Force the scan on a certain folder (even if excluded with hard exclude in LOKI's code
-  --version             Shows welcome text and version of loki, then exit
-```
+![img/loki-daemonized-screen2.png](img/loki-daemonized-screen2.png)
 
 ---
 ## Licensed under GPL 3.0
