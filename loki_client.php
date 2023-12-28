@@ -3,9 +3,11 @@
 $host = "127.0.0.1";
 $port = 1337;
 
-$message = $argv[1];
+$path = $argv[1];
+$auth = $argv[2];
+$message = $path . " " . $auth;
 
-if(!is_file($message) and !is_dir($message))
+if(!is_file($path) and !is_dir($path))
 {
     die("path: $message doesn't exist\n");
 }
@@ -15,7 +17,7 @@ $result = @socket_connect($socket, $host, $port);
 
 if($result) {
     socket_write($socket, $message, strlen($message)) or die("Could not send data to server\n");
-    $result = socket_read ($socket, 1024) or die("Could not read server response\n");
+    $result = socket_read ($socket, 2048) or die("Could not read server response\n");
     echo $result;
 } else {
     echo 'not connected';

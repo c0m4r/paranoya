@@ -15,8 +15,13 @@ except:
     print('missing path')
     sys.exit(1)
 
+try:
+    auth = sys.argv[2]
+except:
+    auth = ''
+
 if not os.path.isfile(path) and not os.path.isdir(path):
-    print(path + 'not found')
+    print(path + ' not found')
     sys.exit(127)
 
 try:
@@ -31,17 +36,12 @@ except socket.error:
     print('Could not connect to server')
     sys.exit()
 
-online = True
-while online:
+if auth:
+    data = sys.argv[1] + " " + sys.argv[2]
+else:
     data = sys.argv[1]
-    client.sendall(data.encode())
-    while True:
-        message = client.recv(4096)
-        if 'RESULT' in message.decode():
-            print(message.decode())
-            client.close()
-            online = False
-            break
-        break
 
+client.send(data.encode())
+message = client.recv(2048)
+print(message.decode())
 client.close()

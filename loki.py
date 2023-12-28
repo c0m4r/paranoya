@@ -1496,8 +1496,9 @@ def main():
     parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
     parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
     parser.add_argument('-d', help='Run as a daemon', action='store_true', default=False)
-    parser.add_argument('--listen-host', help='Listen host for daemon mode', metavar='listen-host', default='localhost')
-    parser.add_argument('--listen-port', help='Listen port for daemon mode', metavar='listen-port', type=int, default=1337)
+    parser.add_argument('--listen-host', help='Listen host for daemon mode (default: localhost)', default='localhost')
+    parser.add_argument('--listen-port', help='Listen port for daemon mode (default: 1337)', type=int, default=1337)
+    parser.add_argument('--auth', help='Auth key, only in daemon mode', default='')
     parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
     parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
     parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
@@ -1674,14 +1675,32 @@ if __name__ == '__main__':
            server.listen(5)
            
            def handle_client(client_socket, address):
-               size = 1024
+               size = 2048
                while True:
                    try:
                        clientid = threading.current_thread().name
                        threading.current_thread().message = ''
                        data = client_socket.recv(size)
+                       scan_path = data.decode().split(" ")[0]
+                       if args.auth:
+                           server_authkey = args.auth
+                           try:
+                               client_authkey = data.decode().split(" ")[1]
+                           except:
+                               logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " no valid authorization")
+                               client_socket.send('authorization required'.encode())
+                               client_socket.close()
+                               return False
+
+                           if client_authkey == server_authkey:
+                               logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " accepted")
+                           else:
+                               logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " unauthorized")
+                               client_socket.send('unauthorized'.encode())
+                               client_socket.close()
+                               return False
                        logger.log("INFO", "Init", "Received: " + data.decode() + " from: " + str(address[0]) + ":" + str(address[1]))
-                       loki.scan_path(data.decode())
+                       loki.scan_path(scan_path)
                        # Result ----------------------------------------------------------
                        if threading.current_thread().message == 'ALERT':
                            logger.log("RESULT", "Results", "Indicators detected! (Client: " + clientid + ")")
