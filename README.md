@@ -21,8 +21,9 @@ Modifications tries to preserve original functionality, although I only care abo
 ## Installation
 
 ```
-git clone https://github.com/c0m4r/Loki-daemonized.git Loki
-cd Loki
+cd /opt/
+git clone https://github.com/c0m4r/Loki-daemonized.git
+cd Loki-daemonized
 python3 -m venv .
 . bin/activate
 pip3 install -r requirements.txt
