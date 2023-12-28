@@ -1591,8 +1591,17 @@ if __name__ == '__main__':
         updateLoki(sigsOnly=False)
         sys.exit(0)
 
+    if os_platform == "linux":
+        for key, val in platform.freedesktop_os_release().items():
+            if key == 'PRETTY_NAME':
+                platform_pretty_name = val
+        platform_machine = platform.machine()
+        platform_full = platform_pretty_name + " (" + platform_machine + ")"
+    else:
+        platform_full = getPlatformFull()
+
     logger.log("NOTICE", "Init", "Starting Loki Scan VERSION: {3} SYSTEM: {0} TIME: {1} PLATFORM: {2}".format(
-        getHostname(os_platform), getSyslogTimestamp(), getPlatformFull(), logger.version))
+        getHostname(os_platform), getSyslogTimestamp(), platform_full, logger.version))
 
     # Loki
     loki = Loki(args.intense)
@@ -1658,12 +1667,12 @@ if __name__ == '__main__':
 
         # Linux & macOS
         elif args.d == True:
-           logger.log("INFO", "Init", "Running daemon mode")
+           logger.log("NOTICE", "Init", "Loki-daemonized (c) 2023 c0m4r")
            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
            server.bind((args.listen_host, args.listen_port))
            server.listen(5)
-              
+           
            def handle_client(client_socket, address):
                size = 1024
                while True:
@@ -1691,7 +1700,7 @@ if __name__ == '__main__':
                        client_socket.close()
                        return False
 
-           logger.log("INFO", "Init", "Listening on " + args.listen_host + ":" + str(args.listen_port))
+           logger.log("NOTICE", "Init", "Listening on " + args.listen_host + ":" + str(args.listen_port))
            while True:
                client, addr = server.accept()
                Thread(target=handle_client, args=(client, addr), name=str(addr[0]) + ":" + str(addr[1])).start()
