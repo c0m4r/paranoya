@@ -52,7 +52,10 @@ unix2dos loki.py
 Start as a daemon and bind on default localhost:1337
 
 ```
+cd Loki-daemonized
+. bin/activate
 python3 loki.py -d -s 20000 --noindicator --csv --nolog --intense &> /dev/null &
+deactivate
 ```
 
 You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
