@@ -83,6 +83,8 @@ Diff: [loki-daemonized.patch](loki-daemonized.patch)
 
 ![img/loki-daemonized-screen1.png](img/loki-daemonized-screen1.png)
 
+With auth:
+
 ![img/loki-daemonized-screen2.png](img/loki-daemonized-screen2.png)
 
 ---
