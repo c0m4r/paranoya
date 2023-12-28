@@ -21,7 +21,7 @@ Modifications tries to preserve original functionality, although I only care abo
 ## Installation
 
 ```
-cd /opt/
+cd /opt
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
 python3 -m venv .
