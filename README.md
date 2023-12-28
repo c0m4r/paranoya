@@ -81,10 +81,10 @@ Diff: [loki-daemonized.patch](loki-daemonized.patch)
 ## Usage
 
 ```
-usage: loki.py [-h] [-p path] [-s kilobyte] [-l log-file] [-r remote-loghost] [-t remote-syslog-port] [-a alert-level] [-w warning-level] [-n notice-level] [-d] [--listen-host listen-host]
-               [--listen-port listen-port] [--allhds] [--alldrives] [--printall] [--allreasons] [--noprocscan] [--nofilescan] [--vulnchecks] [--nolevcheck] [--scriptanalysis] [--rootkit] [--noindicator]
-               [--dontwait] [--intense] [--csv] [--onlyrelevant] [--nolog] [--update] [--debug] [--maxworkingset MAXWORKINGSET] [--syslogtcp] [--logfolder log-folder] [--nopesieve] [--pesieveshellc]
-               [--python PYTHON] [--nolisten] [--excludeprocess EXCLUDEPROCESS] [--force] [--version]
+usage: loki.py [-h] [-p path] [-s kilobyte] [-l log-file] [-r remote-loghost] [-t remote-syslog-port] [-a alert-level] [-w warning-level] [-n notice-level] [-d] [--listen-host LISTEN_HOST]
+               [--listen-port LISTEN_PORT] [--auth AUTH] [--allhds] [--alldrives] [--printall] [--allreasons] [--noprocscan] [--nofilescan] [--vulnchecks] [--nolevcheck] [--scriptanalysis] [--rootkit]
+               [--noindicator] [--dontwait] [--intense] [--csv] [--onlyrelevant] [--nolog] [--update] [--debug] [--maxworkingset MAXWORKINGSET] [--syslogtcp] [--logfolder log-folder] [--nopesieve]
+               [--pesieveshellc] [--python PYTHON] [--nolisten] [--excludeprocess EXCLUDEPROCESS] [--force] [--version]
 
 Loki - Simple IOC Scanner
 
@@ -100,10 +100,11 @@ options:
   -w warning-level      Warning score
   -n notice-level       Notice score
   -d                    Run as a daemon
-  --listen-host listen-host
-                        Listen host for daemon mode
-  --listen-port listen-port
-                        Listen port for daemon mode
+  --listen-host LISTEN_HOST
+                        Listen host for daemon mode (default: localhost)
+  --listen-port LISTEN_PORT
+                        Listen port for daemon mode (default: 1337)
+  --auth AUTH           Auth key, only in daemon mode
   --allhds              Scan all local hard drives (Windows only)
   --alldrives           Scan all drives (including network drives and removable media)
   --printall            Print all files that are scanned
