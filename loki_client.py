@@ -4,7 +4,8 @@
 
 import os
 import socket
-import sys, time
+import sys
+import time
 
 host = '127.0.0.1'
 port = 1337
