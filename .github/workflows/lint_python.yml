@@ -1,0 +1,27 @@
+name: lint_python
+on:
+  push:
+    paths:
+      - /*.py
+  pull_request:
+    paths:
+    - /*.py
+jobs:
+  lint_python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - run: pip install --upgrade pip setuptools wheel
+      - run: pip install black codespell mypy pytest ruff safety
+      - run: ruff --output-format=github --ignore=E501,E701,E713,E722,F401,F403,F405,F841 --line-length=263 .
+      - run: black --check . || true
+      - run: codespell --ignore-words-list="datas" --skip="./.git/*"
+      - run: pip install -r requirements.txt
+      - run: mypy --install-types --non-interactive . || true
+      - run: pytest . || true
+      - run: pytest --doctest-modules . || true
+      - run: python ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
+      - run: python ./loki.py --noprocs --noindicator --dontwait --debug --intense -p ./test
+      - run: python ./loki.py --noprocs --noindicator --dontwait --debug --csv -p ./test
+      # - run: safety check
