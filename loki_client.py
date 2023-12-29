@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Usage: ./loki_client /path/to/scan
+# Usage: ./loki_client.py /path/to/scan
 
 import os
 import socket
