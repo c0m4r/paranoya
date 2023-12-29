@@ -2,10 +2,12 @@ name: lint_python
 on:
   push:
     paths:
-      - /*.py
+      - loki.py
+      - loki_client.py
   pull_request:
     paths:
-    - /*.py
+    - loki.py
+    - loki_client.py
 jobs:
   lint_python:
     runs-on: ubuntu-latest
