@@ -78,7 +78,7 @@ deactivate
 
 You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
 
-Check example [/etc/init.d/loki](/etc/init.d/loki) for OpenRC integration.
+Check example [/etc](/etc) for OpenRC and systemd integration.
 
 #### Client
 
