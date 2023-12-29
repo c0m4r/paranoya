@@ -4,8 +4,13 @@ $host = "127.0.0.1";
 $port = 1337;
 
 $path = $argv[1];
-$auth = $argv[2];
-$message = $path . " " . $auth;
+
+if(isset($argv[2])) {
+    $auth = $argv[2];
+    $message = $path . " " . $auth;
+} else {
+    $message = $path;
+}
 
 if(!is_file($path) and !is_dir($path))
 {
