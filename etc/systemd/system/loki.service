@@ -1,0 +1,13 @@
+[Unit]
+Description=Loki (daemonized) Simple IOC And Yara Scanner (fork)
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/Loki-daemonized
+ExecStart=/opt/Loki-daemonized/bin/python3 loki.py --listen-host localhost --listen-port 1337 -d -s 20000 --noindicator --csv --nolog --intense --force
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
