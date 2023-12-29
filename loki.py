@@ -242,7 +242,7 @@ class Loki(object):
                     newDirectories.append(dir)
             directories[:] = newDirectories
 
-            loki.scan_path_files(root, directories, files);
+            loki.scan_path_files(root, directories, files)
 
     def scan_path_files(self, root, directories, files):
 
@@ -1570,7 +1570,7 @@ if __name__ == '__main__':
     args = main()
 
     # Save pidfile
-    if args.d == True:
+    if args.d is True:
         with open('loki.pid', 'w', encoding='utf-8') as f:
             f.write(str(os.getpid()))
 
@@ -1667,7 +1667,7 @@ if __name__ == '__main__':
                 loki.scan_path(defaultPath)
 
         # Linux & macOS
-        elif args.d == True:
+        elif args.d is True:
            logger.log("NOTICE", "Init", "Loki-daemonized (c) 2023 c0m4r")
            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
