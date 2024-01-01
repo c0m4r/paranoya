@@ -1488,20 +1488,25 @@ def walk_error(err):
 
 
 # CTRL+C Handler --------------------------------------------------------------
+def remove_pidfile():
+    if(args.d):
+        try:
+            os.remove(args.pidfile)
+        except Exception:
+            pass
+
 def signal_handler(signal_name, frame):
     try:
         print("------------------------------------------------------------------------------\n")
         logger.log('INFO', 'Init', 'LOKI\'s work has been interrupted by a human. Returning to Asgard.')
     except Exception:
         print('LOKI\'s work has been interrupted by a human. Returning to Asgard.')
+    remove_pidfile()
     sys.exit(0)
 
 def signal_handler_term(signal_name, frame):
-    try:
-        os.remove(args.pidfile)
-    except:
-        pass
-    print('SIGTERM')
+    remove_pidfile()
+    print('LOKI\'s work has been interrupted by a SIGTERM. Returning to Asgard.')
     sys.exit(0)
 
 def main():
@@ -1598,8 +1603,16 @@ if __name__ == '__main__':
 
     # Save pidfile
     if args.d is True:
-        with open(args.pidfile, 'w', encoding='utf-8') as f:
-            f.write(str(os.getpid()))
+        if(os.path.exists(args.pidfile)):
+            fpid = open(args.pidfile, 'r')
+            loki_pid = int(fpid.read())
+            fpid.close()
+            if psutil.pid_exists(loki_pid):
+                print("LOKI daemon already running. Returning to Asgard.")
+                sys.exit(0)
+        with open(args.pidfile, 'w', encoding='utf-8') as fpid:
+            fpid.write(str(os.getpid()))
+            fpid.close()
 
     # Remove old log file
     if os.path.exists(args.l):
