@@ -2,7 +2,7 @@
 
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
-A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner.
+A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner. It also includes some [other imporvements](#Changes) mainly focused on Linux.
 
 The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. This way, we can use Loki to scan, for example, files uploaded to the server.
 
@@ -84,10 +84,25 @@ python3 loki_client.py /path/to/scan
 
 * Focuses on Linux
 * Single file scan if given path is a file
-* Daemon mode (-d) with listening socket (--listen-host, --listen-port) accepting scans requested from loki_client.py
-* Optional auth key (--auth) in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
+* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from loki_client.py
+* Optional auth key `--auth somethingRandomHere` in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
+* You can disable one or more yara files, f.e. `--disable-yara-files apt_vpnfilter.yar,yara_mixed_ext_vars.yar`
+* Exclude files by hash as described by [rafaelarcanjo](https://github.com/rafaelarcanjo) in [Neo23x0/Loki/pull/204](https://github.com/Neo23x0/Loki/pull/204), See: [/config/excludes.cfg](/config/excludes.cfg)
 
 Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
+
+New arguments:
+
+```
+  -d                    Run as a daemon
+  --listen-host LISTEN_HOST
+                        Listen host for daemon mode (default: localhost)
+  --listen-port LISTEN_PORT
+                        Listen port for daemon mode (default: 1337)
+  --auth AUTH           Auth key, only in daemon mode
+  --disable-yara-files DISABLE_YARA_FILES
+                        Comma separated list of yara files to disable
+```
 
 Diff: [loki-daemonized.patch](loki-daemonized.patch)
 
