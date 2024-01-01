@@ -1,5 +1,5 @@
 --- loki.py.original	2023-12-28 14:31:22.375121479 +0100
-+++ loki.py	2024-01-01 22:55:54.170610005 +0100
++++ loki.py	2024-01-01 23:30:04.789802470 +0100
 @@ -48,6 +48,10 @@
  from lib.doublepulsar import DoublePulsar
  from lib.vuln_checker import VulnChecker
@@ -150,7 +150,7 @@
  
 +def signal_handler_term(signal_name, frame):
 +    try:
-+        os.remove("loki.pid")
++        os.remove(args.pidfile)
 +    except:
 +        pass
 +    print('SIGTERM')
@@ -159,11 +159,12 @@
  def main():
      """
      Argument parsing function
-@@ -1468,6 +1520,11 @@
+@@ -1468,6 +1520,12 @@
      parser.add_argument('-a', help='Alert score', metavar='alert-level', default=100)
      parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
      parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
 +    parser.add_argument('-d', help='Run as a daemon', action='store_true', default=False)
++    parser.add_argument('--pidfile', help='Pid file path (default: loki.pid)', default='loki.pid')
 +    parser.add_argument('--listen-host', help='Listen host for daemon mode (default: localhost)', default='localhost')
 +    parser.add_argument('--listen-port', help='Listen port for daemon mode (default: 1337)', type=int, default=1337)
 +    parser.add_argument('--auth', help='Auth key, only in daemon mode', default='')
@@ -171,7 +172,7 @@
      parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
      parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
      parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
-@@ -1532,9 +1589,17 @@
+@@ -1532,9 +1590,17 @@
      # Signal handler for CTRL+C
      signal_module.signal(signal_module.SIGINT, signal_handler)
  
@@ -183,13 +184,13 @@
  
 +    # Save pidfile
 +    if args.d is True:
-+        with open('loki.pid', 'w', encoding='utf-8') as f:
++        with open(args.pidfile, 'w', encoding='utf-8') as f:
 +            f.write(str(os.getpid()))
 +
      # Remove old log file
      if os.path.exists(args.l):
          os.remove(args.l)
-@@ -1553,8 +1618,17 @@
+@@ -1553,8 +1619,17 @@
          updateLoki(sigsOnly=False)
          sys.exit(0)
  
@@ -208,7 +209,7 @@
  
      # Loki
      loki = Loki(args.intense)
-@@ -1619,6 +1693,63 @@
+@@ -1619,6 +1694,63 @@
                  loki.scan_path(defaultPath)
  
          # Linux & macOS
