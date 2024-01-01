@@ -1498,7 +1498,7 @@ def signal_handler(signal_name, frame):
 
 def signal_handler_term(signal_name, frame):
     try:
-        os.remove("loki.pid")
+        os.remove(args.pidfile)
     except:
         pass
     print('SIGTERM')
@@ -1521,6 +1521,7 @@ def main():
     parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
     parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
     parser.add_argument('-d', help='Run as a daemon', action='store_true', default=False)
+    parser.add_argument('--pidfile', help='Pid file path (default: loki.pid)', default='loki.pid')
     parser.add_argument('--listen-host', help='Listen host for daemon mode (default: localhost)', default='localhost')
     parser.add_argument('--listen-port', help='Listen port for daemon mode (default: 1337)', type=int, default=1337)
     parser.add_argument('--auth', help='Auth key, only in daemon mode', default='')
@@ -1597,7 +1598,7 @@ if __name__ == '__main__':
 
     # Save pidfile
     if args.d is True:
-        with open('loki.pid', 'w', encoding='utf-8') as f:
+        with open(args.pidfile, 'w', encoding='utf-8') as f:
             f.write(str(os.getpid()))
 
     # Remove old log file
