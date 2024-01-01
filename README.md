@@ -85,7 +85,7 @@ python3 loki_client.py /path/to/scan
 * Focuses on Linux
 * Single file scan if given path is a file
 * Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from loki_client.py
-* PID file `loki.pid` is created in the program directory if running in daemon mode
+* PID file `loki.pid` is created in the program directory if running in daemon mode, you change its path with `--pidfile /path/to/pidfile`
 * Optional auth key `--auth somethingRandomHere` in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
 * You can disable one or more yara files, f.e. `--disable-yara-files apt_vpnfilter.yar,yara_mixed_ext_vars.yar`
 * Exclude files by hash as proposed by [rafaelarcanjo](https://github.com/rafaelarcanjo) in [Neo23x0/Loki/pull/204](https://github.com/Neo23x0/Loki/pull/204). See: [/config/excludes.cfg](/config/excludes.cfg)
@@ -96,6 +96,7 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 
 ```
   -d                    Run as a daemon
+  --pidfile PIDFILE     Pid file path (default: loki.pid)
   --listen-host LISTEN_HOST
                         Listen host for daemon mode (default: localhost)
   --listen-port LISTEN_PORT
