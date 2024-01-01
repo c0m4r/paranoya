@@ -92,7 +92,7 @@ python3 loki_client.py /path/to/scan
 
 Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 
-New arguments:
+#### New arguments
 
 ```
   -d                    Run as a daemon
