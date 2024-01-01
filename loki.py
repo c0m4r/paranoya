@@ -117,6 +117,8 @@ class Loki(object):
     fullExcludes = []
     # Platform specific excludes (match the beginning of the full path) (not user-defined)
     startExcludes = []
+    # Excludes hash (md5, sha1 and sha256)
+    excludes_hash = []
 
     # File type magics
     filetype_magics = {}
@@ -294,8 +296,12 @@ class Loki(object):
                                     skipIt = True
 
                         # File mode
-                        mode = os.stat(filePath).st_mode
-                        if stat.S_ISCHR(mode) or stat.S_ISBLK(mode) or stat.S_ISFIFO(mode) or stat.S_ISLNK(mode) or stat.S_ISSOCK(mode):
+                        try:
+                            mode = os.stat(filePath).st_mode
+                            if stat.S_ISCHR(mode) or stat.S_ISBLK(mode) or stat.S_ISFIFO(mode) or stat.S_ISLNK(mode) or stat.S_ISSOCK(mode):
+                                continue
+                        except:
+                            logger.log("DEBUG", "FileScan", "Skipping element %s does not exist or is a broken symlink" % (filePath))
                             continue
 
                     # Skip
@@ -411,6 +417,11 @@ class Loki(object):
 
                         # False Positive Hash
                         if md5_num in self.false_hashes.keys() or sha1_num in self.false_hashes.keys() or sha256_num in self.false_hashes.keys():
+                            continue
+
+                        # Skip exclude hash
+                        if md5 in self.excludes_hash or sha1 in self.excludes_hash or sha256 in self.excludes_hash:
+                            logger.log("DEBUG", "FileScan", "Skipping element %s excluded by hash" % (filePath))
                             continue
 
                         # Malware Hash
@@ -1136,6 +1147,10 @@ class Loki(object):
                             # Full Path
                             yaraRuleFile = os.path.join(root, file)
 
+                            if(file in args.disable_yara_files.split(",")):
+                                logger.log("NOTICE", "Init", "Disabled yara file: " + file)
+                                continue
+
                             # Skip hidden, backup or system related files
                             if file.startswith(".") or file.startswith("~") or file.startswith("_"):
                                 continue
@@ -1309,6 +1324,7 @@ class Loki(object):
     def initialize_excludes(self, excludes_file):
         try:
             excludes = []
+            excludes_hash = []
             with open(excludes_file, 'r') as config:
                 lines = config.read().splitlines()
 
@@ -1316,14 +1332,23 @@ class Loki(object):
                 if re.search(r'^[\s]*#', line):
                     continue
                 try:
+                    # If the line contains md5sum
+                    if re.search(r'^md5sum:', line):
+                        excludes_hash.append(re.sub('(md5sum:|(\s\#|\#).*)','', line))
+                    # If the line contains sha1sum
+                    elif re.search(r'^sha1sum:', line):
+                        excludes_hash.append(re.sub('(sha1sum:|(\s\#|\#).*)','', line))
+                    elif re.search(r'^sha256sum:', line):
+                        excludes_hash.append(re.sub('(sha256sum:|(\s\#|\#).*)','', line))
                     # If the line contains something
-                    if re.search(r'\w', line):
+                    elif re.search(r'\w', line):
                         regex = re.compile(line, re.IGNORECASE)
                         excludes.append(regex)
                 except Exception:
                     logger.log("ERROR", "Init", "Cannot compile regex: %s" % line)
 
             self.fullExcludes = excludes
+            self.excludes_hash = excludes_hash
 
         except Exception:
             if logger.debug:
@@ -1499,6 +1524,7 @@ def main():
     parser.add_argument('--listen-host', help='Listen host for daemon mode (default: localhost)', default='localhost')
     parser.add_argument('--listen-port', help='Listen port for daemon mode (default: 1337)', type=int, default=1337)
     parser.add_argument('--auth', help='Auth key, only in daemon mode', default='')
+    parser.add_argument('--disable-yara-files', help='Comma separated list of yara files to disable', default='')
     parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
     parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
     parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
