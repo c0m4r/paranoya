@@ -634,7 +634,11 @@ class Loki(object):
             name = psutil.Process(process).name()
             owner = psutil.Process(process).username()
             status = psutil.Process(process).status()
-            cmd = ' '.join(psutil.Process(process).cmdline())
+            try:
+                cmd = ' '.join(psutil.Process(process).cmdline())
+            except (psutil.NoSuchProcess, psutil.ZombieProcess):
+                logger.log("WARNING", "ProcessScan", "Process PID: %s NAME: %s STATUS: %s" % (str(pid), name, status))
+                continue
             path = psutil.Process(process).cwd()
             bin = psutil.Process(process).exe()
             tty = psutil.Process(process).terminal()
