@@ -15,19 +15,19 @@ Modifications tries to preserve original functionality, although I only care abo
 #### Alpine Linux
 
 ```
-apk add bash python3 python3-dev py3-pip gcc musl-dev linux-headers openssl-dev
+apk add bash curl git python3 python3-dev py3-pip gcc musl-dev linux-headers openssl-dev wget
 ```
 
 #### Void Linux
 
 ```
-xbps-install -Sy bash python3 python3-devel python3-pip python3-virtualenv openssl-devel gcc
+xbps-install -Sy bash curl git python3 python3-devel python3-pip python3-virtualenv openssl-devel gcc wget
 ```
 
 #### Debian / Ubuntu
 
 ```
-apt -y install bash python3 python3-dev python3-pip python3-venv libssl-dev
+apt -y install bash curl git python3 python3-dev python3-pip python3-venv libssl-dev wget
 ```
 
 ## Installation
