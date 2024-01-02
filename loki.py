@@ -631,7 +631,11 @@ class Loki(object):
 
             # Gather Process Information -------------------------------------
             pid = process
-            name = psutil.Process(process).name()
+            try:
+                name = psutil.Process(process).name()
+            except (psutil.NoSuchProcess):
+                logger.log("DEBUG", "ProcessScan", "Skipping Process PID: %s as it just exited and no longer exists" % (str(pid)))
+                continue
             owner = psutil.Process(process).username()
             status = psutil.Process(process).status()
             try:

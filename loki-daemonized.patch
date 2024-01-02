@@ -1,5 +1,5 @@
 --- loki.py.original	2023-12-28 14:31:22.375121479 +0100
-+++ loki.py	2024-01-02 06:33:37.413392742 +0100
++++ loki.py	2024-01-02 20:00:24.560738215 +0100
 @@ -48,6 +48,10 @@
  from lib.doublepulsar import DoublePulsar
  from lib.vuln_checker import VulnChecker
@@ -100,7 +100,7 @@
  
                      if total_score < args.n:
                          continue
-@@ -590,6 +620,74 @@
+@@ -590,6 +620,78 @@
                  owner.upper().startswith("LO") or
                  owner.upper().startswith("SYSTEM"))
  
@@ -115,7 +115,11 @@
 +
 +            # Gather Process Information -------------------------------------
 +            pid = process
-+            name = psutil.Process(process).name()
++            try:
++                name = psutil.Process(process).name()
++            except (psutil.NoSuchProcess):
++                logger.log("DEBUG", "ProcessScan", "Skipping Process PID: %s as it just exited and no longer exists" % (str(pid)))
++                continue
 +            owner = psutil.Process(process).username()
 +            status = psutil.Process(process).status()
 +            try:
@@ -175,7 +179,7 @@
      def scan_processes(self, nopesieve, nolisten, excludeprocess, pesieveshellc):
          # WMI Handler
          c = wmi.WMI()
-@@ -1117,6 +1215,10 @@
+@@ -1117,6 +1219,10 @@
                              # Full Path
                              yaraRuleFile = os.path.join(root, file)
  
@@ -186,7 +190,7 @@
                              # Skip hidden, backup or system related files
                              if file.startswith(".") or file.startswith("~") or file.startswith("_"):
                                  continue
-@@ -1290,6 +1392,7 @@
+@@ -1290,6 +1396,7 @@
      def initialize_excludes(self, excludes_file):
          try:
              excludes = []
@@ -194,7 +198,7 @@
              with open(excludes_file, 'r') as config:
                  lines = config.read().splitlines()
  
-@@ -1297,14 +1400,23 @@
+@@ -1297,14 +1404,23 @@
                  if re.search(r'^[\s]*#', line):
                      continue
                  try:
@@ -219,7 +223,7 @@
  
          except Exception:
              if logger.debug:
-@@ -1444,12 +1556,25 @@
+@@ -1444,12 +1560,25 @@
  
  
  # CTRL+C Handler --------------------------------------------------------------
@@ -245,7 +249,7 @@
      sys.exit(0)
  
  def main():
-@@ -1468,6 +1593,12 @@
+@@ -1468,6 +1597,12 @@
      parser.add_argument('-a', help='Alert score', metavar='alert-level', default=100)
      parser.add_argument('-w', help='Warning score', metavar='warning-level', default=60)
      parser.add_argument('-n', help='Notice score', metavar='notice-level', default=40)
@@ -258,7 +262,7 @@
      parser.add_argument('--allhds', action='store_true', help='Scan all local hard drives (Windows only)', default=False)
      parser.add_argument('--alldrives', action='store_true', help='Scan all drives (including network drives and removable media)', default=False)
      parser.add_argument('--printall', action='store_true', help='Print all files that are scanned', default=False)
-@@ -1532,9 +1663,25 @@
+@@ -1532,9 +1667,25 @@
      # Signal handler for CTRL+C
      signal_module.signal(signal_module.SIGINT, signal_handler)
  
@@ -284,7 +288,7 @@
      # Remove old log file
      if os.path.exists(args.l):
          os.remove(args.l)
-@@ -1553,8 +1700,17 @@
+@@ -1553,8 +1704,17 @@
          updateLoki(sigsOnly=False)
          sys.exit(0)
  
@@ -303,7 +307,7 @@
  
      # Loki
      loki = Loki(args.intense)
-@@ -1589,6 +1745,11 @@
+@@ -1589,6 +1749,11 @@
  
      # Scan Processes --------------------------------------------------
      resultProc = False
@@ -315,7 +319,7 @@
      if not args.noprocscan and os_platform == "windows":
          if isAdmin:
              loki.scan_processes(args.nopesieve, args.nolisten, args.excludeprocess, args.pesieveshellc)
-@@ -1619,6 +1780,63 @@
+@@ -1619,6 +1784,63 @@
                  loki.scan_path(defaultPath)
  
          # Linux & macOS
