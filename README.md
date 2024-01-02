@@ -32,6 +32,8 @@ apt -y install bash curl git python3 python3-dev python3-pip python3-venv libssl
 
 ## Installation
 
+#### Manual
+
 ```bash
 cd /opt
 git clone https://github.com/c0m4r/Loki-daemonized.git
@@ -43,6 +45,24 @@ pip3 install -r requirements.txt
 python3 loki.py --nolog --intense --force -p ./test
 deactivate
 ```
+
+#### Docker
+
+This repo comes with docker-compose.yml and Dockerfile, based on [official python image](https://hub.docker.com/_/python), so running in docker should be as simple as:
+
+```
+git clone https://github.com/c0m4r/Loki-daemonized.git
+cd Loki-daemonized
+docker compose up
+```
+
+However, to be able to scan anything outside docker you have to mount a volume pointing to a specific directory. Change docker-compose.yml accordingly.
+
+There are also [other examples](/docker) available of Docker setup, based on diffrent Linux distros.
+
+#### Chroot
+
+For older systems that can't handle modern deps, you might give it a try: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
 
 ## Patch file
 
