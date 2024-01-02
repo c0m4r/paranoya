@@ -58,7 +58,7 @@ docker compose up
 
 However, to be able to scan anything outside docker you have to mount a volume pointing to a specific directory. Change docker-compose.yml accordingly.
 
-There are also [other examples](/docker) available of Docker setup, based on diffrent Linux distros.
+There are also [other examples](/docker) available of Docker setup, based on different Linux distros.
 
 #### Chroot
 
@@ -112,7 +112,7 @@ python3 loki_client.py /path/to/scan
 * Initial implementation of process scanning under Linux (scan_processes_linux()):
   * File Name Checks: works with signature-base/iocs/filename-iocs.txt (note: linux iocs missing by default)
   * Process connections: for now, it only shows detected connections per process
-  * Process Masquerading Detection: reports non-empty /proc/PID/maps of processess that uses square brackets in their cmdlines
+  * Process Masquerading Detection: reports non-empty /proc/PID/maps of processes that uses square brackets in their cmdlines
 
 Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
 
