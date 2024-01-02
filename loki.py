@@ -644,7 +644,7 @@ class Loki(object):
             process_info = "PID: %s NAME: %s OWNER: %s STATUS: %s BIN: %s CMD: %s PATH: %s TTY: %s" % (str(pid), name, owner, status, bin, cmd, path, tty)
 
             # Print info ----------------------------------------------------------
-            logger.log("INFO", "ProcessScan", "Scanning Process %s" % process_info)
+            logger.log("INFO", "ProcessScan", "Process %s" % process_info)
 
             # File Name Checks -------------------------------------------------
             for fioc in self.filename_iocs:
@@ -658,16 +658,22 @@ class Loki(object):
             # Process connections ----------------------------------------------
             if not args.nolisten:
                 connections = psutil.Process(pid).connections()
+                conn_count = 0
+                conn_limit = 20
                 for pconn in connections:
+                    conn_count += 1
+                    if conn_count > conn_limit:
+                        logger.log("NOTICE", "ProcessScan", "Process PID: %s NAME: %s More connections detected. Showing only %s" % (str(pid), name, conn_limit))
+                        break
                     ip = pconn.laddr.ip
                     status = pconn.status
-                    rc = pconn.raddr
-                    if(rc):
+                    ext = pconn.raddr
+                    if(ext):
                         ext_ip = pconn.raddr.ip
                         ext_port = pconn.raddr.port
-                        logger.log("NOTICE", "ProcessScan", "Connection: %s %s <=> %s %s (%s)" % (str(pid), ip, ext_ip, ext_port, status))
+                        logger.log("NOTICE", "ProcessScan", "Process PID: %s NAME: %s CONNECTION: %s <=> %s %s (%s)" % (str(pid), name, ip, ext_ip, ext_port, status))
                     else:
-                        logger.log("NOTICE", "ProcessScan", "Connection: %s %s (%s)" % (str(pid), ip, status))
+                        logger.log("NOTICE", "ProcessScan", "Process PID: %s NAME: %s CONNECTION: %s (%s)" % (str(pid), name, ip, status))
 
     def scan_processes(self, nopesieve, nolisten, excludeprocess, pesieveshellc):
         # WMI Handler
