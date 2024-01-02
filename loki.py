@@ -629,7 +629,7 @@ class Loki(object):
 
         for process in processes:
 
-            # Gather Process Information --------------------------------------
+            # Gather Process Information -------------------------------------
             pid = process
             name = psutil.Process(process).name()
             owner = psutil.Process(process).username()
@@ -642,13 +642,22 @@ class Loki(object):
             path = psutil.Process(process).cwd()
             bin = psutil.Process(process).exe()
             tty = psutil.Process(process).terminal()
-
+            memory_maps = psutil.Process(process).memory_maps()
             ws_size = psutil.Process(process).memory_info().vms
+            num_fds = psutil.Process(process).num_fds()
+            open_files = psutil.Process(process).open_files()
 
             process_info = "PID: %s NAME: %s OWNER: %s STATUS: %s BIN: %s CMD: %s PATH: %s TTY: %s" % (str(pid), name, owner, status, bin, cmd, path, tty)
 
-            # Print info ----------------------------------------------------------
+            # Print info -------------------------------------------------------
             logger.log("INFO", "ProcessScan", "Process %s" % process_info)
+
+            # Process Masquerading Detection -----------------------------------
+
+            if re.search('\[', cmd):
+                maps = Popen('cat /proc/' + str(pid) + '/maps', shell=True, stdout=subprocess.PIPE)
+                if(maps.stdout.read()):
+                    logger.log("WARNING", "ProcessScan", "Potentional Process Masquerading PID: %s CMD: %s Check /proc/%s/maps" % (str(pid), cmd, str(pid)))
 
             # File Name Checks -------------------------------------------------
             for fioc in self.filename_iocs:
