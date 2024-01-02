@@ -620,6 +620,55 @@ class Loki(object):
                 owner.upper().startswith("LO") or
                 owner.upper().startswith("SYSTEM"))
 
+    def scan_processes_linux(self):
+
+        processes = psutil.pids()
+
+        loki_pid = os.getpid()
+        loki_ppid = psutil.Process(os.getpid()).ppid()
+
+        for process in processes:
+
+            # Gather Process Information --------------------------------------
+            pid = process
+            name = psutil.Process(process).name()
+            owner = psutil.Process(process).username()
+            status = psutil.Process(process).status()
+            cmd = ' '.join(psutil.Process(process).cmdline())
+            path = psutil.Process(process).cwd()
+            bin = psutil.Process(process).exe()
+            tty = psutil.Process(process).terminal()
+
+            ws_size = psutil.Process(process).memory_info().vms
+
+            process_info = "PID: %s NAME: %s OWNER: %s STATUS: %s BIN: %s CMD: %s PATH: %s TTY: %s" % (str(pid), name, owner, status, bin, cmd, path, tty)
+
+            # Print info ----------------------------------------------------------
+            logger.log("INFO", "ProcessScan", "Scanning Process %s" % process_info)
+
+            # File Name Checks -------------------------------------------------
+            for fioc in self.filename_iocs:
+                match = fioc['regex'].search(cmd)
+                if match:
+                    if int(fioc['score']) > 70:
+                        logger.log("ALERT", "ProcessScan", "File Name IOC matched PATTERN: %s DESC: %s MATCH: %s" % (fioc['regex'].pattern, fioc['description'], cmd))
+                    elif int(fioc['score']) > 40:
+                        logger.log("WARNING", "ProcessScan", "File Name Suspicious IOC matched PATTERN: %s DESC: %s MATCH: %s" % (fioc['regex'].pattern, fioc['description'], cmd))
+
+            # Process connections ----------------------------------------------
+            if not args.nolisten:
+                connections = psutil.Process(pid).connections()
+                for pconn in connections:
+                    ip = pconn.laddr.ip
+                    status = pconn.status
+                    rc = pconn.raddr
+                    if(rc):
+                        ext_ip = pconn.raddr.ip
+                        ext_port = pconn.raddr.port
+                        logger.log("NOTICE", "ProcessScan", "Connection: %s %s <=> %s %s (%s)" % (str(pid), ip, ext_ip, ext_port, status))
+                    else:
+                        logger.log("NOTICE", "ProcessScan", "Connection: %s %s (%s)" % (str(pid), ip, status))
+
     def scan_processes(self, nopesieve, nolisten, excludeprocess, pesieveshellc):
         # WMI Handler
         c = wmi.WMI()
@@ -1677,6 +1726,11 @@ if __name__ == '__main__':
 
     # Scan Processes --------------------------------------------------
     resultProc = False
+    if not args.noprocscan and os_platform == "linux":
+        if isAdmin:
+            loki.scan_processes_linux()
+        else:
+            logger.log("NOTICE", "Init", "Skipping process memory check. User has no admin rights.")
     if not args.noprocscan and os_platform == "windows":
         if isAdmin:
             loki.scan_processes(args.nopesieve, args.nolisten, args.excludeprocess, args.pesieveshellc)
