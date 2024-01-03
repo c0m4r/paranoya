@@ -21,7 +21,7 @@ apk add gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-pip
 #### Arch Linux
 
 ```
-pacman -S bash curl gcc git python3 python-devtools python-pip
+pacman -S gcc git python3 python-devtools python-pip
 ```
 
 #### Void Linux
