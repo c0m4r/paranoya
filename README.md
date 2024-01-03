@@ -33,7 +33,7 @@ xbps-install -Sy gcc git openssl-devel python3 python3-devel python3-pip python3
 #### Debian / Ubuntu
 
 ```
-apt -y install git libssl-dev python3 python3-dev python3-pip python3-venv
+apt -y install build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
 ```
 
 ## Installation
