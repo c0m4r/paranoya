@@ -1705,9 +1705,12 @@ if __name__ == '__main__':
         sys.exit(0)
 
     if os_platform == "linux":
-        for key, val in platform.freedesktop_os_release().items():
-            if key == 'PRETTY_NAME':
-                platform_pretty_name = val
+        try:
+            for key, val in platform.freedesktop_os_release().items():
+                if key == 'PRETTY_NAME':
+                    platform_pretty_name = val
+        except Exception:
+            platform_pretty_name = platform.system()
         platform_machine = platform.machine()
         platform_full = platform_pretty_name + " (" + platform_machine + ")"
     else:

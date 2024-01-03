@@ -1,5 +1,5 @@
 --- loki.py.original	2023-12-28 14:31:22.375121479 +0100
-+++ loki.py	2024-01-02 20:00:24.560738215 +0100
++++ loki.py	2024-01-03 03:56:32.048867818 +0100
 @@ -48,6 +48,10 @@
  from lib.doublepulsar import DoublePulsar
  from lib.vuln_checker import VulnChecker
@@ -288,14 +288,17 @@
      # Remove old log file
      if os.path.exists(args.l):
          os.remove(args.l)
-@@ -1553,8 +1704,17 @@
+@@ -1553,8 +1704,20 @@
          updateLoki(sigsOnly=False)
          sys.exit(0)
  
 +    if os_platform == "linux":
-+        for key, val in platform.freedesktop_os_release().items():
-+            if key == 'PRETTY_NAME':
-+                platform_pretty_name = val
++        try:
++            for key, val in platform.freedesktop_os_release().items():
++                if key == 'PRETTY_NAME':
++                    platform_pretty_name = val
++        except Exception:
++            platform_pretty_name = platform.system()
 +        platform_machine = platform.machine()
 +        platform_full = platform_pretty_name + " (" + platform_machine + ")"
 +    else:
@@ -307,7 +310,7 @@
  
      # Loki
      loki = Loki(args.intense)
-@@ -1589,6 +1749,11 @@
+@@ -1589,6 +1752,11 @@
  
      # Scan Processes --------------------------------------------------
      resultProc = False
@@ -319,7 +322,7 @@
      if not args.noprocscan and os_platform == "windows":
          if isAdmin:
              loki.scan_processes(args.nopesieve, args.nolisten, args.excludeprocess, args.pesieveshellc)
-@@ -1619,6 +1784,63 @@
+@@ -1619,6 +1787,63 @@
                  loki.scan_path(defaultPath)
  
          # Linux & macOS
