@@ -300,7 +300,7 @@ class Loki(object):
                             mode = os.stat(filePath).st_mode
                             if stat.S_ISCHR(mode) or stat.S_ISBLK(mode) or stat.S_ISFIFO(mode) or stat.S_ISLNK(mode) or stat.S_ISSOCK(mode):
                                 continue
-                        except:
+                        except Exception:
                             logger.log("DEBUG", "FileScan", "Skipping element %s does not exist or is a broken symlink" % (filePath))
                             continue
 
@@ -595,7 +595,7 @@ class Loki(object):
                     string_value = string_value[:140] + " ... (truncated)"
                 matching_strings.append("{0}: '{1}'".format(string.identifier, string_value))
             return matching_strings
-        except:
+        except Exception:
             traceback.print_exc()
 
     def check_svchost_owner(self, owner):
@@ -1793,7 +1793,7 @@ if __name__ == '__main__':
            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
            server.bind((args.listen_host, args.listen_port))
            server.listen(5)
-           
+
            def handle_client(client_socket, address):
                size = 2048
                while True:
@@ -1806,21 +1806,21 @@ if __name__ == '__main__':
                            server_authkey = args.auth
                            try:
                                client_authkey = data.decode().split(" ")[1]
-                           except:
+                           except Exception:
                                logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " no valid authorization")
                                client_socket.send('authorization required'.encode())
                                client_socket.close()
                                return False
 
-                           if client_authkey == server_authkey:
+                           if client_authkey.strip() == server_authkey:
                                logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " accepted")
                            else:
                                logger.log("NOTICE", "Auth", "Client " + str(address[0]) + ":" + str(address[1]) + " unauthorized")
                                client_socket.send('unauthorized'.encode())
                                client_socket.close()
                                return False
-                       logger.log("INFO", "Init", "Received: " + data.decode() + " from: " + str(address[0]) + ":" + str(address[1]))
-                       loki.scan_path(scan_path)
+                       logger.log("INFO", "Init", "Received: " + data.decode().strip() + " from: " + str(address[0]) + ":" + str(address[1]))
+                       loki.scan_path(scan_path.strip())
                        # Result ----------------------------------------------------------
                        if threading.current_thread().message == 'ALERT':
                            logger.log("RESULT", "Results", "Indicators detected! (Client: " + clientid + ")")
