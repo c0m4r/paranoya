@@ -661,7 +661,7 @@ class Loki(object):
             if re.search('\[', cmd):
                 maps = Popen('cat /proc/' + str(pid) + '/maps', shell=True, stdout=subprocess.PIPE)
                 if(maps.stdout.read()):
-                    logger.log("WARNING", "ProcessScan", "Potentional Process Masquerading PID: %s CMD: %s Check /proc/%s/maps" % (str(pid), cmd, str(pid)))
+                    logger.log("WARNING", "ProcessScan", "Potential Process Masquerading PID: %s CMD: %s Check /proc/%s/maps" % (str(pid), cmd, str(pid)))
 
             # File Name Checks -------------------------------------------------
             for fioc in self.filename_iocs:
