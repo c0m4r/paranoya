@@ -30,10 +30,16 @@ pacman -S gcc git python3 python-devtools python-pip
 xbps-install -Sy gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv
 ```
 
-#### Debian / Ubuntu
+#### Debian / Ubuntu / Linux Mint
 
 ```
 apt -y install build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
+```
+
+#### Rocky Linux / AlmaLinux
+
+```
+dnf install gcc git openssl-devel python3 python3-devel python3-pip
 ```
 
 ## Installation
