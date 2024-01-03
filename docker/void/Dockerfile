@@ -1,7 +1,7 @@
 FROM ghcr.io/void-linux/void-glibc:latest
-RUN xbps-install -Su && xbps-install -Sy bash python3 python3-devel python3-pip python3-virtualenv openssl-devel gcc
+RUN xbps-install -Su && xbps-install -Sy bash curl gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv wget
 WORKDIR /opt
-COPY Loki-daemonized ./
+RUN git clone https://github.com/c0m4r/Loki-daemonized.git .
 EXPOSE 1337
 RUN python3 -m venv .
 RUN /bin/bash -c "source bin/activate && pip3 install -r requirements.txt && ./loki-upgrader.py --sigsonly --nolog"

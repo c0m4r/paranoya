@@ -1,7 +1,7 @@
 FROM alpine:3.19
-RUN apk add --no-cache bash python3 python3-dev py3-pip gcc musl-dev linux-headers openssl-dev
+RUN apk add --no-cache bash gcc git musl-dev linux-headers openssl-dev python3 python3-dev py3-pip wget
 WORKDIR /opt
-COPY Loki-daemonized ./
+RUN git clone https://github.com/c0m4r/Loki-daemonized.git .
 EXPOSE 1337
 RUN python3 -m venv .
 RUN /bin/bash -c "source bin/activate && pip3 install -r requirements.txt && ./loki-upgrader.py --sigsonly --nolog"
