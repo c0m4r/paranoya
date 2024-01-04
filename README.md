@@ -72,6 +72,10 @@ However, to be able to scan anything outside docker you have to mount a volume p
 
 There are also other [Dockerfiles](/docker) available, based on different Linux distros.
 
+#### Flatpak
+
+DIY flatpak-builder files available [here](/flatpak).
+
 #### Chroot
 
 For older systems that can't handle modern deps, you might give it a try: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
