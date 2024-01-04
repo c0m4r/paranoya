@@ -4,9 +4,9 @@
 #
 #  LOKI Upgrader
 try:
- from urllib2 import urlopen
+    from urllib2 import urlopen
 except ImportError:
- from urllib.request import urlopen #For python 3.5
+    from urllib.request import urlopen
 import json
 import zipfile
 import shutil
@@ -16,29 +16,16 @@ import argparse
 import traceback
 from sys import platform as _platform
 try:
-    from urlparse import urlparse 
+    from urlparse import urlparse
 except ImportError:
     from urllib.parse import urlparse
 from os.path import exists
-
-# Win32 Imports
-if _platform == "win32":
-    try:
-        import win32api
-    except Exception:
-        platform = "linux"  # crazy guess
-
-
 from lib.lokilogger import *
 
 # Platform
-platform = ""
+platform = _platform
 if _platform == "linux" or _platform == "linux2":
     platform = "linux"
-elif _platform == "darwin":
-    platform = "macos"
-elif _platform == "win32":
-    platform = "windows"
 
 def needs_update(sig_url):
     try:
@@ -66,7 +53,6 @@ def needs_update(sig_url):
     except Exception:
         return True
 
-
 class LOKIUpdater(object):
 
     # Incompatible signatures
@@ -76,9 +62,9 @@ class LOKIUpdater(object):
         "https://github.com/Neo23x0/signature-base/archive/master.zip",
         "https://github.com/reversinglabs/reversinglabs-yara-rules/archive/develop.zip"
     ]
-    
-    UPDATE_URL_LOKI = "https://api.github.com/repos/Neo23x0/Loki/releases/latest"
-    
+
+    UPDATE_URL_LOKI = "https://api.github.com/repos/c0m4r/Loki-daemonized/releases/latest"
+
     def __init__(self, debug, logger, application_path):
         self.debug = debug
         self.logger = logger
@@ -88,6 +74,7 @@ class LOKIUpdater(object):
         try:
             for sig_url in self.UPDATE_URL_SIGS:
                 if needs_update(sig_url):
+
                     # Downloading current repository
                     try:
                         self.logger.log("INFO", "Upgrader", "Downloading %s ..." % sig_url)
@@ -95,8 +82,7 @@ class LOKIUpdater(object):
                     except Exception:
                         if self.debug:
                             traceback.print_exc()
-                        self.logger.log("ERROR", "Upgrader", "Error downloading the signature database - "
-                                                            "check your Internet connection")
+                        self.logger.log("ERROR", "Upgrader", "Error downloading the signature database - check your Internet connection")
                         sys.exit(1)
 
                     # Preparations
@@ -122,6 +108,7 @@ class LOKIUpdater(object):
                             sigName = os.path.basename(zipFilePath)
                             if zipFilePath.endswith("/"):
                                 continue
+
                             # Skip incompatible rules
                             skip = False
                             for incompatible_rule in self.INCOMPATIBLE_RULES:
@@ -130,6 +117,7 @@ class LOKIUpdater(object):
                                     skip = True
                             if skip:
                                 continue
+
                             # Extract the rules
                             self.logger.log("DEBUG", "Upgrader", "Extracting %s ..." % zipFilePath)
                             if "/iocs/" in zipFilePath and zipFilePath.endswith(".txt"):
@@ -158,8 +146,7 @@ class LOKIUpdater(object):
                     except Exception:
                         if self.debug:
                             traceback.print_exc()
-                        self.logger.log("ERROR", "Upgrader", "Error while extracting the signature files from the download "
-                                                            "package")
+                        self.logger.log("ERROR", "Upgrader", "Error while extracting the signature files from the download package")
                         sys.exit(1)
                 else:
                     self.logger.log("INFO", "Upgrader", "%s is up to date." % sig_url)
@@ -170,17 +157,15 @@ class LOKIUpdater(object):
             return False
         return True
 
-
     def update_loki(self):
         try:
-
             # Downloading the info for latest release
             try:
                 self.logger.log("INFO", "Upgrader", "Checking location of latest release %s ..." % self.UPDATE_URL_LOKI)
                 response_info = urlopen(self.UPDATE_URL_LOKI)
                 data = json.load(response_info)
                 # Get download URL
-                zip_url = data['assets'][0]['browser_download_url']
+                zip_url = data['zipball_url']
                 self.logger.log("INFO", "Upgrader", "Downloading latest release %s ..." % zip_url)
                 response_zip = urlopen(zip_url)
             except Exception:
@@ -193,7 +178,7 @@ class LOKIUpdater(object):
             try:
                 zipUpdate = zipfile.ZipFile(io.BytesIO(response_zip.read()))
                 for zipFilePath in zipUpdate.namelist():
-                    if zipFilePath.endswith("/") or "/config/" in zipFilePath or "/loki-upgrader.exe" in zipFilePath:
+                    if zipFilePath.endswith("/") or "/config/" in zipFilePath:
                         continue
 
                     source = zipUpdate.open(zipFilePath)
@@ -227,8 +212,7 @@ class LOKIUpdater(object):
             except Exception:
                 if self.debug:
                     traceback.print_exc()
-                self.logger.log("ERROR", "Upgrader",
-                                "Error while extracting the signature files from the download package")
+                self.logger.log("ERROR", "Upgrader", "Error while extracting the signature files from the download package")
                 sys.exit(1)
 
         except Exception:
@@ -237,7 +221,6 @@ class LOKIUpdater(object):
             return False
         return True
 
-
 def get_application_path():
     try:
         if getattr(sys, 'frozen', False):
@@ -245,16 +228,11 @@ def get_application_path():
         else:
             application_path = os.path.dirname(os.path.realpath(__file__))
         if "~" in application_path and platform == "windows":
-            # print "Trying to translate"
-            # print application_path
             application_path = win32api.GetLongPathName(application_path)
-        #if args.debug:
-        #    logger.log("DEBUG", "Init", "Application Path: %s" % application_path)
         return application_path
     except Exception:
         print("Error while evaluation of application path")
         traceback.print_exc()
-
 
 if __name__ == '__main__':
 
@@ -265,17 +243,12 @@ if __name__ == '__main__':
     parser.add_argument('--progonly', action='store_true', help='Update the program files only', default=False)
     parser.add_argument('--nolog', action='store_true', help='Don\'t write a local log file', default=False)
     parser.add_argument('--debug', action='store_true', default=False, help='Debug output')
-    parser.add_argument('--clean', action='store_true', default=False, help='Clean up the signature directory and get '
-                                                                            'a fresh set')
+    parser.add_argument('--clean', action='store_true', default=False, help='Clean up the signature directory and get a fresh set')
     parser.add_argument('--detached', action='store_true', default=False, help=argparse.SUPPRESS)
 
     args = parser.parse_args()
 
-    # Computername
-    if platform == "windows":
-        t_hostname = os.environ['COMPUTERNAME']
-    else:
-        t_hostname = os.uname()[1]
+    t_hostname = os.uname()[1]
 
     # Logger
     logger = LokiLogger(args.nolog, args.l, t_hostname, '', '', False, False, False, args.debug, platform=platform, caller='upgrader')
