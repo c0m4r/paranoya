@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres-ish to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.51.0-d2] - 2024-01-04
+
+### Added
+
+- added missing exceptions
+- added stripping socket data
+- flatpak builder files
+
+## [0.51.0-d1] - 2024-01-03
+
+### Added
+
+- first release
+- focuses on Linux
+- single file scan if given path is a file
+- daemon mode
+- exclude files by hash
+- initial implementation of process scanning under Linux
