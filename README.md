@@ -116,14 +116,14 @@ Check example [init files](/etc) for OpenRC and systemd integration.
 python3 loki_client.py /path/to/scan
 ```
 
-As for now server accepts plain path and optional authkey, space-separated and response and answers with one of 3 results
+As for now the server accepts plain path and an optional space-separated authkey.
 
 ```
 echo "./test" | nc localhost 1337 ; echo
 echo "./test authkey" | nc localhost 1337 ; echo
 ```
 
-Possible results:
+Possible responses:
 
 | Answer                               | Level   | Score  |
 | ------------------------------------ | ------- | ------ |
@@ -131,7 +131,7 @@ Possible results:
 | RESULT: Suspicious objects detected! | WARNING | >= 60  |
 | RESULT: SYSTEM SEEMS TO BE CLEAN.    | NOTICE  | >= 40  |
 
-In --auth mode it respond with `authorization required` if authkey was not sent or `unauthorized` if authkey is invalid.
+In `--auth` mode it will respond with `authorization required` if authkey was not sent or `unauthorized` if authkey is invalid.
 
 ## Changes
 
