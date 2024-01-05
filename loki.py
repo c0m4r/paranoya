@@ -1586,6 +1586,21 @@ def walk_error(err):
         print("Directory walk error")
 
 
+def save_pidfile():
+    # Save pidfile
+    if args.d is True:
+        if os.path.exists(args.pidfile):
+            fpid = open(args.pidfile, "r")
+            loki_pid = int(fpid.read())
+            fpid.close()
+            if psutil.pid_exists(loki_pid):
+                print("LOKI daemon already running. Returning to Asgard.")
+                sys.exit(0)
+        with open(args.pidfile, "w", encoding="utf-8") as fpid:
+            fpid.write(str(os.getpid()))
+            fpid.close()
+
+
 def remove_pidfile():
     if args.d:
         try:
@@ -1831,19 +1846,6 @@ if __name__ == "__main__":
     # Argument parsing
     args = main()
 
-    # Save pidfile
-    if args.d is True:
-        if os.path.exists(args.pidfile):
-            fpid = open(args.pidfile, "r")
-            loki_pid = int(fpid.read())
-            fpid.close()
-            if psutil.pid_exists(loki_pid):
-                print("LOKI daemon already running. Returning to Asgard.")
-                sys.exit(0)
-        with open(args.pidfile, "w", encoding="utf-8") as fpid:
-            fpid.write(str(os.getpid()))
-            fpid.close()
-
     # Remove old log file
     if os.path.exists(args.l):
         os.remove(args.l)
@@ -1932,7 +1934,13 @@ if __name__ == "__main__":
         if args.d is True:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            server.bind((args.listen_host, args.listen_port))
+            try:
+                server.bind((args.listen_host, args.listen_port))
+            except Exception as strerror:
+                logger.log("ERROR", "Init", "{0}".format(strerror))
+                server.close()
+                sys.exit(1)
+            save_pidfile()
             server.listen(5)
 
             def handle_client(client_socket, address):
