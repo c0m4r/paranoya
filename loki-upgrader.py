@@ -14,18 +14,18 @@ import io
 import os
 import argparse
 import traceback
-from sys import platform as _platform
+import sys
 
 try:
     from urlparse import urlparse
 except ImportError:
     from urllib.parse import urlparse
 from os.path import exists
-from lib.lokilogger import *
+from lib.lokilogger import LokiLogger
 
 # Platform
-platform = _platform
-if _platform == "linux" or _platform == "linux2":
+platform = sys.platform
+if platform == "linux" or platform == "linux2":
     platform = "linux"
 
 
@@ -82,10 +82,10 @@ class LOKIUpdater(object):
         self.logger = logger
         self.application_path = application_path
 
-    def update_signatures(self, clean=False):
+    def update_signatures(self, clean):
         try:
             for sig_url in self.UPDATE_URL_SIGS:
-                if needs_update(sig_url):
+                if needs_update(sig_url) or clean is True:
                     # Downloading current repository
                     try:
                         self.logger.log(
@@ -107,7 +107,7 @@ class LOKIUpdater(object):
                         sigDir = os.path.join(
                             self.application_path, os.path.abspath("signature-base/")
                         )
-                        if clean:
+                        if clean is True:
                             self.logger.log(
                                 "INFO", "Upgrader", "Cleaning directory '%s'" % sigDir
                             )

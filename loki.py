@@ -31,8 +31,21 @@ from subprocess import Popen, PIPE
 import yara
 
 # LOKI modules
-from lib.lokilogger import *
-from lib.helpers import *
+from lib.lokilogger import codecs, logging, LokiLogger, getSyslogTimestamp
+from lib.helpers import (
+    is_ip,
+    is_cidr,
+    ip_in_net,
+    generateHashes,
+    getExcludedMountpoints,
+    printProgress,
+    transformOS,
+    replaceEnvVars,
+    get_file_type,
+    removeNonAsciiDrop,
+    getAgeString,
+    getHostname,
+)
 
 # Platform
 os_platform = "linux"
