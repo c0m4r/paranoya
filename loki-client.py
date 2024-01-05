@@ -5,20 +5,19 @@
 import os
 import socket
 import sys
-import time
 
 host = "127.0.0.1"
 port = 1337
 
 try:
     path = sys.argv[1]
-except:
+except Exception:
     print("missing path")
     sys.exit(1)
 
 try:
     auth = sys.argv[2]
-except:
+except Exception:
     auth = ""
 
 if not os.path.isfile(path) and not os.path.isdir(path):

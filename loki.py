@@ -834,7 +834,7 @@ class Loki(object):
 
             # Process Masquerading Detection -----------------------------------
 
-            if re.search("\[", cmd):
+            if re.search(r"\[", cmd):
                 maps = Popen("cat /proc/" + str(pid) + "/maps", shell=True, stdout=PIPE)
                 if maps.stdout.read():
                     logger.log(
@@ -1437,13 +1437,13 @@ class Loki(object):
                 try:
                     # If the line contains md5sum
                     if re.search(r"^md5sum:", line):
-                        excludes_hash.append(re.sub("(md5sum:|(\s\#|\#).*)", "", line))
+                        excludes_hash.append(re.sub(r"(md5sum:|(\s\#|\#).*)", "", line))
                     # If the line contains sha1sum
                     elif re.search(r"^sha1sum:", line):
-                        excludes_hash.append(re.sub("(sha1sum:|(\s\#|\#).*)", "", line))
+                        excludes_hash.append(re.sub(r"(sha1sum:|(\s\#|\#).*)", "", line))
                     elif re.search(r"^sha256sum:", line):
                         excludes_hash.append(
-                            re.sub("(sha256sum:|(\s\#|\#).*)", "", line)
+                            re.sub(r"(sha256sum:|(\s\#|\#).*)", "", line)
                         )
                     # If the line contains something
                     elif re.search(r"\w", line):
@@ -2094,5 +2094,3 @@ if __name__ == "__main__":
         "Finished LOKI Scan SYSTEM: %s TIME: %s"
         % (getHostname(os_platform), getSyslogTimestamp()),
     )
-
-sys.exit(0)
