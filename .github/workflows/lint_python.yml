@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
       - run: pip install --upgrade pip setuptools wheel
       - run: pip install black codespell mypy pytest ruff safety
       - run: ruff . --ignore "F403,F405"
@@ -23,8 +25,8 @@ jobs:
       - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
       - run: pip install -r requirements.txt
       - run: mypy --exclude 'lib64' . || true
-      - run: bin/pytest --ignore-glob="lib/python3*" --ignore="lib64"
-      - run: bin/pytest --ignore-glob="lib/python3*" --ignore="lib64" --doctest-modules || true
+      - run: pytest --ignore-glob="lib/python3*" --ignore="lib64"
+      - run: pytest --ignore-glob="lib/python3*" --ignore="lib64" --doctest-modules || true
       - run: safety check
       - run: timeout -s TERM 10 python ./loki.py -d || true
       - run: python ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
