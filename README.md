@@ -1,4 +1,4 @@
-![addons/img/loki-daemonized-icon.png](addons/img/loki-daemonized-icon.png)
+![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-icon.png)
 
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
@@ -150,11 +150,11 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 
 ## Screenshots
 
-![img/loki-daemonized-screen1.png](/addons/img/loki-daemonized-screen1.png)
+![/addons/img/loki-daemonized-screen1.png](/addons/img/loki-daemonized-screen1.png)
 
 With auth:
 
-![img/loki-daemonized-screen2.png](/addons/img/loki-daemonized-screen2.png)
+![/addons/img/loki-daemonized-screen2.png](/addons/img/loki-daemonized-screen2.png)
 
 ---
 ## Licensed under GPL 3.0
