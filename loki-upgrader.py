@@ -308,7 +308,7 @@ if __name__ == "__main__":
     # Parse Arguments
     parser = argparse.ArgumentParser(description="Loki - Upgrader")
     parser.add_argument(
-        "-l", help="Log file", metavar="log-file", default="loki-upgrade.log"
+        "-l", help="Log file", metavar="log-file", default="loki-upgrader.log"
     )
     parser.add_argument(
         "--sigsonly",
