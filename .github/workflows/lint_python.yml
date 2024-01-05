@@ -2,14 +2,14 @@ name: lint_python
 on:
   push:
     paths:
-      - ./*.py
-      - ./lib/*.py
-      - .github/workflows/lint_python.yml
+      - '**.py'
+      - 'lib/**.py'
+      - '.github/workflows/lint_python.yml'
   pull_request:
     paths:
-    - ./*.py
-    - ./lib/*.py
-    - github/workflows/lint_python.yml
+    - '**.py'
+    - 'lib/**.py'
+    - '.github/workflows/lint_python.yml'
 jobs:
   lint_python:
     runs-on: ubuntu-latest
