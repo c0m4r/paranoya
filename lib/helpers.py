@@ -16,6 +16,7 @@ import traceback
 
 # Helper Functions -------------------------------------------------------------
 
+
 def is_ip(string):
     try:
         if netaddr.valid_ipv4(string):
@@ -27,6 +28,7 @@ def is_ip(string):
         traceback.print_exc()
         return False
 
+
 def is_cidr(string):
     try:
         if netaddr.IPNetwork(string) and "/" in string:
@@ -34,6 +36,7 @@ def is_cidr(string):
         return False
     except Exception:
         return False
+
 
 def ip_in_net(ip, network):
     try:
@@ -43,6 +46,7 @@ def ip_in_net(ip, network):
         return False
     except Exception:
         return False
+
 
 def generateHashes(filedata):
     try:
@@ -57,6 +61,7 @@ def generateHashes(filedata):
         traceback.print_exc()
         return 0, 0, 0
 
+
 def getExcludedMountpoints():
     excludes = []
     try:
@@ -67,29 +72,31 @@ def getExcludedMountpoints():
                 if not options[1] == "/":
                     excludes.append(options[1])
     except Exception:
-        print ("Error while reading /etc/mtab")
+        print("Error while reading /etc/mtab")
     finally:
         mtab.close()
     return excludes
 
+
 def printProgress(i):
-    if (i%4) == 0:
-        sys.stdout.write('\b/')
-    elif (i%4) == 1:
-        sys.stdout.write('\b-')
-    elif (i%4) == 2:
-        sys.stdout.write('\b\\')
-    elif (i%4) == 3:
-        sys.stdout.write('\b|')
+    if (i % 4) == 0:
+        sys.stdout.write("\b/")
+    elif (i % 4) == 1:
+        sys.stdout.write("\b-")
+    elif (i % 4) == 2:
+        sys.stdout.write("\b\\")
+    elif (i % 4) == 3:
+        sys.stdout.write("\b|")
     sys.stdout.flush()
 
+
 def transformOS(regex):
-    regex = regex.replace(r'\\', r'/')
-    regex = regex.replace(r'C:', '')
+    regex = regex.replace(r"\\", r"/")
+    regex = regex.replace(r"C:", "")
     return regex
 
-def replaceEnvVars(path):
 
+def replaceEnvVars(path):
     # Setting new path to old path for default
     new_path = path
 
@@ -114,10 +121,11 @@ def replaceEnvVars(path):
 
     return new_path
 
+
 def get_file_type(filePath, filetype_sigs, max_filetype_magics, logger):
     try:
         # Reading bytes from file
-        res_full = open(filePath, 'rb', os.O_RDONLY).read(max_filetype_magics)
+        res_full = open(filePath, "rb", os.O_RDONLY).read(max_filetype_magics)
         # Checking sigs
         for sig in filetype_sigs:
             bytes_to_read = int(len(str(sig)) / 2)
@@ -130,13 +138,14 @@ def get_file_type(filePath, filetype_sigs, max_filetype_magics, logger):
             traceback.print_exc()
         return "UNKNOWN"
 
+
 def removeNonAscii(s, stripit=False):
     nonascii = "error"
     try:
         try:
             printable = set(string.printable)
-            filtered_string = filter(lambda x: x in printable, s.decode('utf-8'))
-            nonascii = ''.join(filtered_string)
+            filtered_string = filter(lambda x: x in printable, s.decode("utf-8"))
+            nonascii = "".join(filtered_string)
         except Exception:
             traceback.print_exc()
             nonascii = s.hex()
@@ -144,6 +153,7 @@ def removeNonAscii(s, stripit=False):
         traceback.print_exc()
         pass
     return nonascii
+
 
 def removeNonAsciiDrop(s):
     nonascii = "error"
@@ -156,16 +166,17 @@ def removeNonAsciiDrop(s):
         pass
     return nonascii
 
+
 def getAge(filePath):
     try:
-        stats=os.stat(filePath)
+        stats = os.stat(filePath)
 
         # Created
-        ctime=stats.st_ctime
+        ctime = stats.st_ctime
         # Modified
-        mtime=stats.st_mtime
+        mtime = stats.st_mtime
         # Accessed
-        atime=stats.st_atime
+        atime = stats.st_atime
 
     except Exception:
         # traceback.print_exc()
@@ -174,14 +185,22 @@ def getAge(filePath):
     # print "%s %s %s" % ( ctime, mtime, atime )
     return (ctime, mtime, atime)
 
+
 def getAgeString(filePath):
-    ( ctime, mtime, atime ) = getAge(filePath)
+    (ctime, mtime, atime) = getAge(filePath)
     timestring = ""
     try:
-        timestring = "CREATED: %s MODIFIED: %s ACCESSED: %s" % ( time.ctime(ctime), time.ctime(mtime), time.ctime(atime) )
+        timestring = "CREATED: %s MODIFIED: %s ACCESSED: %s" % (
+            time.ctime(ctime),
+            time.ctime(mtime),
+            time.ctime(atime),
+        )
     except Exception:
-        timestring = "CREATED: not_available MODIFIED: not_available ACCESSED: not_available"
+        timestring = (
+            "CREATED: not_available MODIFIED: not_available ACCESSED: not_available"
+        )
     return timestring
+
 
 def getHostname(os_platform):
     """
@@ -192,4 +211,4 @@ def getHostname(os_platform):
     if os_platform == "linux" or os_platform == "macos":
         return os.uname()[1]
     else:
-        return os.environ['COMPUTERNAME']
+        return os.environ["COMPUTERNAME"]

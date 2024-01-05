@@ -7,34 +7,34 @@ import socket
 import sys
 import time
 
-host = '127.0.0.1'
+host = "127.0.0.1"
 port = 1337
 
 try:
     path = sys.argv[1]
 except:
-    print('missing path')
+    print("missing path")
     sys.exit(1)
 
 try:
     auth = sys.argv[2]
 except:
-    auth = ''
+    auth = ""
 
 if not os.path.isfile(path) and not os.path.isdir(path):
-    print(path + ' not found')
+    print(path + " not found")
     sys.exit(127)
 
 try:
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 except socket.error:
-    print('Could not create a socket')
+    print("Could not create a socket")
     sys.exit()
 
 try:
     client.connect((host, port))
 except socket.error:
-    print('Could not connect to server')
+    print("Could not connect to server")
     sys.exit()
 
 if auth:
