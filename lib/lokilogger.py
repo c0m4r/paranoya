@@ -14,10 +14,8 @@ import logging
 from logging import handlers
 import socket
 
-__version__ = '0.51.0'
+__version__ = '0.51.0-d3'
 
-
-# Logger Class -----------------------------------------------------------------
 class LokiLogger:
 
     STDOUT_CSV = 0
@@ -49,10 +47,8 @@ class LokiLogger:
         self.debug = debug
         self.caller = caller
         self.CustomFormatter = customformatter
-        if "windows" in platform.lower():
-            self.linesep = "\r\n"
 
-        # Colorization ----------------------------------------------------
+        # Colorization
         init()
 
         # Welcome
@@ -221,17 +217,18 @@ class LokiLogger:
         if self.caller == 'main':
             print(str(Back.WHITE))
             print(" ".ljust(79) + Back.BLACK + Style.BRIGHT)
-
-            print("      __   ____  __ ______  ")
-            print("     / /  / __ \\/ //_/  _/  ")
-            print("    / /__/ /_/ / ,< _/ /    ")
-            print("   /____/\\____/_/|_/___/    ")
-            print("   YARA and IOC Scanner     ")
+            print("      __   ____  __ ______     __                         _            __")
+            print("     / /  / __ \/ //_/  _/ ___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /")
+            print("    / /__/ /_/ / ,< _/ /  / _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / ")
+            print("   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  ")
+            print("   YARA and IOC Scanner")
             print("  ")
             print("   by Florian Roth, GNU General Public License")
-            print("   version %s (Python 3 release)" % __version__)
+            print("   version %s" % __version__)
             print("  ")
-            print("   DISCLAIMER - USE AT YOUR OWN RISK")
+            print("   Loki-daemonized (c) 2023 c0m4r")
+            print("  ")
+            print("   DISCLAIMER - USE AT YOUR OWN RISK & DON\'T BE EVIL")
             print(str(Back.WHITE))
             print(" ".ljust(79) + Back.BLACK + Fore.GREEN)
             print(Fore.WHITE+''+Back.BLACK)
@@ -239,14 +236,11 @@ class LokiLogger:
         else:
             print("  ")
             print(Back.GREEN + " ".ljust(79) + Back.BLACK + Fore.GREEN)
-
             print("  ")
             print("  LOKI UPGRADER ")
-
             print("  ")
             print(Back.GREEN + " ".ljust(79) + Back.BLACK)
             print(Fore.WHITE + '' + Back.BLACK)
-
 
 def getSyslogTimestamp():
     date_obj = datetime.datetime.utcnow()

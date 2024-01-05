@@ -1,9 +1,11 @@
 /*.cache
-/bin/
-/lib/__pycache__/
-/lib/python3.11/
+/*.log
+/bin
+/include
+/lib/__pycache__
+/lib/python3.11
 /lib64
 /loki.pid
-/loki-upgrade.log
 /pyvenv.cfg
+/.ruff_cache
 /signature-base

@@ -227,8 +227,6 @@ def get_application_path():
             application_path = os.path.dirname(os.path.realpath(sys.executable))
         else:
             application_path = os.path.dirname(os.path.realpath(__file__))
-        if "~" in application_path and platform == "windows":
-            application_path = win32api.GetLongPathName(application_path)
         return application_path
     except Exception:
         print("Error while evaluation of application path")
