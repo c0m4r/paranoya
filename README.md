@@ -78,19 +78,6 @@ DIY flatpak-builder files available [here](/addons/flatpak).
 
 For older systems that can't handle modern deps, you might give it a try: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
 
-## Patch file
-
-Patch file contains changes made to original loki.py.
-
-To apply the patch on original Loki you have to convert loki.py before and after due to DOS line-ending characters used by original author, which the patch does not have.
-
-```bash
-wget https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
-dos2unix loki.py
-patch < loki-daemonized.patch
-unix2dos loki.py
-```
-
 ## Daemonized usage
 
 #### Daemon (server)
@@ -160,8 +147,6 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
   --disable-yara-files DISABLE_YARA_FILES
                         Comma separated list of yara files to disable
 ```
-
-Diff: [loki-daemonized.patch](/addons/loki-daemonized.patch)
 
 ## Screenshots
 
