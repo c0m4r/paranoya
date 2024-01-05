@@ -1,12 +1,10 @@
-![img/loki-daemonized-icon.png](img/loki-daemonized-icon.png)
+![addons/img/loki-daemonized-icon.png](addons/img/loki-daemonized-icon.png)
 
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
-A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes) and is mainly focused on Linux.
+A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes) and is focused on Linux.
 
 The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. This way, we can use Loki to scan, for example, files uploaded to the server.
-
-Modifications tries to preserve original functionality, although I only care about Linux, so I do not guarantee compatibility with other platforms.
 
 ## Dependencies
 
@@ -70,11 +68,11 @@ docker compose up -d
 
 However, to be able to scan anything outside docker you have to mount a volume pointing to a specific directory. Change docker-compose.yml accordingly.
 
-There are also other [Dockerfiles](/docker) available, based on different Linux distros.
+There are also other [Dockerfiles](/addons/docker) available, based on different Linux distros.
 
 #### Flatpak
 
-DIY flatpak-builder files available [here](/flatpak).
+DIY flatpak-builder files available [here](/addons/flatpak).
 
 #### Chroot
 
@@ -108,7 +106,7 @@ deactivate
 
 You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
 
-Check example [init files](/etc) for OpenRC and systemd integration.
+Check example [init files](/addons/etc) for OpenRC and systemd integration.
 
 #### Client
 
@@ -141,7 +139,7 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
 * PID file `loki.pid` is created in the program directory if running in daemon mode, you change its path with `--pidfile /path/to/pidfile`
 * Optional auth key `--auth somethingRandomHere` in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
 * You can disable one or more yara files, f.e. `--disable-yara-files apt_vpnfilter.yar,yara_mixed_ext_vars.yar`
-* Exclude files by hash as proposed by [rafaelarcanjo](https://github.com/rafaelarcanjo) in [Neo23x0/Loki/pull/204](https://github.com/Neo23x0/Loki/pull/204). See: [/config/excludes.cfg](/config/excludes.cfg)
+* Exclude files by hash as proposed by [rafaelarcanjo](https://github.com/rafaelarcanjo) in [Neo23x0/Loki/pull/204](https://github.com/Neo23x0/Loki/pull/204). See: [excludes.cfg](/config/excludes.cfg)
 * Initial implementation of process scanning under Linux (scan_processes_linux()):
   * File Name Checks: works with signature-base/iocs/filename-iocs.txt (note: linux iocs missing by default)
   * Process connections: for now, it only shows detected connections per process
@@ -163,15 +161,15 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
                         Comma separated list of yara files to disable
 ```
 
-Diff: [loki-daemonized.patch](loki-daemonized.patch)
+Diff: [loki-daemonized.patch](/addons/loki-daemonized.patch)
 
 ## Screenshots
 
-![img/loki-daemonized-screen1.png](img/loki-daemonized-screen1.png)
+![img/loki-daemonized-screen1.png](/addons/img/loki-daemonized-screen1.png)
 
 With auth:
 
-![img/loki-daemonized-screen2.png](img/loki-daemonized-screen2.png)
+![img/loki-daemonized-screen2.png](/addons/img/loki-daemonized-screen2.png)
 
 ---
 ## Licensed under GPL 3.0
