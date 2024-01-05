@@ -2,6 +2,7 @@
 #
 # LOKI Logger
 
+from os import get_terminal_size
 import sys
 import re
 from colorama import Fore, Back, Style
@@ -296,20 +297,31 @@ class LokiLogger:
 
     def print_welcome(self):
         if self.caller == "main":
+            try:
+                termsize = get_terminal_size().columns
+            except Exception:
+                termsize = 80
+            print(termsize)
             print(str(Back.WHITE))
             print(" ".ljust(79) + Back.BLACK + Style.BRIGHT)
-            print(
-                r"      __   ____  __ ______     __                         _            __"
-            )
-            print(
-                r"     / /  / __ \/ //_/  _/ ___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /"
-            )
-            print(
-                r"    / /__/ /_/ / ,< _/ /  / _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / "
-            )
-            print(
-                r"   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  "
-            )
+            if termsize > 80:
+                print(
+                    r"      __   ____  __ ______     __                         _            __"
+                )
+                print(
+                    r"     / /  / __ \/ //_/  _/ ___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /"
+                )
+                print(
+                    r"    / /__/ /_/ / ,< _/ /  / _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / "
+                )
+                print(
+                    r"   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  "
+                )
+            else:
+                print(r"      __   ____  __ ______  ")
+                print(r"     / /  / __ \/ //_/  _/  ")
+                print(r"    / /__/ /_/ / ,< _/ /    ")
+                print(r"   /____/\____/_/|_/___/    ")
             print("   YARA and IOC Scanner")
             print("  ")
             print("   by Florian Roth, GNU General Public License")
@@ -321,7 +333,6 @@ class LokiLogger:
             print(str(Back.WHITE))
             print(" ".ljust(79) + Back.BLACK + Fore.GREEN)
             print(Fore.WHITE + "" + Back.BLACK)
-
         else:
             print("  ")
             print(Back.GREEN + " ".ljust(79) + Back.BLACK + Fore.GREEN)
