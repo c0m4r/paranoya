@@ -20,7 +20,7 @@ jobs:
       - run: pip install black codespell mypy pytest ruff safety
       - run: ruff . --ignore "F403,F405"
       - run: black --diff .
-      - run: bin/codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
+      - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
       - run: pip install -r requirements.txt
       - run: mypy --exclude 'lib64' . || true
       - run: bin/pytest --ignore-glob="lib/python3*" --ignore="lib64"
