@@ -1577,11 +1577,13 @@ def updateLoki(sigsOnly):
     if os.path.exists(os.path.join(get_application_path(), "loki-upgrader.py")):
         pArgs.append(args.python)
         pArgs.append("loki-upgrader.py")
+    elif os.path.exists(os.path.join(get_application_path(), "loki-upgrader")):
+        pArgs.append("./loki-upgrader")
     else:
         logger.log(
             "ERROR",
             "Update",
-            "Cannot find loki-upgrader.py in the current working directory.",
+            "Cannot find loki-upgrader in the current working directory.",
         )
 
     if sigsOnly:

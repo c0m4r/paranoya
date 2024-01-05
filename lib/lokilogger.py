@@ -15,7 +15,7 @@ import logging
 from logging import handlers
 import socket
 
-__version__ = "0.51.0-d3"
+__version__ = "1.0.3"
 
 
 class LokiLogger:
