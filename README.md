@@ -111,7 +111,7 @@ Check example [init files](/addons/etc) for OpenRC and systemd integration.
 #### Client
 
 ```
-python3 loki_client.py /path/to/scan
+python3 loki-client.py /path/to/scan
 ```
 
 As for now the server accepts plain path and an optional space-separated authkey.
@@ -135,7 +135,7 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
 
 * Focuses on Linux
 * Single file scan if given path is a file
-* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from loki_client.py
+* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from loki-client.py
 * PID file `loki.pid` is created in the program directory if running in daemon mode, you change its path with `--pidfile /path/to/pidfile`
 * Optional auth key `--auth somethingRandomHere` in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
 * You can disable one or more yara files, f.e. `--disable-yara-files apt_vpnfilter.yar,yara_mixed_ext_vars.yar`
