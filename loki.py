@@ -1440,7 +1440,9 @@ class Loki(object):
                         excludes_hash.append(re.sub(r"(md5sum:|(\s\#|\#).*)", "", line))
                     # If the line contains sha1sum
                     elif re.search(r"^sha1sum:", line):
-                        excludes_hash.append(re.sub(r"(sha1sum:|(\s\#|\#).*)", "", line))
+                        excludes_hash.append(
+                            re.sub(r"(sha1sum:|(\s\#|\#).*)", "", line)
+                        )
                     elif re.search(r"^sha256sum:", line):
                         excludes_hash.append(
                             re.sub(r"(sha256sum:|(\s\#|\#).*)", "", line)

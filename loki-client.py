@@ -28,13 +28,13 @@ try:
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 except socket.error:
     print("Could not create a socket")
-    sys.exit()
+    sys.exit(1)
 
 try:
     client.connect((host, port))
 except socket.error:
     print("Could not connect to server")
-    sys.exit()
+    sys.exit(1)
 
 if auth:
     data = sys.argv[1] + " " + sys.argv[2]
