@@ -17,31 +17,31 @@ The idea is that we can load all the rules once and then perform only individual
 
 #### Alpine Linux
 
-```
+```bash
 apk add gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-pip
 ```
 
 #### Arch Linux
 
-```
+```bash
 pacman -S gcc git python3 python-devtools python-pip
 ```
 
 #### Void Linux
 
-```
+```bash
 xbps-install -Sy gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv
 ```
 
 #### Debian / Ubuntu / Linux Mint
 
-```
+```bash
 apt -y install build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
 ```
 
 #### Rocky Linux / AlmaLinux
 
-```
+```bash
 dnf install gcc git openssl-devel python3 python3-devel python3-pip
 ```
 
@@ -65,7 +65,7 @@ deactivate
 
 This repo comes with predefined docker files. The default one is based on [official python image](https://hub.docker.com/_/python), so running in docker should be as simple as:
 
-```
+```bash
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized/docker/default
 docker compose up -d
@@ -77,7 +77,21 @@ There are also other [Dockerfiles](/addons/docker) available, based on different
 
 #### Flatpak
 
-DIY flatpak-builder files available [here](/addons/flatpak).
+DIY flatpak-builder files available [here](/addons/flatpak). Simply hit `./build.sh`.
+
+Once it's ready, you can run Loki, passing arguments you need.
+
+```bash
+flatpak run org.flatpak.Loki-daemonized --intense -p ./test
+```
+
+Keep in mind that even though there is `--filesystem=host` set, some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) under Flatpak Sandbox, preventing Loki from scanning them.
+
+In order to scan one of them use an override. An example for /tmp dir:
+
+```bash
+flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
+```
 
 #### Chroot
 
@@ -108,7 +122,7 @@ python3 loki-client.py /path/to/scan
 
 As for now the server accepts plain path and an optional space-separated authkey.
 
-```
+```bash
 echo "./test" | nc localhost 1337 ; echo
 echo "./test authkey" | nc localhost 1337 ; echo
 ```
