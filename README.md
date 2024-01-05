@@ -97,6 +97,10 @@ flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
 
 For older systems that can't handle modern deps, you might give it a try: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
 
+#### Android
+
+See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-on-Android)
+
 ## Daemonized usage
 
 #### Daemon (server)
