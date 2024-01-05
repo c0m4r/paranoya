@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres-ish to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2024-01-04
+
+### Changed
+
+- code refactoring and cleanup
+- dropping support for non-linux platforms
+- loki-upgrader program updates now uses Loki-daemonized repo
+- loki_client.py renamed to loki-client.py to match loki-upgrader.py convention
+- docker, flatpak, init files and img moved to ./addons/
+- example excludes disabled by default
+
+### Removed
+
+- removed any non-linux code
+- removed non-linux deps
+- removed patch file as it no longer makes sense due to the depth of changes
+- future module no longer used, removed from requirements.txt
+
 ## [0.51.0-d2] - 2024-01-04
 
 ### Added
