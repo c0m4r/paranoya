@@ -2048,7 +2048,7 @@ if __name__ == "__main__":
             )
             while True:
                 client, addr = server.accept()
-                Thread(
+                threading.Thread(
                     target=handle_client,
                     args=(client, addr),
                     name=str(addr[0]) + ":" + str(addr[1]),
