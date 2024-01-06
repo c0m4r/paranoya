@@ -849,7 +849,7 @@ class Loki(object):
 
             if re.search(r"\[", cmd):
                 maps = "/proc/%s/maps" % str(pid)
-                maps = run(["cat", maps], encoding="utf-8", stdout=PIPE)
+                maps = run(["/bin/cat", maps], encoding="utf-8", stdout=PIPE)
                 if maps.stdout.strip():
                     logger.log(
                         "WARNING",
