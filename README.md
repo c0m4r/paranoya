@@ -8,9 +8,11 @@
 ![Flatpak](https://img.shields.io/badge/flatpak-%23488bd2.svg?style=for-the-badge&logo=flatpak&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 
-A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes) and is focused on Linux.
+A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, 
+as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes) and is focused on Linux.
 
-The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. This way, we can use Loki to scan, for example, files uploaded to the server.
+The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. 
+This way, we can use Loki to scan, for example, files uploaded to the server.
 
 ## Dependencies
 
@@ -18,31 +20,31 @@ The idea is that we can load all the rules once and then perform only individual
 
 #### Alpine Linux
 
-```bash
+```
 apk add gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-pip
 ```
 
 #### Arch Linux
 
-```bash
+```
 pacman -S gcc git python3 python-devtools python-pip
 ```
 
 #### Void Linux
 
-```bash
+```
 xbps-install -Sy gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv
 ```
 
 #### Debian / Ubuntu / Linux Mint
 
-```bash
+```
 apt -y install build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
 ```
 
 #### Rocky Linux / AlmaLinux
 
-```bash
+```
 dnf install gcc git openssl-devel python3 python3-devel python3-pip
 ```
 
@@ -50,7 +52,7 @@ dnf install gcc git openssl-devel python3 python3-devel python3-pip
 
 #### Manual
 
-```bash
+```
 cd /opt
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
@@ -64,9 +66,10 @@ deactivate
 
 #### Docker
 
-This repo comes with predefined docker files. The default one is based on [official python image](https://hub.docker.com/_/python), so running in docker should be as simple as:
+This repo comes with predefined docker files. The default one is based on [official python image](https://hub.docker.com/_/python), 
+so running in docker should be as simple as:
 
-```bash
+```
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized/docker/default
 docker compose up -d
@@ -82,21 +85,31 @@ DIY flatpak-builder files available [here](/addons/flatpak). Simply hit `./build
 
 Once it's ready, you can run Loki, passing arguments you need.
 
-```bash
+```
 flatpak run org.flatpak.Loki-daemonized --intense -p ./test
 ```
 
-Keep in mind that even though there is `--filesystem=host` set, some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) under Flatpak Sandbox, preventing Loki from scanning them.
+Keep in mind that even though there is `--filesystem=host` set, 
+some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) under Flatpak Sandbox, preventing Loki from scanning them.
 
 In order to scan one of them use an override. An example for /tmp dir:
 
-```bash
+```
 flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
 ```
 
+#### Compiled
+
+For binary version of Loki-daemonized and its tools check [latest release](https://github.com/c0m4r/Loki-daemonized/releases/latest).
+
+There are binaries compiled with [PyInstaller](https://pyinstaller.org/) for x86_64 (x64/amd64) and aarch64 (arm64).
+
+However, when possible, you should use bare python under venv, 
+as it will allow you to get the latest versions of python modules and keep them up-to-date.
+
 #### Chroot
 
-For older systems that can't handle modern deps, you might give it a try: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
+See: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
 
 #### Android
 
@@ -108,7 +121,7 @@ See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wik
 
 Start as a daemon and bind on default localhost:1337
 
-```bash
+```
 cd Loki-daemonized
 . bin/activate
 python3 loki.py -d -s 20000 --noindicator --csv --nolog --intense --force &> loki.log &
@@ -127,7 +140,7 @@ python3 loki-client.py -p /path/to/scan
 
 As for now the server accepts plain path and an optional space-separated authkey.
 
-```bash
+```
 echo "./test" | nc localhost 1337 ; echo
 echo "./test authkey" | nc localhost 1337 ; echo
 ```
@@ -182,101 +195,22 @@ With auth:
 
 ## Usage
 
-### Loki-daemonized
+Run a program with --help to view usage information.
 
-```
-usage: loki.py [options]
-
-Loki - Simple IOC Scanner
-
-options:
-  -h, --help            show this help message and exit
-  -p path               Path to scan
-  -s kilobyte           Maximum file size to check in KB (default 5000 KB)
-  -l log-file           Log file
-  -r remote-loghost     Remote syslog system
-  -t remote-syslog-port
-                        Remote syslog port
-  -a alert-level        Alert score
-  -w warning-level      Warning score
-  -n notice-level       Notice score
-  -d                    Run as a daemon
-  --pidfile PIDFILE     Pid file path (default: loki.pid)
-  --listen-host LISTEN_HOST
-                        Listen host for daemon mode (default: localhost)
-  --listen-port LISTEN_PORT
-                        Listen port for daemon mode (default: 1337)
-  --auth AUTH           Auth key, only in daemon mode
-  --disable-yara-files DISABLE_YARA_FILES
-                        Comma separated list of yara files to disable
-  --alldrives           Scan all drives (including network drives and removable media)
-  --printall            Print all files that are scanned
-  --allreasons          Print all reasons that caused the score
-  --noprocscan          Skip the process scan
-  --nofilescan          Skip the file scan
-  --scriptanalysis      Statistical analysis for scripts to detect obfuscated code (beta)
-  --rootkit             Skip the rootkit check
-  --noindicator         Do not show a progress indicator
-  --dontwait            Do not wait on exit
-  --intense             Intense scan mode (also scan unknown file types and all extensions)
-  --csv                 Write CSV log format to STDOUT (machine processing)
-  --onlyrelevant        Only print warnings or alerts
-  --nolog               Don't write a local log file
-  --update              Update the signatures from the "signature-base" sub repository
-  --debug               Debug output
-  --maxworkingset MAXWORKINGSET
-                        Maximum working set size of processes to scan (in MB, default 100 MB)
-  --syslogtcp           Use TCP instead of UDP for syslog logging
-  --logfolder log-folder
-                        Folder to use for logging when log file is not specified
-  --python PYTHON       Override default python path
-  --nolisten            Dot not show listening connections
-  --excludeprocess EXCLUDEPROCESS
-                        Specify an executable name to exclude from scans, can be used multiple times
-  --force               Force the scan on a certain folder (even if excluded with hard exclude in LOKI's code
-  --version             Shows welcome text and version of loki, then exit
-```
-
-### Loki Client
-
-```
-usage: loki-client.py [-h] [-p PATH] [--host HOST] [--port PORT] [--auth AUTHKEY] [--check]
-
-Loki - Client
-
-options:
-  -h, --help      show this help message and exit
-  -p PATH         Path to scan (default: None)
-  --host HOST     Target daemon host (default: localhost)
-  --port PORT     Target daemon port (default: 1337)
-  --auth AUTHKEY  Pass authkey if it is required (default: None)
-  --check         Check if path exists before it is sent (default: False)
-```
-
-### Loki Upgrader
-
-```
-usage: loki-upgrader.py [-h] [-l log-file] [--sigsonly] [--progonly] [--nolog] [--debug] [--clean]
-
-Loki - Upgrader
-
-options:
-  -h, --help   show this help message and exit
-  -l log-file  Log file
-  --sigsonly   Update the signatures only
-  --progonly   Update the program files only
-  --nolog      Don't write a local log file
-  --debug      Debug output
-  --clean      Clean up the signature directory and get a fresh set
-```
+See: [Usage](https://github.com/c0m4r/Loki-daemonized/wiki/Usage)
 
 ---
 ## Licensed under GPL 3.0
 * Loki - Simple IOC Scanner Copyright (c) 2015 Florian Roth
 * Loki (daemonized) - Simple IOC and YARA Scanner fork (c) 2023 c0m4r
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under the terms 
+of the GNU General Public License as published by the Free Software Foundation, 
+either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/
+You should have received a copy of the GNU General Public License 
+along with this program. If not, see http://www.gnu.org/licenses/
