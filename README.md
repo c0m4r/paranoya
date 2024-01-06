@@ -105,7 +105,8 @@ For binary version of Loki-daemonized and its tools check [latest release](https
 There are binaries compiled with [PyInstaller](https://github.com/pyinstaller/pyinstaller) for x86_64 (x64/amd64) and aarch64 (arm64).
 
 However, when possible, you should use bare python under venv, 
-as it will allow you to get the latest versions of python modules and keep them up-to-date.
+as it will allow you to get the latest versions of python modules and keep them up-to-date, 
+as well as view and verify the source code.
 
 #### Chroot
 
