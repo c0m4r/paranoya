@@ -9,7 +9,7 @@ and this project adheres-ish to [Semantic Versioning](https://semver.org/spec/v2
 
 ### Added
 
-- addded handling ascii welcome for smaller terminals
+- added handling ascii welcome for smaller terminals
 - binary upgrader handling
 - pyinstaller build bash script
 - venv setup bash script
