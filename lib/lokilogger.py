@@ -15,7 +15,7 @@ import logging
 from logging import handlers
 import socket
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 
 class LokiLogger:
@@ -114,7 +114,8 @@ class LokiLogger:
             self.log_to_stdout(message, mes_type)
         except Exception:
             print(
-                "Cannot print certain characters to command line - see log file for full unicode encoded log line"
+                "Cannot print certain characters to command line, "
+                "see log file for full unicode encoded log line"
             )
             self.log_to_stdout(message, mes_type)
 
@@ -187,7 +188,7 @@ class LokiLogger:
                 )
                 message = linebreaker.sub(r"\n\1", message)
                 # Colorize Key Words
-                colorer = re.compile("([A-Z_0-9]{2,}:)\s", re.VERBOSE)
+                colorer = re.compile(r"([A-Z_0-9]{2,}:)\s", re.VERBOSE)
                 message = colorer.sub(
                     key_color + Style.BRIGHT + r"\1 " + base_color + Style.NORMAL,
                     message,
