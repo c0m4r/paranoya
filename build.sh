@@ -14,4 +14,4 @@ cp -r LICENSE dist/
 cp -r CHANGELOG dist/
 mv dist Loki-daemonized-$(arch)
 zip -r -9 -T Loki-daemonized-$(arch).zip Loki-daemonized-$(arch)
-tar -I 'gzip -9' cvzf Loki-daemonized-$(arch).tar.gz Loki-daemonized-$(arch)
+tar -I 'gzip -9' -cvf Loki-daemonized-$(arch).tar.gz Loki-daemonized-$(arch)
