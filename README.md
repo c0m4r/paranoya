@@ -122,7 +122,7 @@ Check example [init files](/addons/etc) for OpenRC and systemd integration.
 #### Client
 
 ```
-python3 loki-client.py /path/to/scan
+python3 loki-client.py -p /path/to/scan
 ```
 
 As for now the server accepts plain path and an optional space-separated authkey.
@@ -179,6 +179,96 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 With auth:
 
 ![/addons/img/loki-daemonized-screen2.png](/addons/img/loki-daemonized-screen2.png)
+
+## Usage
+
+### Loki-daemonized
+
+```
+usage: loki.py [options]
+
+Loki - Simple IOC Scanner
+
+options:
+  -h, --help            show this help message and exit
+  -p path               Path to scan
+  -s kilobyte           Maximum file size to check in KB (default 5000 KB)
+  -l log-file           Log file
+  -r remote-loghost     Remote syslog system
+  -t remote-syslog-port
+                        Remote syslog port
+  -a alert-level        Alert score
+  -w warning-level      Warning score
+  -n notice-level       Notice score
+  -d                    Run as a daemon
+  --pidfile PIDFILE     Pid file path (default: loki.pid)
+  --listen-host LISTEN_HOST
+                        Listen host for daemon mode (default: localhost)
+  --listen-port LISTEN_PORT
+                        Listen port for daemon mode (default: 1337)
+  --auth AUTH           Auth key, only in daemon mode
+  --disable-yara-files DISABLE_YARA_FILES
+                        Comma separated list of yara files to disable
+  --alldrives           Scan all drives (including network drives and removable media)
+  --printall            Print all files that are scanned
+  --allreasons          Print all reasons that caused the score
+  --noprocscan          Skip the process scan
+  --nofilescan          Skip the file scan
+  --scriptanalysis      Statistical analysis for scripts to detect obfuscated code (beta)
+  --rootkit             Skip the rootkit check
+  --noindicator         Do not show a progress indicator
+  --dontwait            Do not wait on exit
+  --intense             Intense scan mode (also scan unknown file types and all extensions)
+  --csv                 Write CSV log format to STDOUT (machine processing)
+  --onlyrelevant        Only print warnings or alerts
+  --nolog               Don't write a local log file
+  --update              Update the signatures from the "signature-base" sub repository
+  --debug               Debug output
+  --maxworkingset MAXWORKINGSET
+                        Maximum working set size of processes to scan (in MB, default 100 MB)
+  --syslogtcp           Use TCP instead of UDP for syslog logging
+  --logfolder log-folder
+                        Folder to use for logging when log file is not specified
+  --python PYTHON       Override default python path
+  --nolisten            Dot not show listening connections
+  --excludeprocess EXCLUDEPROCESS
+                        Specify an executable name to exclude from scans, can be used multiple times
+  --force               Force the scan on a certain folder (even if excluded with hard exclude in LOKI's code
+  --version             Shows welcome text and version of loki, then exit
+```
+
+### Loki Client
+
+```
+usage: loki-client.py [-h] [-p PATH] [--host HOST] [--port PORT] [--auth AUTHKEY] [--check]
+
+Loki - Client
+
+options:
+  -h, --help      show this help message and exit
+  -p PATH         Path to scan (default: None)
+  --host HOST     Target daemon host (default: localhost)
+  --port PORT     Target daemon port (default: 1337)
+  --auth AUTHKEY  Pass authkey if it is required (default: None)
+  --check         Check if path exists before it is sent (default: False)
+```
+
+### Loki Upgrader
+
+```
+usage: loki-upgrader.py [-h] [-l log-file] [--sigsonly] [--progonly] [--nolog] [--debug] [--clean]
+
+Loki - Upgrader
+
+options:
+  -h, --help   show this help message and exit
+  -l log-file  Log file
+  --sigsonly   Update the signatures only
+  --progonly   Update the program files only
+  --nolog      Don't write a local log file
+  --debug      Debug output
+  --clean      Clean up the signature directory and get a fresh set
+```
 
 ---
 ## Licensed under GPL 3.0
