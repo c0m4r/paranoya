@@ -90,7 +90,8 @@ class LOKIUpdater(object):
                         self.logger.log(
                             "ERROR",
                             "Upgrader",
-                            "Error downloading the signature database - check your Internet connection",
+                            "Error downloading the signature database "
+                            "- check your Internet connection",
                         )
                         sys.exit(1)
 
