@@ -301,7 +301,6 @@ class LokiLogger:
                 termsize = get_terminal_size().columns
             except Exception:
                 termsize = 80
-            print(termsize)
             print(str(Back.WHITE))
             print(" ".ljust(79) + Back.BLACK + Style.BRIGHT)
             if termsize > 80:
