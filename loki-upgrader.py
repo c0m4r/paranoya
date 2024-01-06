@@ -11,21 +11,15 @@ import os
 import argparse
 import traceback
 import sys
-import ssl
-import certifi
+import requests
 from os.path import exists
 from urllib.parse import urlparse
-from urllib.request import urlopen
 from lib.lokilogger import LokiLogger
 
 # Platform
 platform = sys.platform
 if platform == "linux" or platform == "linux2":
     platform = "linux"
-
-
-ssl_context = ssl.create_default_context()
-ssl_context.load_verify_locations(certifi.where())
 
 
 def needs_update(sig_url):
@@ -44,8 +38,8 @@ def needs_update(sig_url):
             + "/commits/"
             + branch
         )
-        response_info = urlopen(url, context=ssl_context)
-        j = json.load(response_info)
+        response_info = requests.get(url=url, timeout=5)
+        j = response_info.json()
         sha = j["sha"]
         cache = "_".join(path) + ".cache"
         changed = False
@@ -90,7 +84,7 @@ class LOKIUpdater(object):
                         self.logger.log(
                             "INFO", "Upgrader", "Downloading %s ..." % sig_url
                         )
-                        response = urlopen(sig_url, context=ssl_context)
+                        response = requests.get(url=sig_url, timeout=5)
                     except Exception:
                         if self.debug:
                             traceback.print_exc()
@@ -127,7 +121,7 @@ class LOKIUpdater(object):
 
                     # Read ZIP file
                     try:
-                        zipUpdate = zipfile.ZipFile(io.BytesIO(response.read()))
+                        zipUpdate = zipfile.ZipFile(io.BytesIO(response.content))
                         for zipFilePath in zipUpdate.namelist():
                             sigName = os.path.basename(zipFilePath)
                             if zipFilePath.endswith("/"):
@@ -208,14 +202,14 @@ class LOKIUpdater(object):
                     "Upgrader",
                     "Checking location of latest release %s ..." % self.UPDATE_URL_LOKI,
                 )
-                response_info = urlopen(self.UPDATE_URL_LOKI, context=ssl_context)
-                data = json.load(response_info)
+                response_info = requests.get(url=self.UPDATE_URL_LOKI, timeout=5)
+                data = response_info.json()
                 # Get download URL
                 zip_url = data["zipball_url"]
                 self.logger.log(
                     "INFO", "Upgrader", "Downloading latest release %s ..." % zip_url
                 )
-                response_zip = urlopen(zip_url, context=ssl_context)
+                response_zip = requests.get(url=zip_url, timeout=5)
             except Exception:
                 if self.debug:
                     traceback.print_exc()
@@ -228,7 +222,7 @@ class LOKIUpdater(object):
 
             # Read ZIP file
             try:
-                zipUpdate = zipfile.ZipFile(io.BytesIO(response_zip.read()))
+                zipUpdate = zipfile.ZipFile(io.BytesIO(response_zip.content))
                 for zipFilePath in zipUpdate.namelist():
                     if zipFilePath.endswith("/") or "/config/" in zipFilePath:
                         continue
