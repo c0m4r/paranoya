@@ -356,7 +356,8 @@ class Loki(object):
                         logger.log(
                             "INFO",
                             "FileScan",
-                            "Skipping %s directory [fixed excludes] (try using --force or --alldrives)"
+                            "Skipping %s directory [fixed excludes] "
+                            "(try using --force or --alldrives)"
                             % skip,
                         )
                         skipIt = True
@@ -540,7 +541,8 @@ class Loki(object):
                     logger.log(
                         "INFO",
                         "FileScan",
-                        "Skipping file due to file size: %s TYPE: %s SIZE: %s CURRENT SIZE LIMIT(kilobytes): %d"
+                        "Skipping file due to file size: %s TYPE: %s SIZE: %s "
+                        "CURRENT SIZE LIMIT(kilobytes): %d"
                         % (fileNameCleaned, fileType, fileSize, fileSizeLimit),
                     )
 
@@ -666,7 +668,8 @@ class Loki(object):
                         ):
                             # Message
                             message = (
-                                "Yara Rule MATCH: %s SUBSCORE: %s DESCRIPTION: %s REF: %s AUTHOR: %s"
+                                "Yara Rule MATCH: %s SUBSCORE: %s "
+                                "DESCRIPTION: %s REF: %s AUTHOR: %s"
                                 % (rule, score, description, reference, author)
                             )
                             # Matches
@@ -969,7 +972,8 @@ class Loki(object):
                         logger.log(
                             "ALERT",
                             "ProcessScan",
-                            "Malware Domain/IP match in remote address PID: %s NAME: %s COMMAND: %s IP: %s PORT: %s DESC: %s"
+                            "Malware Domain/IP match in remote address PID: "
+                            "%s NAME: %s COMMAND: %s IP: %s PORT: %s DESC: %s"
                             % (
                                 str(pid),
                                 name,
@@ -985,7 +989,8 @@ class Loki(object):
                     logger.log(
                         "NOTICE",
                         "ProcessScan",
-                        "Established connection PID: %s NAME: %s COMMAND: %s LIP: %s LPORT: %s RIP: %s RPORT: %s"
+                        "Established connection PID: %s NAME: %s COMMAND: %s "
+                        "LIP: %s LPORT: %s RIP: %s RPORT: %s"
                         % (
                             str(pid),
                             name,
@@ -1077,7 +1082,8 @@ class Loki(object):
                                         logger.log(
                                             "NOTICE",
                                             "Init",
-                                            "C2 server definition is suspiciously short - will not add %s"
+                                            "C2 server definition is "
+                                            "suspiciously short - will not add %s"
                                             % c2,
                                         )
                                         continue
@@ -1152,7 +1158,8 @@ class Loki(object):
                                     # Replacements
                                     regex_fp = replaceEnvVars(regex_fp)
                                     regex_fp = transformOS(regex_fp)
-                                    # String regex as key - value is compiled regex of false positive values
+                                    # String regex as key - value is compiled regex
+                                    # of false positive values
                                     regex_fp_comp = re.compile(regex_fp)
 
                                 # Create dictionary with IOC data
@@ -1301,7 +1308,8 @@ class Loki(object):
                 logger.log(
                     "ERROR",
                     "Init",
-                    "Error during YARA rule compilation ERROR: %s - please fix the issue in the rule set"
+                    "Error during YARA rule compilation ERROR: %s "
+                    "- please fix the issue in the rule set"
                     % sys.exc_info()[1],
                 )
                 sys.exit(1)
@@ -1799,13 +1807,15 @@ def main():
     parser.add_argument(
         "--excludeprocess",
         action="append",
-        help="Specify an executable name to exclude from scans, can be used multiple times",
+        help="Specify an executable name to exclude from scans,"
+        " can be used multiple times",
         default=[],
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Force the scan on a certain folder (even if excluded with hard exclude in LOKI's code",
+        help="Force the scan on a certain folder "
+        "(even if excluded with hard exclude in LOKI's code",
         default=False,
     )
     parser.add_argument(
@@ -1923,7 +1933,8 @@ if __name__ == "__main__":
         logger.log(
             "NOTICE",
             "Init",
-            "Program should be run as 'root' to ensure all access rights to process memory and file objects.",
+            "Program should be run as 'root' to ensure all access rights "
+            "to process memory and file objects.",
         )
 
     # Scan Processes --------------------------------------------------
