@@ -25,7 +25,7 @@ import signal as signal_module
 
 from bisect import bisect_left
 from collections import Counter
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, run
 
 # yara-python module
 import yara
@@ -848,8 +848,9 @@ class Loki(object):
             # Process Masquerading Detection -----------------------------------
 
             if re.search(r"\[", cmd):
-                maps = Popen("cat /proc/" + str(pid) + "/maps", shell=True, stdout=PIPE)
-                if maps.stdout.read():
+                maps = "/proc/%s/maps" % str(pid)
+                maps = run(["cat", maps], encoding="utf-8", stdout=PIPE)
+                if maps.stdout.strip():
                     logger.log(
                         "WARNING",
                         "ProcessScan",
@@ -1617,11 +1618,8 @@ def save_pidfile():
 
 
 def remove_pidfile():
-    if args.d:
-        try:
-            os.remove(args.pidfile)
-        except Exception:
-            pass
+    if args.d and os.path.exists(args.pidfile):
+        os.remove(args.pidfile)
 
 
 # CTRL+C Handler --------------------------------------------------------------
