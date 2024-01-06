@@ -2,6 +2,7 @@
 
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
 
+![Python](https://img.shields.io/badge/made%20with-python-blue?logo=python&logoColor=ffffff)
 [![CodeFactor](https://www.codefactor.io/repository/github/c0m4r/loki-daemonized/badge)](https://www.codefactor.io/repository/github/c0m4r/loki-daemonized)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
