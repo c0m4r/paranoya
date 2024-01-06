@@ -3,7 +3,6 @@
 # -*- coding: utf-8 -*-
 #
 #  LOKI Upgrader
-import json
 import zipfile
 import shutil
 import io
