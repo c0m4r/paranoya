@@ -1,28 +1,47 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-# Usage: python3 loki_client.py test
-
+import argparse
 import os
 import socket
 import sys
 
-host = "127.0.0.1"
-port = 1337
+# Parse Arguments
+parser = argparse.ArgumentParser(
+    description="Loki - Client", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+parser.add_argument("-p", help="Path to scan", metavar="PATH")
+parser.add_argument(
+    "--host",
+    help="Target daemon host",
+    default="localhost",
+)
+parser.add_argument(
+    "--port",
+    help="Target daemon port",
+    default=1337,
+)
+parser.add_argument(
+    "--auth",
+    metavar="AUTHKEY",
+    help="Pass authkey if it is required",
+)
+parser.add_argument(
+    "--check",
+    action="store_true",
+    help="Check if path exists before it is sent",
+    default=False,
+)
 
-try:
-    path = sys.argv[1]
-except Exception:
-    print("missing path")
+args = parser.parse_args()
+
+if not args.p:
+    print("Missing -p path")
     sys.exit(1)
 
-try:
-    auth = sys.argv[2]
-except Exception:
-    auth = ""
-
-if not os.path.isfile(path) and not os.path.isdir(path):
-    print(path + " not found")
-    sys.exit(127)
+if args.check:
+    if not os.path.isfile(args.p) and not os.path.isdir(args.p):
+        print(args.p + " not found")
+        sys.exit(1)
 
 try:
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,15 +50,15 @@ except socket.error:
     sys.exit(1)
 
 try:
-    client.connect((host, port))
+    client.connect((args.host, int(args.port)))
 except socket.error:
     print("Could not connect to server")
     sys.exit(1)
 
-if auth:
-    data = sys.argv[1] + " " + sys.argv[2]
+if args.auth:
+    data = args.p + " " + args.auth
 else:
-    data = sys.argv[1]
+    data = args.p
 
 client.send(data.encode())
 message = client.recv(2048)
