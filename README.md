@@ -14,7 +14,7 @@ The idea is that we can load all the rules once and then perform only individual
 
 ## Dependencies
 
-[Python3](https://www.python.org/) | [colorama](https://pypi.org/project/colorama/) | [future](https://pypi.org/project/future/) | [netaddr](https://pypi.org/project/netaddr/) | [psutil](https://pypi.org/project/psutil/) | [rfc5424-logging-handler](https://pypi.org/project/rfc5424-logging-handler/) | [yara-python](https://pypi.org/project/yara-python/)
+[Python3](https://www.python.org/) | [colorama](https://pypi.org/project/colorama/) | [certifi](https://pypi.org/project/certifi/) | [netaddr](https://pypi.org/project/netaddr/) | [psutil](https://pypi.org/project/psutil/) | [rfc5424-logging-handler](https://pypi.org/project/rfc5424-logging-handler/) | [yara-python](https://pypi.org/project/yara-python/)
 
 #### Alpine Linux
 
