@@ -1,4 +1,4 @@
-FROM ghcr.io/void-linux/void-glibc:latest
+FROM ghcr.io/void-linux/void-glibc:20231230r1
 RUN xbps-install -Su && xbps-install -Sy bash curl gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv wget
 WORKDIR /opt
 RUN git clone https://github.com/c0m4r/Loki-daemonized.git .
