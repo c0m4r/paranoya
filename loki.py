@@ -1658,7 +1658,7 @@ def main():
         metavar="kilobyte",
         default=5000,
     )
-    parser.add_argument("-l", help="Log file", metavar="log-file", default="")
+    parser.add_argument("-l", "--logfile", default="")
     parser.add_argument(
         "-r", help="Remote syslog system", metavar="remote-loghost", default=""
     )
@@ -1817,13 +1817,16 @@ def main():
 
     args = parser.parse_args()
 
+    print(args.logfile)
+    sys.exit()
+
     if args.syslogtcp and not args.r:
         print(
             "Syslog logging set to TCP with --syslogtcp, but syslog logging not enabled with -r"
         )
         sys.exit(1)
 
-    if args.nolog and (args.l or args.logfolder):
+    if args.nolog and (args.logfile or args.logfolder):
         print("The --logfolder and -l directives are not compatible with --nolog")
         sys.exit(1)
 
@@ -1831,7 +1834,7 @@ def main():
         getHostname(os_platform),
         datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
     )
-    if args.logfolder and args.l:
+    if args.logfolder and args.logfile:
         print(
             "Must specify either log folder with --logfolder, which uses the default filename, "
             "or log file with -l. Log file can be an absolute path"
@@ -1839,9 +1842,9 @@ def main():
         sys.exit(1)
     elif args.logfolder:
         args.logfolder = os.path.abspath(args.logfolder)
-        args.l = os.path.join(args.logfolder, filename)
-    elif not args.l:
-        args.l = filename
+        args.logfile = os.path.join(args.logfolder, filename)
+    elif not args.logfile:
+        args.logfile = filename
 
     args.excludeprocess = [x.lower() for x in args.excludeprocess]
 
@@ -1860,14 +1863,14 @@ if __name__ == "__main__":
     args = main()
 
     # Remove old log file
-    if os.path.exists(args.l):
-        os.remove(args.l)
+    if os.path.exists(args.logfile):
+        os.remove(args.logfile)
 
     # Logger
     LokiCustomFormatter = None
     logger = LokiLogger(
         args.nolog,
-        args.l,
+        args.logfile,
         getHostname(os_platform),
         args.r,
         int(args.t),
