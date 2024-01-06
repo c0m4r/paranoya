@@ -3,10 +3,6 @@
 # -*- coding: utf-8 -*-
 #
 #  LOKI Upgrader
-try:
-    from urllib2 import urlopen
-except ImportError:
-    from urllib.request import urlopen
 import json
 import zipfile
 import shutil
@@ -15,18 +11,21 @@ import os
 import argparse
 import traceback
 import sys
-
-try:
-    from urlparse import urlparse
-except ImportError:
-    from urllib.parse import urlparse
+import ssl
+import certifi
 from os.path import exists
+from urllib.parse import urlparse
+from urllib.request import urlopen
 from lib.lokilogger import LokiLogger
 
 # Platform
 platform = sys.platform
 if platform == "linux" or platform == "linux2":
     platform = "linux"
+
+
+ssl_context = ssl.create_default_context()
+ssl_context.load_verify_locations(certifi.where())
 
 
 def needs_update(sig_url):
@@ -45,7 +44,7 @@ def needs_update(sig_url):
             + "/commits/"
             + branch
         )
-        response_info = urlopen(url)
+        response_info = urlopen(url, context=ssl_context)
         j = json.load(response_info)
         sha = j["sha"]
         cache = "_".join(path) + ".cache"
@@ -91,7 +90,7 @@ class LOKIUpdater(object):
                         self.logger.log(
                             "INFO", "Upgrader", "Downloading %s ..." % sig_url
                         )
-                        response = urlopen(sig_url)
+                        response = urlopen(sig_url, context=ssl_context)
                     except Exception:
                         if self.debug:
                             traceback.print_exc()
@@ -209,14 +208,14 @@ class LOKIUpdater(object):
                     "Upgrader",
                     "Checking location of latest release %s ..." % self.UPDATE_URL_LOKI,
                 )
-                response_info = urlopen(self.UPDATE_URL_LOKI)
+                response_info = urlopen(self.UPDATE_URL_LOKI, context=ssl_context)
                 data = json.load(response_info)
                 # Get download URL
                 zip_url = data["zipball_url"]
                 self.logger.log(
                     "INFO", "Upgrader", "Downloading latest release %s ..." % zip_url
                 )
-                response_zip = urlopen(zip_url)
+                response_zip = urlopen(zip_url, context=ssl_context)
             except Exception:
                 if self.debug:
                     traceback.print_exc()
