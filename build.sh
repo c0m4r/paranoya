@@ -39,4 +39,5 @@ cp -r CHANGELOG dist/
 mv dist Loki-daemonized-"$(arch)"
 zip -r -9 -T Loki-daemonized-"$(arch)".zip Loki-daemonized-"$(arch)"
 tar -I 'gzip -9' -cvf Loki-daemonized-"$(arch)".tar.gz Loki-daemonized-"$(arch)"
+mv Loki-daemonized-"$(arch)" dist
 print "Build complete 🎉"
