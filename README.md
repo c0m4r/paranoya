@@ -61,6 +61,7 @@ git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
 python3 -m venv .
 . bin/activate
+pip3 install --upgrade pip setuptools wheel
 pip3 install -r requirements.txt
 ./loki-upgrader.py --sigsonly --nolog
 python3 loki.py --nolog --intense --force -p ./test
