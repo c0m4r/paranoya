@@ -1817,9 +1817,6 @@ def main():
 
     args = parser.parse_args()
 
-    print(args.logfile)
-    sys.exit()
-
     if args.syslogtcp and not args.r:
         print(
             "Syslog logging set to TCP with --syslogtcp, but syslog logging not enabled with -r"
