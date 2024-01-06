@@ -1658,7 +1658,7 @@ def main():
         "-s",
         help="Maximum file size to check in KB (default 5000 KB)",
         metavar="kilobyte",
-        default=10000,
+        default=5000,
     )
     parser.add_argument("-l", help="Log file", metavar="log-file", default="")
     parser.add_argument(
