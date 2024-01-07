@@ -224,7 +224,6 @@ Run a program with --help to view usage information.
 
 See: [Usage](https://github.com/c0m4r/Loki-daemonized/wiki/Usage)
 
----
 ## Licensed under GPL 3.0
 * Loki - Simple IOC Scanner Copyright (c) 2015 Florian Roth
 * Loki (daemonized) - Simple IOC and YARA Scanner fork (c) 2023 c0m4r
@@ -239,3 +238,9 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 
 You should have received a copy of the GNU General Public License 
 along with this program. If not, see http://www.gnu.org/licenses/
+
+## DISCLAIMER
+
+> USE AT YOUR OWN RISK & DON'T BE EVIL
+
+If you're looking for sometthing production-grade consider [THOR Scanners](https://www.nextron-systems.com/products/#scanners)
