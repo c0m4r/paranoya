@@ -742,6 +742,28 @@ class Loki(object):
                     traceback.print_exc()
                     sys.exit(1)
 
+    def yara_externals(
+        self, dummy, fileName=b"-", filePath=b"-", extension=b"-", fileType="-", md5="-"
+    ):
+        if dummy is True:
+            return {
+                "filename": "dummy",
+                "filepath": "dummy",
+                "extension": "dummy",
+                "filetype": "dummy",
+                "md5": "dummy",
+                "owner": "dummy",
+            }
+        else:
+            return {
+                "filename": fileName,
+                "filepath": filePath,
+                "extension": extension,
+                "filetype": fileType,
+                "md5": md5,
+                "owner": "dummy",
+            }
+
     def scan_data(
         self,
         fileData,
@@ -755,16 +777,17 @@ class Loki(object):
         try:
             for rules in self.yara_rules:
                 # Yara Rule Match
+                EXTERNALS = self.yara_externals(
+                    False,
+                    fileName.decode("utf-8"),
+                    filePath.decode("utf-8"),
+                    extension,
+                    fileType,
+                    md5,
+                )
                 matches = rules.match(
                     data=fileData,
-                    externals={
-                        "filename": fileName.decode("utf-8"),
-                        "filepath": filePath.decode("utf-8"),
-                        "extension": extension,
-                        "filetype": fileType,
-                        "md5": md5,
-                        "owner": "dummy",
-                    },
+                    externals=EXTERNALS,
                 )
 
                 # If matched
@@ -1210,7 +1233,6 @@ class Loki(object):
 
     def initialize_yara_rules(self):
         yaraRules = ""
-        dummy = ""
         rule_count = 0
 
         try:
@@ -1256,16 +1278,10 @@ class Loki(object):
 
                             # Test Compile
                             try:
+                                EXTERNALS = self.yara_externals(True)
                                 compiledRules = yara.compile(
                                     source=yara_rule_data,
-                                    externals={
-                                        "filename": dummy,
-                                        "filepath": dummy,
-                                        "extension": dummy,
-                                        "filetype": dummy,
-                                        "md5": dummy,
-                                        "owner": dummy,
-                                    },
+                                    externals=EXTERNALS,
                                 )
                                 logger.log(
                                     "DEBUG", "Init", "Initializing Yara rule %s" % file
@@ -1303,16 +1319,10 @@ class Loki(object):
                     "Init",
                     "Initializing all YARA rules at once (composed string of all rule files)",
                 )
+                EXTERNALS = self.yara_externals(True)
                 compiledRules = yara.compile(
                     source=yaraRules,
-                    externals={
-                        "filename": dummy,
-                        "filepath": dummy,
-                        "extension": dummy,
-                        "filetype": dummy,
-                        "md5": dummy,
-                        "owner": dummy,
-                    },
+                    externals=EXTERNALS,
                 )
                 logger.log("INFO", "Init", "Initialized %d Yara rules" % rule_count)
             except Exception:
