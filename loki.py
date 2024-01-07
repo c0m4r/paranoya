@@ -155,6 +155,20 @@ SCRIPT_EXTENSIONS = [
 
 SCRIPT_TYPES = ["VBS", "PHP", "JSP", "ASP", "BATCH"]
 
+HASH_WHITELIST = [  # Empty file
+    int("d41d8cd98f00b204e9800998ecf8427e", 16),
+    int("da39a3ee5e6b4b0d3255bfef95601890afd80709", 16),
+    int("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", 16),
+    # One byte line break file (Unix) 0x0a
+    int("68b329da9893e34099c7d8ad5cb9c940", 16),
+    int("adc83b19e793491b1c6ea0fd8b46cd9f32e592fc", 16),
+    int("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b", 16),
+    # One byte line break file (Windows) 0x0d0a
+    int("81051bcc2cf1bedf378224b0a93e2877", 16),
+    int("ba8ab5a0280b953aa97435ff8946cbcbb2755a27", 16),
+    int("7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6", 16),
+]
+
 
 def ioc_contains(sorted_list, value):
     # returns true if sorted_list contains value
@@ -1321,19 +1335,6 @@ class Loki(object):
                 sys.exit(1)
 
     def initialize_hash_iocs(self, ioc_directory, false_positive=False):
-        HASH_WHITELIST = [  # Empty file
-            int("d41d8cd98f00b204e9800998ecf8427e", 16),
-            int("da39a3ee5e6b4b0d3255bfef95601890afd80709", 16),
-            int("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", 16),
-            # One byte line break file (Unix) 0x0a
-            int("68b329da9893e34099c7d8ad5cb9c940", 16),
-            int("adc83b19e793491b1c6ea0fd8b46cd9f32e592fc", 16),
-            int("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b", 16),
-            # One byte line break file (Windows) 0x0d0a
-            int("81051bcc2cf1bedf378224b0a93e2877", 16),
-            int("ba8ab5a0280b953aa97435ff8946cbcbb2755a27", 16),
-            int("7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6", 16),
-        ]
         try:
             for ioc_filename in os.listdir(ioc_directory):
                 if "hash" in ioc_filename:
