@@ -420,13 +420,13 @@ class Loki(object):
                 if os_platform == "linux":
                     # Skip paths that end with ..
                     for skip in self.LINUX_PATH_SKIPS_END:
-                        if filePath.endswith(skip):
-                            if self.LINUX_PATH_SKIPS_END[skip] == 0:
-                                logger.log(
-                                    "INFO", "FileScan", "Skipping %s element" % skip
-                                )
-                                self.LINUX_PATH_SKIPS_END[skip] = 1
-                                skipIt = True
+                        if (
+                            filePath.endswith(skip)
+                            and self.LINUX_PATH_SKIPS_END[skip] == 0
+                        ):
+                            logger.log("INFO", "FileScan", "Skipping %s element" % skip)
+                            self.LINUX_PATH_SKIPS_END[skip] = 1
+                            skipIt = True
 
                     # File mode
                     try:
@@ -533,22 +533,20 @@ class Loki(object):
                     print_filesize_info = False
 
                 # Intense Check switch
-                if do_intense_check:
-                    if args.printall:
-                        logger.log(
-                            "INFO",
-                            "FileScan",
-                            "Scanning %s TYPE: %s SIZE: %s"
-                            % (fileNameCleaned, fileType, fileSize),
-                        )
-                else:
-                    if args.printall:
-                        logger.log(
-                            "INFO",
-                            "FileScan",
-                            "Checking %s TYPE: %s SIZE: %s"
-                            % (fileNameCleaned, fileType, fileSize),
-                        )
+                if do_intense_check and args.printall:
+                    logger.log(
+                        "INFO",
+                        "FileScan",
+                        "Scanning %s TYPE: %s SIZE: %s"
+                        % (fileNameCleaned, fileType, fileSize),
+                    )
+                elif args.printall:
+                    logger.log(
+                        "INFO",
+                        "FileScan",
+                        "Checking %s TYPE: %s SIZE: %s"
+                        % (fileNameCleaned, fileType, fileSize),
+                    )
 
                 if print_filesize_info and args.printall:
                     logger.log(
