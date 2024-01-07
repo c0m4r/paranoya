@@ -166,6 +166,20 @@ Possible responses:
 
 In `--auth` mode it will respond with `authorization required` if authkey was not sent or `unauthorized` if authkey is invalid.
 
+## Comparsion
+
+A brief comparison to illustrate the key differences between Loki and Loki-daemonized.
+
+| Feature | Loki (daemonized) | Loki |
+| --- | --- | --- |
+| OS | Linux only | Multi-platform (mainly Windows) |
+| Oneshot mode | ✅ | ✅ |
+| Directory scan | ✅ | ✅ |
+| Daemon mode | ✅ | - |
+| Linux procscan | ✅ | - |
+| Single-file scan | ✅ | - |
+| By-hash user excludes | ✅ | - |
+
 ## Changes
 
 * Focuses on Linux
