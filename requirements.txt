@@ -1,4 +1,3 @@
-certifi
 colorama
 netaddr
 psutil
