@@ -357,8 +357,7 @@ class Loki(object):
                             "INFO",
                             "FileScan",
                             "Skipping %s directory [fixed excludes] "
-                            "(try using --force or --alldrives)"
-                            % skip,
+                            "(try using --force or --alldrives)" % skip,
                         )
                         skipIt = True
 
@@ -1083,8 +1082,7 @@ class Loki(object):
                                             "NOTICE",
                                             "Init",
                                             "C2 server definition is "
-                                            "suspiciously short - will not add %s"
-                                            % c2,
+                                            "suspiciously short - will not add %s" % c2,
                                         )
                                         continue
 
@@ -1309,8 +1307,7 @@ class Loki(object):
                     "ERROR",
                     "Init",
                     "Error during YARA rule compilation ERROR: %s "
-                    "- please fix the issue in the rule set"
-                    % sys.exc_info()[1],
+                    "- please fix the issue in the rule set" % sys.exc_info()[1],
                 )
                 sys.exit(1)
 
