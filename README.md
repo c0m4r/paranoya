@@ -1,3 +1,5 @@
+<div align="center">
+
 ![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-icon.png)
 
 ## Loki (daemonized) - Simple IOC and YARA Scanner fork
@@ -13,11 +15,13 @@
 ![Flatpak](https://img.shields.io/badge/flatpak-%23488bd2.svg?style=for-the-badge&logo=flatpak&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 
-A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scan, 
+A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scans, 
 as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes) and is focused on Linux.
 
 The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. 
 This way, we can use Loki to scan, for example, files uploaded to the server.
+
+</div>
 
 ## Dependencies
 
