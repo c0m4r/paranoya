@@ -3,6 +3,7 @@
 /__pycache__
 /*.cache
 /*.log
+/addons/flatpak/flatpak-pip-generator
 /bin
 /include
 /lib/__pycache__
