@@ -43,7 +43,7 @@ import psutil
 import yara
 
 # LOKI modules
-from lib.lokilogger import codecs, logging, LokiLogger, get_syslog_timestamp
+from lib.lokilogger import codecs, LokiLogger, get_syslog_timestamp
 from lib.helpers import (
     is_ip,
     is_cidr,
@@ -183,12 +183,17 @@ HASH_WHITELIST = [  # Empty file
 
 
 def ioc_contains(sorted_list, value):
-    # returns true if sorted_list contains value
+    """
+    returns true if sorted_list contains value
+    """
     index = bisect_left(sorted_list, value)
     return index != len(sorted_list) and sorted_list[index] == value
 
 
 class Loki(object):
+    """
+    Loki
+    """
     # Signatures
     yara_rules = []
     filename_iocs = []
@@ -338,6 +343,9 @@ class Loki(object):
         )
 
     def scan_path(self, path):
+        """
+        scan path
+        """
         if os.path.isfile(path):
             root = ""
             directories = ""
@@ -394,6 +402,9 @@ class Loki(object):
             loki.scan_path_files(root, directories, files)
 
     def scan_path_files(self, root, directories, files):
+        """
+        scan path files
+        """
         # Counter
         c = 0
 
@@ -755,6 +766,9 @@ class Loki(object):
     def yara_externals(
         self, dummy, fileName=b"-", filePath=b"-", extension=b"-", fileType="-", md5="-"
     ):
+        """
+        yara externals
+        """
         if dummy is True:
             return {
                 "filename": "dummy",
@@ -783,6 +797,9 @@ class Loki(object):
         extension=b"-",
         md5="-",
     ):
+        """
+        scan data
+        """
         # Scan with yara
         try:
             for rules in self.yara_rules:
@@ -841,6 +858,9 @@ class Loki(object):
                 traceback.print_exc()
 
     def get_string_matches(self, strings):
+        """
+        get string matches
+        """
         try:
             matching_strings = []
             for string in strings:
@@ -856,6 +876,9 @@ class Loki(object):
             traceback.print_exc()
 
     def scan_processes_linux(self):
+        """
+        scan processes linux
+        """
         processes = psutil.pids()
 
         for process in processes:
@@ -962,6 +985,9 @@ class Loki(object):
                         )
 
     def check_process_connections(self, process):
+        """
+        check process connections
+        """
         try:
             # Limits
             MAXIMUM_CONNECTIONS = 20
@@ -1068,6 +1094,9 @@ class Loki(object):
             )
 
     def check_c2(self, remote_system):
+        """
+        check c2
+        """
         # IP - exact match
         if is_ip(remote_system):
             for c2 in self.c2_server:
@@ -1088,6 +1117,9 @@ class Loki(object):
         return False, ""
 
     def initialize_c2_iocs(self, ioc_directory):
+        """
+        initialize c2 iocs
+        """
         try:
             for ioc_filename in os.listdir(ioc_directory):
                 try:
@@ -1149,6 +1181,9 @@ class Loki(object):
             logger.log("ERROR", "Init", "Error reading Hash file: %s" % ioc_filename)
 
     def initialize_filename_iocs(self, ioc_directory):
+        """
+        initialize_filename_iocs
+        """
         try:
             for ioc_filename in os.listdir(ioc_directory):
                 if "filename" in ioc_filename:
@@ -1242,6 +1277,9 @@ class Loki(object):
             sys.exit(1)
 
     def initialize_yara_rules(self):
+        """
+        initialize yara rules
+        """
         yaraRules = ""
         rule_count = 0
 
@@ -1355,6 +1393,9 @@ class Loki(object):
                 sys.exit(1)
 
     def initialize_hash_iocs(self, ioc_directory, false_positive=False):
+        """
+        initialize hash iocs
+        """
         try:
             for ioc_filename in os.listdir(ioc_directory):
                 if "hash" in ioc_filename:
@@ -1432,6 +1473,9 @@ class Loki(object):
             logger.log("ERROR", "Init", "Error reading Hash file: %s" % ioc_filename)
 
     def initialize_filetype_magics(self, filetype_magics_file):
+        """
+        initialize filetype magics
+        """
         try:
             with open(filetype_magics_file, "r") as config:
                 lines = config.readlines()
@@ -1465,6 +1509,9 @@ class Loki(object):
             )
 
     def initialize_excludes(self, excludes_file):
+        """
+        initialize_excludes
+        """
         try:
             excludes = []
             excludes_hash = []
@@ -1505,6 +1552,9 @@ class Loki(object):
             )
 
     def get_file_data(self, filePath):
+        """
+        get file data
+        """
         fileData = b""
         try:
             # Read file complete
@@ -1574,6 +1624,9 @@ class Loki(object):
 
 
 def get_application_path():
+    """
+    get application path
+    """
     try:
         if getattr(sys, "frozen", False):
             application_path = os.path.dirname(os.path.realpath(sys.executable))
@@ -1597,6 +1650,9 @@ def processExists(pid):
 
 
 def updateLoki(sigsOnly):
+    """
+    update loki
+    """
     logger.log("INFO", "Update", "Starting separate updater process ...")
     pArgs = []
 
@@ -1623,13 +1679,18 @@ def updateLoki(sigsOnly):
 
 
 def walk_error(err):
+    """
+    walk error
+    """
     if "Error 3" in str(err):
         logging.error(str(err))
         print("Directory walk error")
 
 
 def save_pidfile():
-    # Save pidfile
+    """
+    save pidfile
+    """
     if args.d is True:
         if os.path.exists(args.pidfile):
             fpid = open(args.pidfile, "r")
@@ -1644,12 +1705,18 @@ def save_pidfile():
 
 
 def remove_pidfile():
+    """
+    remove pidfile
+    """
     if args.d and os.path.exists(args.pidfile):
         os.remove(args.pidfile)
 
 
 # CTRL+C Handler --------------------------------------------------------------
 def signal_handler(signal_name, frame):
+    """
+    signal handler
+    """
     try:
         logger.log(
             "INFO",
@@ -1664,6 +1731,9 @@ def signal_handler(signal_name, frame):
 
 # SIGTERM Handler -------------------------------------------------------------
 def signal_handler_term(signal_name, frame):
+    """
+    term signal handler
+    """
     remove_pidfile()
     print("LOKI's work has been interrupted by a SIGTERM. Returning to Asgard.")
     sys.exit(0)
@@ -1685,12 +1755,6 @@ def main():
         default=5000,
     )
     parser.add_argument("-l", "--logfile", default="")
-    parser.add_argument(
-        "-r", help="Remote syslog system", metavar="remote-loghost", default=""
-    )
-    parser.add_argument(
-        "-t", help="Remote syslog port", metavar="remote-syslog-port", default=514
-    )
     parser.add_argument("-a", help="Alert score", metavar="alert-level", default=100)
     parser.add_argument("-w", help="Warning score", metavar="warning-level", default=60)
     parser.add_argument("-n", help="Notice score", metavar="notice-level", default=40)
@@ -1799,12 +1863,6 @@ def main():
         help="Maximum working set size of processes to scan (in MB, default 100 MB)",
     )
     parser.add_argument(
-        "--syslogtcp",
-        action="store_true",
-        default=False,
-        help="Use TCP instead of UDP for syslog logging",
-    )
-    parser.add_argument(
         "--logfolder",
         help="Folder to use for logging when log file is not specified",
         metavar="log-folder",
@@ -1844,12 +1902,6 @@ def main():
     )
 
     args = parser.parse_args()
-
-    if args.syslogtcp and not args.r:
-        print(
-            "Syslog logging set to TCP with --syslogtcp, but syslog logging not enabled with -r"
-        )
-        sys.exit(1)
 
     if args.nolog and (args.logfile or args.logfolder):
         print("The --logfolder and -l directives are not compatible with --nolog")
@@ -1897,9 +1949,6 @@ if __name__ == "__main__":
         args.nolog,
         args.logfile,
         getHostname(os_platform),
-        args.r,
-        int(args.t),
-        args.syslogtcp,
         args.csv,
         args.onlyrelevant,
         args.debug,
@@ -1985,6 +2034,9 @@ if __name__ == "__main__":
             server.listen(5)
 
             def handle_client(client_socket, address):
+                """
+                handle client
+                """
                 size = 2048
                 while True:
                     try:
