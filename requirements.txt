@@ -1,6 +1,5 @@
 colorama
 netaddr
 psutil
-rfc5424-logging-handler
 requests
 yara-python
