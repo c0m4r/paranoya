@@ -25,7 +25,7 @@ This way, we can use Loki to scan, for example, files uploaded to the server.
 
 ## Dependencies
 
-[Python3](https://www.python.org/) | [colorama](https://pypi.org/project/colorama/) | [netaddr](https://pypi.org/project/netaddr/) | [psutil](https://pypi.org/project/psutil/) | [requests](https://pypi.org/project/requests/) | [rfc5424-logging-handler](https://pypi.org/project/rfc5424-logging-handler/) | [yara-python](https://pypi.org/project/yara-python/)
+[Python3](https://www.python.org/) | [colorama](https://pypi.org/project/colorama/) | [netaddr](https://pypi.org/project/netaddr/) | [psutil](https://pypi.org/project/psutil/) | [requests](https://pypi.org/project/requests/) | [yara-python](https://pypi.org/project/yara-python/)
 
 #### Alpine Linux
 
