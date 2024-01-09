@@ -22,7 +22,13 @@ as well as a daemon mode to accept scans in client/server manner. It also includ
 
 ## Dependencies
 
-[Python3](https://www.python.org/) | [colorama](https://pypi.org/project/colorama/) | [psutil](https://pypi.org/project/psutil/) | [requests](https://pypi.org/project/requests/) | [yara-python](https://pypi.org/project/yara-python/)
+[Python3](https://www.python.org/) 
+| [colorama](https://pypi.org/project/colorama/) 
+| [psutil](https://pypi.org/project/psutil/) 
+| [requests](https://pypi.org/project/requests/) 
+| [yara-python](https://pypi.org/project/yara-python/) 
+| [signature-base](https://github.com/Neo23x0/signature-base) 
+| [reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
 
 #### Alpine Linux
 
