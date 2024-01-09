@@ -127,6 +127,37 @@ class LokiLogger:
         else:
             return self.custom_formatter(type, message, args)
 
+    def set_color(self, mes_type: str, message):
+        if mes_type == "NOTICE":
+            base_color = Fore.CYAN + "" + Back.BLACK
+            high_color = Fore.BLACK + "" + Back.CYAN
+        elif mes_type == "INFO":
+            base_color = Fore.GREEN + "" + Back.BLACK
+            high_color = Fore.BLACK + "" + Back.GREEN
+        elif mes_type == "WARNING":
+            base_color = Fore.YELLOW + "" + Back.BLACK
+            high_color = Fore.BLACK + "" + Back.YELLOW
+        elif mes_type == "ALERT":
+            base_color = Fore.RED + "" + Back.BLACK
+            high_color = Fore.BLACK + "" + Back.RED
+        elif mes_type == "DEBUG":
+            base_color = Fore.WHITE + "" + Back.BLACK
+            high_color = Fore.BLACK + "" + Back.WHITE
+        elif mes_type == "ERROR":
+            base_color = Fore.MAGENTA + "" + Back.BLACK
+            high_color = Fore.WHITE + "" + Back.MAGENTA
+        elif mes_type == "RESULT":
+            if "clean" in message.lower():
+                high_color = Fore.BLACK + Back.GREEN
+                base_color = Fore.GREEN + Back.BLACK
+            elif "suspicious" in message.lower():
+                high_color = Fore.BLACK + Back.YELLOW
+                base_color = Fore.YELLOW + Back.BLACK
+            else:
+                high_color = Fore.BLACK + Back.RED
+                base_color = Fore.RED + Back.BLACK
+        return high_color, base_color
+
     def log_to_stdout(self, message, mes_type):
         """
         log to stdout
@@ -150,34 +181,7 @@ class LokiLogger:
                 base_color = Back.BLACK + Fore.WHITE
                 high_color = Fore.WHITE + Back.BLACK
 
-                if mes_type == "NOTICE":
-                    base_color = Fore.CYAN + "" + Back.BLACK
-                    high_color = Fore.BLACK + "" + Back.CYAN
-                elif mes_type == "INFO":
-                    base_color = Fore.GREEN + "" + Back.BLACK
-                    high_color = Fore.BLACK + "" + Back.GREEN
-                elif mes_type == "WARNING":
-                    base_color = Fore.YELLOW + "" + Back.BLACK
-                    high_color = Fore.BLACK + "" + Back.YELLOW
-                elif mes_type == "ALERT":
-                    base_color = Fore.RED + "" + Back.BLACK
-                    high_color = Fore.BLACK + "" + Back.RED
-                elif mes_type == "DEBUG":
-                    base_color = Fore.WHITE + "" + Back.BLACK
-                    high_color = Fore.BLACK + "" + Back.WHITE
-                elif mes_type == "ERROR":
-                    base_color = Fore.MAGENTA + "" + Back.BLACK
-                    high_color = Fore.WHITE + "" + Back.MAGENTA
-                elif mes_type == "RESULT":
-                    if "clean" in message.lower():
-                        high_color = Fore.BLACK + Back.GREEN
-                        base_color = Fore.GREEN + Back.BLACK
-                    elif "suspicious" in message.lower():
-                        high_color = Fore.BLACK + Back.YELLOW
-                        base_color = Fore.YELLOW + Back.BLACK
-                    else:
-                        high_color = Fore.BLACK + Back.RED
-                        base_color = Fore.RED + Back.BLACK
+                high_color, base_color = self.set_color(mes_type, message)
 
                 # Colorize Type Word at the beginning of the line
                 type_colorer = re.compile(r"([A-Z]{3,})", re.VERBOSE)
