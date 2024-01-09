@@ -272,17 +272,14 @@ class LOKIUpdater:
         """
         response_info = requests.get(url=self.UPDATE_URL_LOKI, timeout=5)
         data = response_info.json()
-        if "assets" in data:
-            for asset in data["assets"]:
-                zip_url = asset["browser_download_url"]
-                if asset["browser_download_url"].endswith(f"{ARCH}.zip"):
-                    return str(zip_url)
+        if "zipball_url" in data:
+            return str(data["zipball_url"])
         elif "message" in data:
             log("ERROR", "GITHUB", data)
             sys.exit(1)
         return ""
 
-    def create_target_file(self, target_file: str, source: IO[bytes]) -> None:
+    def create_target_file(self, target_file, source) -> None:
         """
         Create target file
         """
@@ -371,9 +368,9 @@ class LOKIUpdater:
 
                         log("INFO", "Upgrader", f"Extracting {target_file} ...")
 
-                    self.make_dir_loki(target_file)
+                        self.make_dir_loki(target_file)
 
-                    self.create_target_file(target_file, source)
+                        self.create_target_file(target_file, source)
 
         except Exception:
             if self.debug:
