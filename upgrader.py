@@ -279,7 +279,7 @@ class LOKIUpdater:
             sys.exit(1)
         return ""
 
-    def create_target_file(self, target_file, source) -> None:
+    def create_target_file(self, target_file: str, source: IO[bytes]) -> None:
         """
         Create target file
         """
