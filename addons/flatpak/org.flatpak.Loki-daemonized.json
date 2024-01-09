@@ -17,7 +17,7 @@
                 "build-args": [ "--share=network" ]
             },
             "build-commands": [
-                "./loki-upgrader.py --sigsonly --nolog",
+                "./upgrader.py --sigsonly",
                 "mv * /app/bin/"
             ],
             "sources": [
