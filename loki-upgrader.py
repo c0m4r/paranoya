@@ -17,8 +17,7 @@ import sys
 from io import BytesIO
 from os.path import exists
 from traceback import print_exc as trace
-
-# from typing import Callable
+from typing import Any
 from urllib.parse import urlparse
 from shutil import copyfileobj
 from signal import signal, SIGPIPE, SIG_DFL
@@ -148,112 +147,109 @@ class LOKIUpdater:
             target_file = ""
         return target_file
 
-    def update_signatures_base(self, force: bool, debug: bool) -> None:
+    def get_response(self, sig_url: str) -> Any:
         """
-        Update signature rules
+        Get response from signature URL
         """
-        for sig_url in self.UPDATE_URL_SIGS:
-            if needs_update(sig_url) or force:
-                # Downloading current repository
-                try:
-                    log("INFO", "Upgrader", f"Downloading {sig_url} ...")
-                    response = requests.get(url=sig_url, timeout=5)
-                except Exception:
-                    if self.debug:
-                        trace()
-                    log(
-                        "ERROR",
-                        "Upgrader",
-                        "Error downloading the signature database "
-                        "- check your Internet connection",
-                    )
-                    sys.exit(1)
-
-                # Preparations
-                try:
-                    sig_dir = os.path.join(
-                        self.application_path, os.path.abspath("signature-base/")
-                    )
-                    self.make_sigdirs(sig_dir)
-                except Exception:
-                    if self.debug:
-                        trace()
-                    log(
-                        "ERROR",
-                        "Upgrader",
-                        "Error while creating the signature-base directories",
-                    )
-                    sys.exit(1)
-
-                # Read ZIP file
-                try:
-                    zip_update = ZipFile(BytesIO(response.content))
-                    for zip_file_path in zip_update.namelist():
-                        sig_name = os.path.basename(zip_file_path)
-                        if zip_file_path.endswith("/"):
-                            if debug:
-                                log("DEBUG", "skip", zip_file_path)
-                            continue
-                        if debug:
-                            log("DEBUG", "zip_file_path", zip_file_path)
-
-                        # Extract the rules
-                        if debug:
-                            log(
-                                "DEBUG",
-                                "Upgrader",
-                                f"Extracting {zip_file_path} ...",
-                            )
-
-                        target_file = self.get_target_file(
-                            zip_file_path, sig_dir, sig_name
-                        )
-
-                        if not target_file:
-                            if debug:
-                                log("DEBUG", "skip sig_dir", sig_dir)
-                                log("DEBUG", "skip sig_name", sig_name)
-                            continue
-
-                        # New file
-                        if not os.path.exists(target_file):
-                            log(
-                                "INFO",
-                                "Upgrader",
-                                f"New signature file: {sig_name}",
-                            )
-
-                        # Extract file
-                        source = zip_update.open(zip_file_path)
-                        target = open(target_file, "wb")
-                        with source, target:
-                            copyfileobj(source, target)
-                        target.close()
-                        source.close()
-
-                except Exception:
-                    if self.debug:
-                        trace()
-                    log(
-                        "ERROR",
-                        "Upgrader",
-                        "Error while extracting the signature files from the download package",
-                    )
-                    sys.exit(1)
-            else:
-                log("INFO", "Upgrader", f"{sig_url} is up to date.")
-
-    def update_signatures(self, force: bool, debug: bool) -> bool:
-        """
-        Update signatures
-        """
+        # Downloading current repository
         try:
-            self.update_signatures_base(force, debug)
+            log("INFO", "Upgrader", f"Downloading {sig_url} ...")
+            return requests.get(url=sig_url, timeout=5)
         except Exception:
             if self.debug:
                 trace()
-            return False
-        return True
+            log(
+                "ERROR",
+                "Upgrader",
+                "Error downloading the signature database "
+                "- check your Internet connection",
+            )
+            sys.exit(1)
+        return ""
+
+    def update_signatures_base(self, force: bool, debug: bool, sig_url: str) -> None:
+        """
+        Update signature rules
+        """
+        # Downloading current repository
+        response = self.get_response(sig_url)
+
+        # Preparations
+        try:
+            sig_dir = os.path.join(
+                self.application_path, os.path.abspath("signature-base/")
+            )
+            self.make_sigdirs(sig_dir)
+        except Exception:
+            if self.debug:
+                trace()
+            log(
+                "ERROR",
+                "Upgrader",
+                "Error while creating the signature-base directories",
+            )
+            sys.exit(1)
+
+        # Read ZIP file
+        try:
+            zip_update = ZipFile(BytesIO(response.content))
+            for zip_file_path in zip_update.namelist():
+                sig_name = os.path.basename(zip_file_path)
+                if zip_file_path.endswith("/"):
+                    continue
+
+                # Extract the rules
+                if debug:
+                    log(
+                        "DEBUG",
+                        "Upgrader",
+                        f"Extracting {zip_file_path} ...",
+                    )
+
+                target_file = self.get_target_file(zip_file_path, sig_dir, sig_name)
+
+                if not target_file:
+                    continue
+
+                # New file
+                if not os.path.exists(target_file):
+                    log(
+                        "INFO",
+                        "Upgrader",
+                        f"New signature file: {sig_name}",
+                    )
+
+                # Extract file
+                source = zip_update.open(zip_file_path)
+                target = open(target_file, "wb")
+                with source, target:
+                    copyfileobj(source, target)
+                target.close()
+                source.close()
+
+        except Exception:
+            if self.debug:
+                trace()
+            log(
+                "ERROR",
+                "Upgrader",
+                "Error while extracting the signature files from the download package",
+            )
+            sys.exit(1)
+
+    def update_signatures(self, force: bool, debug: bool) -> None:
+        """
+        Update signatures
+        """
+        for sig_url in self.UPDATE_URL_SIGS:
+            if needs_update(sig_url) or force:
+                try:
+                    self.update_signatures_base(force, debug, sig_url)
+                except Exception:
+                    if self.debug:
+                        trace()
+            else:
+                log("INFO", "Upgrader", f"{sig_url} is up to date.")
 
     def get_loki_zip_file_url(self) -> str:
         """
