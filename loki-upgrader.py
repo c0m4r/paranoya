@@ -17,10 +17,10 @@ import sys
 from io import BytesIO
 from os.path import exists
 from traceback import print_exc as trace
-from typing import Any
 from urllib.parse import urlparse
 from shutil import copyfileobj
 from signal import signal, SIGPIPE, SIG_DFL
+from typing import IO
 from zipfile import ZipFile
 
 # Modules
@@ -147,7 +147,7 @@ class LOKIUpdater:
             target_file = ""
         return target_file
 
-    def get_response(self, sig_url: str) -> Any:
+    def get_response(self, sig_url: str) -> requests.models.Response:
         """
         Get response from signature URL
         """
@@ -167,32 +167,13 @@ class LOKIUpdater:
             sys.exit(1)
         return ""
 
-    def update_signatures_base(self, force: bool, debug: bool, sig_url: str) -> None:
+    def extract_signatures(
+        self, response: requests.models.Response, debug: bool, sig_dir: str
+    ) -> None:
         """
-        Update signature rules
+        Extract signatures from zip
         """
-        # Downloading current repository
-        response = self.get_response(sig_url)
-
-        # Preparations
-        try:
-            sig_dir = os.path.join(
-                self.application_path, os.path.abspath("signature-base/")
-            )
-            self.make_sigdirs(sig_dir)
-        except Exception:
-            if self.debug:
-                trace()
-            log(
-                "ERROR",
-                "Upgrader",
-                "Error while creating the signature-base directories",
-            )
-            sys.exit(1)
-
-        # Read ZIP file
-        try:
-            zip_update = ZipFile(BytesIO(response.content))
+        with ZipFile(BytesIO(response.content)) as zip_update:
             for zip_file_path in zip_update.namelist():
                 sig_name = os.path.basename(zip_file_path)
                 if zip_file_path.endswith("/"):
@@ -227,6 +208,32 @@ class LOKIUpdater:
                 target.close()
                 source.close()
 
+    def update_signatures_base(self, debug: bool, sig_url: str) -> None:
+        """
+        Update signature rules
+        """
+        # Downloading current repository
+        response = self.get_response(sig_url)
+
+        # Preparations
+        try:
+            sig_dir = os.path.join(
+                self.application_path, os.path.abspath("signature-base/")
+            )
+            self.make_sigdirs(sig_dir)
+        except Exception:
+            if self.debug:
+                trace()
+            log(
+                "ERROR",
+                "Upgrader",
+                "Error while creating the signature-base directories",
+            )
+            sys.exit(1)
+
+        # Read ZIP file and extract
+        try:
+            self.extract_signatures(response, debug, sig_dir)
         except Exception:
             if self.debug:
                 trace()
@@ -244,7 +251,7 @@ class LOKIUpdater:
         for sig_url in self.UPDATE_URL_SIGS:
             if needs_update(sig_url) or force:
                 try:
-                    self.update_signatures_base(force, debug, sig_url)
+                    self.update_signatures_base(debug, sig_url)
                 except Exception:
                     if self.debug:
                         trace()
@@ -267,93 +274,116 @@ class LOKIUpdater:
             sys.exit(1)
         return ""
 
-    def update_loki(self) -> bool:
+    def create_target_file(self, target_file: str, source: IO[bytes]) -> None:
         """
-        Update Loki
+        Create target file
         """
         try:
-            # Downloading the info for latest release
-            try:
-                log(
-                    "INFO",
-                    "Upgrader",
-                    f"Checking location of latest release {self.UPDATE_URL_LOKI} ...",
-                )
-                # Get download URL
-                zip_url = self.get_loki_zip_file_url()
-                if zip_url:
-                    log("INFO", "Upgrader", f"Downloading latest release {zip_url} ...")
-                    response_zip = requests.get(url=zip_url, timeout=5)
-                else:
-                    log(
-                        "ERROR",
-                        "Upgrader",
-                        "Error downloading the loki update - check your Internet connection",
-                    )
-                    sys.exit(1)
-            except Exception:
+            # Create target file
+            target = open(target_file, "wb")
+            with source, target:
+                copyfileobj(source, target)
                 if self.debug:
-                    trace()
+                    log(
+                        "DEBUG",
+                        "Upgrader",
+                        f"Successfully extracted '{target_file}'",
+                    )
+            target.close()
+        except Exception:
+            log("ERROR", "Upgrader", f"Cannot extract '{target_file}'")
+            if self.debug:
+                trace()
+
+    def download_loki(self) -> requests.models.Response:
+        """
+        Download Loki
+        """
+        # Downloading the info for latest release
+        try:
+            log(
+                "INFO",
+                "Upgrader",
+                f"Checking location of latest release {self.UPDATE_URL_LOKI} ...",
+            )
+            # Get download URL
+            zip_url = self.get_loki_zip_file_url()
+            if not zip_url:
                 log(
                     "ERROR",
                     "Upgrader",
                     "Error downloading the loki update - check your Internet connection",
                 )
                 sys.exit(1)
+            else:
+                log("INFO", "Upgrader", f"Downloading latest release {zip_url} ...")
+                rq = requests.get(url=zip_url, timeout=5)
+                return rq
+        except Exception:
+            if self.debug:
+                trace()
+            log(
+                "ERROR",
+                "Upgrader",
+                "Error downloading the loki update - check your Internet connection",
+            )
+            sys.exit(1)
 
-            # Read ZIP file
-            try:
-                zip_update = ZipFile(BytesIO(response_zip.content))
+    def make_dir_loki(self, target_file: str) -> None:
+        """
+        Make dirs for loki
+        """
+        try:
+            # Create file if not present
+            if not os.path.exists(os.path.dirname(target_file)):
+                if os.path.dirname(target_file) != "":
+                    os.makedirs(os.path.dirname(target_file))
+        except Exception:
+            if self.debug:
+                log(
+                    "DEBUG",
+                    "Upgrader",
+                    f"Cannot create dir name '{os.path.dirname(target_file)}'",
+                )
+                trace()
+
+    def extract_loki(self, response_zip: requests.models.Response) -> None:
+        """
+        Extract Loki
+        """
+        # Read ZIP file
+        try:
+            with ZipFile(BytesIO(response_zip.content)) as zip_update:
                 for zip_file_path in zip_update.namelist():
                     if zip_file_path.endswith("/") or "/config/" in zip_file_path:
                         continue
 
-                    source = zip_update.open(zip_file_path)
-                    target_file = "/".join(zip_file_path.split("/")[1:])
+                    with zip_update.open(zip_file_path) as source:
+                        target_file = "/".join(zip_file_path.split("/")[1:])
 
-                    log("INFO", "Upgrader", f"Extracting {target_file} ...")
+                        log("INFO", "Upgrader", f"Extracting {target_file} ...")
 
-                    try:
-                        # Create file if not present
-                        if not os.path.exists(os.path.dirname(target_file)):
-                            if os.path.dirname(target_file) != "":
-                                os.makedirs(os.path.dirname(target_file))
-                    except Exception:
-                        if self.debug:
-                            log(
-                                "DEBUG",
-                                "Upgrader",
-                                f"Cannot create dir name '{os.path.dirname(target_file)}'",
-                            )
-                            trace()
+                    self.make_dir_loki(target_file)
 
-                    try:
-                        # Create target file
-                        target = open(target_file, "wb")
-                        with source, target:
-                            copyfileobj(source, target)
-                            if self.debug:
-                                log(
-                                    "DEBUG",
-                                    "Upgrader",
-                                    f"Successfully extracted '{target_file}'",
-                                )
-                        target.close()
-                    except Exception:
-                        log("ERROR", "Upgrader", f"Cannot extract '{target_file}'")
-                        if self.debug:
-                            trace()
+                    self.create_target_file(target_file, source)
 
-            except Exception:
-                if self.debug:
-                    trace()
-                log(
-                    "ERROR",
-                    "Upgrader",
-                    "Error while extracting the signature files from the download package",
-                )
-                sys.exit(1)
+        except Exception:
+            if self.debug:
+                trace()
+            log(
+                "ERROR",
+                "Upgrader",
+                "Error while extracting the signature files from the download package",
+            )
+            sys.exit(1)
 
+    def update_loki(self) -> bool:
+        """
+        Update Loki
+        """
+        try:
+            response_zip = self.download_loki()
+            self.extract_loki(response_zip)
         except Exception:
             if self.debug:
                 trace()
