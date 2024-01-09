@@ -28,7 +28,6 @@ print "Build (5/8): pyinstaller loki.py"
 pyinstaller -F \
     --hidden-import lib.lokilogger \
     --hidden-import lib.helpers \
-    --hidden-import rfc5424logging \
     --paths=lib/site-packages \
     --paths=lib loki.py
 

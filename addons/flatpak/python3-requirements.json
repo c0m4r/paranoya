@@ -46,30 +46,6 @@
             ]
         },
         {
-            "name": "python3-rfc5424-logging-handler",
-            "buildsystem": "simple",
-            "build-commands": [
-                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"rfc5424-logging-handler\" --no-build-isolation"
-            ],
-            "sources": [
-                {
-                    "type": "file",
-                    "url": "https://files.pythonhosted.org/packages/32/4d/aaf7eff5deb402fd9a24a1449a8119f00d74ae9c2efa79f8ef9994261fc2/pytz-2023.3.post1-py2.py3-none-any.whl",
-                    "sha256": "ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"
-                },
-                {
-                    "type": "file",
-                    "url": "https://files.pythonhosted.org/packages/c5/45/c4393bb4cff2c5ad9bd836139cb9e4b6c39e787ef8a0e0a3b85a942b6581/rfc5424_logging_handler-1.4.3-py2.py3-none-any.whl",
-                    "sha256": "eaba528e47fba3e2845d52d559885cbc27a37db42a9d265ea539b3b4452d3057"
-                },
-                {
-                    "type": "file",
-                    "url": "https://files.pythonhosted.org/packages/97/3f/c4c51c55ff8487f2e6d0e618dba917e3c3ee2caae6cf0fbb59c9b1876f2e/tzlocal-5.2-py3-none-any.whl",
-                    "sha256": "49816ef2fe65ea8ac19d19aa7a1ae0551c834303d5014c6d5a62e4cbda8047b8"
-                }
-            ]
-        },
-        {
             "name": "python3-requests",
             "buildsystem": "simple",
             "build-commands": [
