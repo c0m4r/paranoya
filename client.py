@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""
+Loki client
+
+Loki - Simple IOC Scanner Copyright (c) 2015 Florian Roth
+Loki (daemonized) - Simple IOC and YARA Scanner fork (c) 2023 c0m4r
+
+https://github.com/c0m4r/Loki-daemonized
+
+Licensed under GPL 3.0
+"""
 
 import argparse
 import os
