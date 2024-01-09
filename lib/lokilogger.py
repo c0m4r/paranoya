@@ -58,14 +58,12 @@ class LokiLogger:
 
     def __init__(
         self,
-        no_log_file,
-        log_file,
-        hostname,
-        csv,
-        only_relevant,
-        debug,
-        caller,
-        custom_formatter=None,
+        no_log_file: bool,
+        log_file: str,
+        hostname: str,
+        csv: bool,
+        only_relevant: bool,
+        debug: bool,
     ):
         self.version = __version__
         self.no_log_file = no_log_file
@@ -74,8 +72,6 @@ class LokiLogger:
         self.csv = csv
         self.only_relevant = only_relevant
         self.debug = debug
-        self.caller = caller
-        self.custom_formatter = custom_formatter
 
         # Colorization
         init()
@@ -122,10 +118,7 @@ class LokiLogger:
         """
         log format
         """
-        if not self.custom_formatter:
-            return message.format(*args)
-        else:
-            return self.custom_formatter(type, message, args)
+        return message.format(*args)
 
     def set_color(self, mes_type: str, message):
         if mes_type == "NOTICE":
@@ -267,49 +260,40 @@ class LokiLogger:
         """
         print welcome
         """
-        if self.caller == "main":
-            try:
-                termsize = get_terminal_size().columns
-            except Exception:
-                termsize = 80
-            print(str(Back.WHITE))
-            print(" ".ljust(79) + Back.BLACK + Style.BRIGHT)
-            if termsize > 80:
-                print(
-                    r"      __   ____  __ ______     __                         _            __"
-                )
-                print(
-                    r"     / /  / __ \/ //_/  _/ ___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /"
-                )
-                print(
-                    r"    / /__/ /_/ / ,< _/ /  / _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / "
-                )
-                print(
-                    r"   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  "
-                )
-            else:
-                print("   ")
-                print(r"   Loki (daemonized)")
-            print("   YARA and IOC Scanner")
-            print("  ")
-            print("   Copyright (c) 2014-2023 Florian Roth")
-            print("   Copyright (c) 2023-2024 c0m4r")
-            print(f"   version {__version__}")
-            print("  ")
-            print("   GNU General Public License v3.0")
-            print("  ")
-            print("   DISCLAIMER - USE AT YOUR OWN RISK & DON'T BE EVIL")
-            print(str(Back.WHITE))
-            print(" ".ljust(79) + Back.BLACK + Fore.GREEN)
-            print(Fore.WHITE + "" + Back.BLACK)
+        try:
+            termsize = get_terminal_size().columns
+        except Exception:
+            termsize = 80
+        print(str(Back.WHITE))
+        print(" ".ljust(79) + Back.BLACK + Style.BRIGHT)
+        if termsize > 80:
+            print(
+                r"      __   ____  __ ______     __                         _            __"
+            )
+            print(
+                r"     / /  / __ \/ //_/  _/ ___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /"
+            )
+            print(
+                r"    / /__/ /_/ / ,< _/ /  / _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / "
+            )
+            print(
+                r"   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  "
+            )
         else:
-            print("  ")
-            print(Back.GREEN + " ".ljust(79) + Back.BLACK + Fore.GREEN)
-            print("  ")
-            print("  LOKI UPGRADER ")
-            print("  ")
-            print(Back.GREEN + " ".ljust(79) + Back.BLACK)
-            print(Fore.WHITE + "" + Back.BLACK)
+            print("   ")
+            print(r"   Loki (daemonized)")
+        print("   YARA and IOC Scanner")
+        print("  ")
+        print("   Copyright (c) 2014-2023 Florian Roth")
+        print("   Copyright (c) 2023-2024 c0m4r")
+        print(f"   version {__version__}")
+        print("  ")
+        print("   GNU General Public License v3.0")
+        print("  ")
+        print("   DISCLAIMER - USE AT YOUR OWN RISK & DON'T BE EVIL")
+        print(str(Back.WHITE))
+        print(" ".ljust(79) + Back.BLACK + Fore.GREEN)
+        print(Fore.WHITE + "" + Back.BLACK)
 
 
 def get_syslog_timestamp() -> str:

@@ -1942,7 +1942,6 @@ if __name__ == "__main__":
         os.remove(args.logfile)
 
     # Logger
-    loki_custom_formatter = None
     logger = LokiLogger(
         args.nolog,
         args.logfile,
@@ -1950,8 +1949,6 @@ if __name__ == "__main__":
         args.csv,
         args.onlyrelevant,
         args.debug,
-        caller="main",
-        custom_formatter=loki_custom_formatter,
     )
 
     # Show version
