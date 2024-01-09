@@ -210,7 +210,7 @@ Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9d
 
 ## Screenshots
 
-![/addons/img/loki-daemonized-screen1.png](/addons/img/loki-daemonized-screen1.png)
+![/addons/img/loki-daemonized-screen3.png](/addons/img/loki-daemonized-screen3.png)
 
 With auth:
 
