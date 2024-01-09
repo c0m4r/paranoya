@@ -17,11 +17,8 @@
 
 </div>
 
-A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), modified to support single file scans, 
-as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes) and is focused on Linux.
-
-The idea is that we can load all the rules once and then perform only individual file scans, which significantly reduces the load on hardware resources. 
-This way, we can use Loki to scan, for example, files uploaded to the server.
+A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), rewritten for Linux and modified to support single file scans, 
+as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes).
 
 ## Dependencies
 
@@ -126,7 +123,7 @@ See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wik
 
 ## Daemonized usage
 
-#### Daemon (server)
+#### Server
 
 Start as a daemon and bind on default localhost:1337
 
@@ -192,22 +189,6 @@ A brief comparison to illustrate the key differences between Loki and Loki-daemo
   * Process connections: for now, it only shows detected connections per process
   * Process Masquerading Detection: reports non-empty /proc/PID/maps of processes that uses square brackets in their cmdlines
 
-Derived from https://github.com/Neo23x0/Loki/blob/5b7175882a9b7247714b47347c2f9dccdf38d894/loki.py
-
-#### New arguments
-
-```
-  -d                    Run as a daemon
-  --pidfile PIDFILE     Pid file path (default: loki.pid)
-  --listen-host LISTEN_HOST
-                        Listen host for daemon mode (default: localhost)
-  --listen-port LISTEN_PORT
-                        Listen port for daemon mode (default: 1337)
-  --auth AUTH           Auth key, only in daemon mode
-  --disable-yara-files DISABLE_YARA_FILES
-                        Comma separated list of yara files to disable
-```
-
 ## Screenshots
 
 ![/addons/img/loki-daemonized-screen3.png](/addons/img/loki-daemonized-screen3.png)
@@ -246,5 +227,3 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ## DISCLAIMER
 
 > USE AT YOUR OWN RISK & DON'T BE EVIL
-
-If you're looking for sometthing production-grade consider [THOR Scanners](https://www.nextron-systems.com/products/#scanners)
