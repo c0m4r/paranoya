@@ -1,5 +1,4 @@
 colorama
-netaddr
 psutil
 requests
 yara-python

@@ -18,20 +18,6 @@
             ]
         },
         {
-            "name": "python3-netaddr",
-            "buildsystem": "simple",
-            "build-commands": [
-                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"netaddr\" --no-build-isolation"
-            ],
-            "sources": [
-                {
-                    "type": "file",
-                    "url": "https://files.pythonhosted.org/packages/b6/a6/aa2c645188e00f7db040d1b0b1dd353b5b51c67984ada4f6d60aa388982f/netaddr-0.10.1-py2.py3-none-any.whl",
-                    "sha256": "9822305b42ea1020d54fee322d43cee5622b044c07a1f0130b459bb467efcf88"
-                }
-            ]
-        },
-        {
             "name": "python3-psutil",
             "buildsystem": "simple",
             "build-commands": [

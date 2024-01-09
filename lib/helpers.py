@@ -22,7 +22,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import hashlib
-import netaddr
 import os
 import re
 import string
@@ -31,37 +30,6 @@ import time
 import traceback
 
 # Helper Functions -------------------------------------------------------------
-
-
-def is_ip(string):
-    try:
-        if netaddr.valid_ipv4(string):
-            return True
-        if netaddr.valid_ipv6(string):
-            return True
-        return False
-    except Exception:
-        traceback.print_exc()
-        return False
-
-
-def is_cidr(string):
-    try:
-        if netaddr.IPNetwork(string) and "/" in string:
-            return True
-        return False
-    except Exception:
-        return False
-
-
-def ip_in_net(ip, network):
-    try:
-        # print "Checking if ip %s is in network %s" % (ip, network)
-        if netaddr.IPAddress(ip) in netaddr.IPNetwork(network):
-            return True
-        return False
-    except Exception:
-        return False
 
 
 def generateHashes(filedata):

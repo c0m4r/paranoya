@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
 import datetime
+import ipaddress
 import os
 import platform
 import re
@@ -45,9 +46,6 @@ import yara
 # LOKI modules
 from lib.lokilogger import codecs, LokiLogger, get_syslog_timestamp
 from lib.helpers import (
-    is_ip,
-    is_cidr,
-    ip_in_net,
     generateHashes,
     getExcludedMountpoints,
     printProgress,
@@ -1099,11 +1097,11 @@ class Loki:
         check c2
         """
         # IP - exact match
-        if is_ip(remote_system):
+        if ipaddress.ip_address(remote_system):
             for c2 in self.c2_server:
                 # if C2 definition is CIDR network
-                if is_cidr(c2):
-                    if ip_in_net(remote_system, c2):
+                if ipaddress.ip_network(c2):
+                    if ipaddress.ip_address(remote_system) in ipaddress.ip_network(c2):
                         return True, self.c2_server[c2]
                 # if C2 is ip or else
                 if c2 == remote_system:
