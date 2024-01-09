@@ -18,23 +18,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from os import get_terminal_size
-import sys
-import re
-from colorama import Fore, Back, Style
-from colorama import init
 import codecs
 import datetime
-import traceback
-import rfc5424logging
 import logging
-from logging import handlers
+import re
 import socket
+import sys
+import traceback
+
+from logging import handlers
+from os import get_terminal_size
+
+# Modules
+from colorama import Fore, Back, Style
+from colorama import init
+import rfc5424logging
 
 __version__ = "1.0.4"
 
 
 class LokiLogger:
+    """
+    Loki logger
+    """
     STDOUT_CSV = 0
     STDOUT_LINE = 1
     FILE_CSV = 2
@@ -65,9 +71,8 @@ class LokiLogger:
         csv,
         only_relevant,
         debug,
-        platform,
         caller,
-        customformatter=None,
+        custom_formatter=None,
     ):
         self.version = __version__
         self.no_log_file = no_log_file
@@ -77,7 +82,7 @@ class LokiLogger:
         self.only_relevant = only_relevant
         self.debug = debug
         self.caller = caller
-        self.CustomFormatter = customformatter
+        self.custom_formatter = custom_formatter
 
         # Colorization
         init()
@@ -101,10 +106,13 @@ class LokiLogger:
                 self.remote_logger.addHandler(remote_syslog_handler)
                 self.remote_logging = True
             except Exception as e:
-                print("Failed to create remote logger: " + str(e))
+                print(f"Failed to create remote logger: {str(e)}")
                 sys.exit(1)
 
-    def log(self, mes_type, module, message):
+    def log(self, mes_type, module, message) -> None:
+        """
+        log
+        """
         if not self.debug and mes_type == "DEBUG":
             return
 
@@ -139,19 +147,25 @@ class LokiLogger:
         if self.remote_logging:
             self.log_to_remotesys(message, mes_type, module)
 
-    def Format(self, type, message, *args):
-        if not self.CustomFormatter:
+    def log_format(self, type, message, *args) -> str:
+        """
+        log format
+        """
+        if not self.custom_formatter:
             return message.format(*args)
         else:
-            return self.CustomFormatter(type, message, args)
+            return self.custom_formatter(type, message, args)
 
     def log_to_stdout(self, message, mes_type):
+        """
+        log to stdout
+        """
         if self.csv:
             print(
-                self.Format(
+                self.log_format(
                     self.STDOUT_CSV,
                     "{0},{1},{2},{3}",
-                    getSyslogTimestamp(),
+                    get_syslog_timestamp(),
                     self.hostname,
                     mes_type,
                     message,
@@ -236,15 +250,18 @@ class LokiLogger:
                 print("Cannot print to cmd line - formatting error")
 
     def log_to_file(self, message, mes_type, module):
+        """
+        log to file
+        """
         try:
             # Write to file
             with codecs.open(self.log_file, "a", encoding="utf-8") as logfile:
                 if self.csv:
                     logfile.write(
-                        self.Format(
+                        self.log_format(
                             self.FILE_CSV,
                             "{0},{1},{2},{3},{4}{5}",
-                            getSyslogTimestamp(),
+                            get_syslog_timestamp(),
                             self.hostname,
                             mes_type,
                             module,
@@ -254,10 +271,10 @@ class LokiLogger:
                     )
                 else:
                     logfile.write(
-                        self.Format(
+                        self.log_format(
                             self.FILE_LINE,
                             "{0} {1} LOKI: {2}: MODULE: {3} MESSAGE: {4}{5}",
-                            getSyslogTimestamp(),
+                            get_syslog_timestamp(),
                             self.hostname,
                             mes_type.title(),
                             module,
@@ -272,8 +289,11 @@ class LokiLogger:
             print("Cannot print line to log file {0}".format(self.log_file))
 
     def log_to_remotesys(self, message, mes_type, module):
+        """
+        log to remotesys
+        """
         # Preparing the message
-        syslog_message = self.Format(
+        syslog_message = self.log_format(
             self.SYSLOG_LINE,
             "LOKI: {0}: MODULE: {1} MESSAGE: {2}",
             mes_type.title(),
@@ -310,9 +330,12 @@ class LokiLogger:
             if self.debug:
                 traceback.print_exc()
                 sys.exit(1)
-            print("Error while logging to remote syslog server ERROR: %s" % str(e))
+            print(f"Error while logging to remote syslog server ERROR: {str(e)}")
 
-    def print_welcome(self):
+    def print_welcome(self) -> None:
+        """
+        print welcome
+        """
         if self.caller == "main":
             try:
                 termsize = get_terminal_size().columns
@@ -334,16 +357,15 @@ class LokiLogger:
                     r"   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  "
                 )
             else:
-                print(r"      __   ____  __ ______  ")
-                print(r"     / /  / __ \/ //_/  _/  ")
-                print(r"    / /__/ /_/ / ,< _/ /    ")
-                print(r"   /____/\____/_/|_/___/    ")
+                print("   ")
+                print(r"   Loki (daemonized)")
             print("   YARA and IOC Scanner")
             print("  ")
-            print("   by Florian Roth, GNU General Public License")
-            print("   version %s" % __version__)
+            print("   Copyright (c) 2014-2023 Florian Roth")
+            print("   Copyright (c) 2023-2024 c0m4r")
+            print(f"   version {__version__}")
             print("  ")
-            print("   Loki-daemonized (c) 2023 c0m4r")
+            print("   GNU General Public License v3.0")
             print("  ")
             print("   DISCLAIMER - USE AT YOUR OWN RISK & DON'T BE EVIL")
             print(str(Back.WHITE))
@@ -359,7 +381,10 @@ class LokiLogger:
             print(Fore.WHITE + "" + Back.BLACK)
 
 
-def getSyslogTimestamp():
+def get_syslog_timestamp() -> str:
+    """
+    get syslog timestamp
+    """
     date_obj = datetime.datetime.utcnow()
     date_str = date_obj.strftime("%Y%m%dT%H:%M:%SZ")
     return date_str

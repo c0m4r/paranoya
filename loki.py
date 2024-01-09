@@ -43,7 +43,7 @@ import psutil
 import yara
 
 # LOKI modules
-from lib.lokilogger import codecs, logging, LokiLogger, getSyslogTimestamp
+from lib.lokilogger import codecs, logging, LokiLogger, get_syslog_timestamp
 from lib.helpers import (
     is_ip,
     is_cidr,
@@ -1892,7 +1892,7 @@ if __name__ == "__main__":
         os.remove(args.logfile)
 
     # Logger
-    LokiCustomFormatter = None
+    loki_custom_formatter = None
     logger = LokiLogger(
         args.nolog,
         args.logfile,
@@ -1903,9 +1903,8 @@ if __name__ == "__main__":
         args.csv,
         args.onlyrelevant,
         args.debug,
-        platform=os_platform,
         caller="main",
-        customformatter=LokiCustomFormatter,
+        custom_formatter=loki_custom_formatter,
     )
 
     # Show version
@@ -1932,7 +1931,7 @@ if __name__ == "__main__":
         "Init",
         "Starting Loki Scan VERSION: {3} SYSTEM: {0} TIME: {1} PLATFORM: {2}".format(
             getHostname(os_platform),
-            getSyslogTimestamp(),
+            get_syslog_timestamp(),
             platform_full,
             logger.version,
         ),
@@ -2082,7 +2081,7 @@ if __name__ == "__main__":
                             % (
                                 clientid,
                                 getHostname(os_platform),
-                                getSyslogTimestamp(),
+                                get_syslog_timestamp(),
                             ),
                         )
                         client_socket.close()
@@ -2144,5 +2143,5 @@ if __name__ == "__main__":
         "NOTICE",
         "Results",
         "Finished LOKI Scan SYSTEM: %s TIME: %s"
-        % (getHostname(os_platform), getSyslogTimestamp()),
+        % (getHostname(os_platform), get_syslog_timestamp()),
     )
