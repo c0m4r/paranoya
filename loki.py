@@ -1711,7 +1711,7 @@ def remove_pidfile():
 
 
 # CTRL+C Handler --------------------------------------------------------------
-def signal_handler():
+def signal_handler(signal_name, frame):
     """
     signal handler
     """
@@ -1728,7 +1728,7 @@ def signal_handler():
 
 
 # SIGTERM Handler -------------------------------------------------------------
-def signal_handler_term():
+def signal_handler_term(signal_name, frame):
     """
     term signal handler
     """
