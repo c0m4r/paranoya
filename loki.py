@@ -190,10 +190,11 @@ def ioc_contains(sorted_list, value):
     return index != len(sorted_list) and sorted_list[index] == value
 
 
-class Loki(object):
+class Loki:
     """
     Loki
     """
+
     # Signatures
     yara_rules = []
     filename_iocs = []
@@ -1321,7 +1322,7 @@ class Loki(object):
                             if extension != ".yar" and extension != ".yara":
                                 continue
 
-                            with open(yaraRuleFile, "r") as yfile:
+                            with open(yaraRuleFile, "r", encoding="utf-8") as yfile:
                                 yara_rule_data = yfile.read()
 
                             # Test Compile
@@ -1477,7 +1478,7 @@ class Loki(object):
         initialize filetype magics
         """
         try:
-            with open(filetype_magics_file, "r") as config:
+            with open(filetype_magics_file, "r", encoding="utf-8") as config:
                 lines = config.readlines()
 
             for line in lines:
@@ -1515,7 +1516,7 @@ class Loki(object):
         try:
             excludes = []
             excludes_hash = []
-            with open(excludes_file, "r") as config:
+            with open(excludes_file, "r", encoding="utf-8") as config:
                 lines = config.read().splitlines()
 
             for line in lines:
@@ -1558,7 +1559,7 @@ class Loki(object):
         fileData = b""
         try:
             # Read file complete
-            with open(filePath, "rb") as f:
+            with open(filePath, "rb", "utf-8") as f:
                 fileData = f.read()
         except Exception:
             if logger.debug:
@@ -1683,7 +1684,6 @@ def walk_error(err):
     walk error
     """
     if "Error 3" in str(err):
-        logging.error(str(err))
         print("Directory walk error")
 
 
@@ -1693,7 +1693,7 @@ def save_pidfile():
     """
     if args.d is True:
         if os.path.exists(args.pidfile):
-            fpid = open(args.pidfile, "r")
+            fpid = open(args.pidfile, "r", encoding="utf-8")
             loki_pid = int(fpid.read())
             fpid.close()
             if psutil.pid_exists(loki_pid):
@@ -1713,7 +1713,7 @@ def remove_pidfile():
 
 
 # CTRL+C Handler --------------------------------------------------------------
-def signal_handler(signal_name, frame):
+def signal_handler():
     """
     signal handler
     """
@@ -1730,7 +1730,7 @@ def signal_handler(signal_name, frame):
 
 
 # SIGTERM Handler -------------------------------------------------------------
-def signal_handler_term(signal_name, frame):
+def signal_handler_term():
     """
     term signal handler
     """

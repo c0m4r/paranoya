@@ -37,6 +37,7 @@ class LokiLogger:
     """
     Loki logger
     """
+
     STDOUT_CSV = 0
     STDOUT_LINE = 1
     FILE_CSV = 2
