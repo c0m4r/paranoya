@@ -30,8 +30,7 @@ import stat
 import sys
 import threading
 import traceback
-
-import signal as signal_module
+import signal
 
 from bisect import bisect_left
 from collections import Counter
@@ -1710,10 +1709,9 @@ def remove_pidfile():
         os.remove(args.pidfile)
 
 
-# CTRL+C Handler --------------------------------------------------------------
-def signal_handler(signal_name, frame):
+def sigint_handler(signal_name, frame):
     """
-    signal handler
+    SIGINT handler
     """
     try:
         logger.log(
@@ -1727,10 +1725,9 @@ def signal_handler(signal_name, frame):
     sys.exit(0)
 
 
-# SIGTERM Handler -------------------------------------------------------------
-def signal_handler_term(signal_name, frame):
+def sigterm_handler(signal_name, frame):
     """
-    term signal handler
+    SIGTERM handler
     """
     remove_pidfile()
     print("LOKI's work has been interrupted by a SIGTERM. Returning to Asgard.")
@@ -1929,10 +1926,10 @@ def main():
 # MAIN ################################################################
 if __name__ == "__main__":
     # Signal handler for CTRL+C
-    signal_module.signal(signal_module.SIGINT, signal_handler)
+    signal.signal(signal.SIGINT, sigint_handler)
 
     # Signal handler for SIGTERM
-    signal_module.signal(signal_module.SIGTERM, signal_handler_term)
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
     # Argument parsing
     args = main()
