@@ -20,19 +20,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import codecs
 import datetime
-import logging
 import re
-import socket
 import sys
 import traceback
 
-from logging import handlers
 from os import get_terminal_size
 
 # Modules
 from colorama import Fore, Back, Style
 from colorama import init
-import rfc5424logging
 
 __version__ = "1.0.4"
 
@@ -56,7 +52,6 @@ class LokiLogger:
     notices = 0
     messagecount = 0
     only_relevant = False
-    remote_logging = False
     debug = False
     linesep = "\n"
 
@@ -65,9 +60,6 @@ class LokiLogger:
         no_log_file,
         log_file,
         hostname,
-        remote_host,
-        remote_port,
-        syslog_tcp,
         csv,
         only_relevant,
         debug,
@@ -90,24 +82,6 @@ class LokiLogger:
         # Welcome
         if not self.csv:
             self.print_welcome()
-
-        # Syslog server target
-        if remote_host:
-            try:
-                # Create remote logger
-                self.remote_logger = logging.getLogger("LOKI")
-                self.remote_logger.setLevel(logging.DEBUG)
-                socket_type = socket.SOCK_STREAM if syslog_tcp else socket.SOCK_DGRAM
-                remote_syslog_handler = rfc5424logging.Rfc5424SysLogHandler(
-                    address=(remote_host, remote_port),
-                    facility=handlers.SysLogHandler.LOG_LOCAL3,
-                    socktype=socket_type,
-                )
-                self.remote_logger.addHandler(remote_syslog_handler)
-                self.remote_logging = True
-            except Exception as e:
-                print(f"Failed to create remote logger: {str(e)}")
-                sys.exit(1)
 
     def log(self, mes_type, module, message) -> None:
         """
@@ -142,10 +116,6 @@ class LokiLogger:
                 "see log file for full unicode encoded log line"
             )
             self.log_to_stdout(message, mes_type)
-
-        # to syslog server
-        if self.remote_logging:
-            self.log_to_remotesys(message, mes_type, module)
 
     def log_format(self, type, message, *args) -> str:
         """
@@ -287,50 +257,6 @@ class LokiLogger:
                 traceback.print_exc()
                 sys.exit(1)
             print("Cannot print line to log file {0}".format(self.log_file))
-
-    def log_to_remotesys(self, message, mes_type, module):
-        """
-        log to remotesys
-        """
-        # Preparing the message
-        syslog_message = self.log_format(
-            self.SYSLOG_LINE,
-            "LOKI: {0}: MODULE: {1} MESSAGE: {2}",
-            mes_type.title(),
-            module,
-            message,
-        )
-        try:
-            # Mapping LOKI's levels to the syslog levels
-            if mes_type == "NOTICE":
-                self.remote_logger.info(
-                    syslog_message, extra={"msgid": str(self.messagecount)}
-                )
-            elif mes_type == "INFO":
-                self.remote_logger.info(
-                    syslog_message, extra={"msgid": str(self.messagecount)}
-                )
-            elif mes_type == "WARNING":
-                self.remote_logger.warning(
-                    syslog_message, extra={"msgid": str(self.messagecount)}
-                )
-            elif mes_type == "ALERT":
-                self.remote_logger.critical(
-                    syslog_message, extra={"msgid": str(self.messagecount)}
-                )
-            elif mes_type == "DEBUG":
-                self.remote_logger.debug(
-                    syslog_message, extra={"msgid": str(self.messagecount)}
-                )
-            elif mes_type == "ERROR":
-                self.remote_logger.error(
-                    syslog_message, extra={"msgid": str(self.messagecount)}
-                )
-        except Exception as e:
-            if self.debug:
-                traceback.print_exc()
-                sys.exit(1)
-            print(f"Error while logging to remote syslog server ERROR: {str(e)}")
 
     def print_welcome(self) -> None:
         """
