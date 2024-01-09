@@ -69,7 +69,7 @@ python3 -m venv .
 . bin/activate
 pip3 install --upgrade pip setuptools wheel
 pip3 install -r requirements.txt
-./loki-upgrader.py --sigsonly --nolog
+./upgrader.py --sigsonly
 python3 loki.py --nolog --intense --force -p ./test
 deactivate
 ```
@@ -144,7 +144,7 @@ Check example [init files](/addons/etc) for OpenRC and systemd integration.
 #### Client
 
 ```
-python3 loki-client.py -p /path/to/scan
+./client.py -p /path/to/scan
 ```
 
 As for now the server accepts plain path and an optional space-separated authkey.
@@ -182,7 +182,7 @@ A brief comparison to illustrate the key differences between Loki and Loki-daemo
 
 * Focuses on Linux
 * Single file scan if given path is a file
-* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from loki-client.py
+* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from client.py
 * PID file `loki.pid` is created in the program directory if running in daemon mode, you change its path with `--pidfile /path/to/pidfile`
 * Optional auth key `--auth somethingRandomHere` in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
 * You can disable one or more yara files, f.e. `--disable-yara-files apt_vpnfilter.yar,yara_mixed_ext_vars.yar`
