@@ -110,9 +110,7 @@ flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
 
 #### Compiled
 
-For binary version of Loki-daemonized and its tools check [latest release](https://github.com/c0m4r/Loki-daemonized/releases/latest).
-
-There are binaries compiled with [PyInstaller](https://github.com/pyinstaller/pyinstaller) for x86_64 (x64/amd64) and aarch64 (arm64).
+For binary version of Loki-daemonized and its tools use ./build.sh script.
 
 However, when possible, you should use bare python under venv, 
 as it will allow you to get the latest versions of python modules and keep them up-to-date, 
