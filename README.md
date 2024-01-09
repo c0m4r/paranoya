@@ -2,7 +2,7 @@
 
 ![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-icon.png)
 
-## Loki (daemonized) - Simple IOC and YARA Scanner
+## Loki (daemonized) - Simple IOC and YARA scanner for Linux
 
 ![Python](https://img.shields.io/badge/made%20with-python-blue?logo=python&logoColor=ffffff)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
