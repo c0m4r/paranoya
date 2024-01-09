@@ -1557,7 +1557,7 @@ class Loki:
         fileData = b""
         try:
             # Read file complete
-            with open(filePath, "rb", encoding="utf-8") as f:
+            with open(filePath, "rb") as f:
                 fileData = f.read()
         except Exception:
             if logger.debug:
