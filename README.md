@@ -2,7 +2,7 @@
 
 ![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-icon.png)
 
-## Loki (daemonized) - Simple IOC and YARA Scanner fork
+## Loki (daemonized) - Simple IOC and YARA Scanner
 
 ![Python](https://img.shields.io/badge/made%20with-python-blue?logo=python&logoColor=ffffff)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -222,20 +222,26 @@ Run a program with --help to view usage information.
 
 See: [Usage](https://github.com/c0m4r/Loki-daemonized/wiki/Usage)
 
-## Licensed under GPL 3.0
-* Loki - Simple IOC Scanner Copyright (c) 2015 Florian Roth
-* Loki (daemonized) - Simple IOC and YARA Scanner fork (c) 2023 c0m4r
+## License
 
-This program is free software: you can redistribute it and/or modify it under the terms 
-of the GNU General Public License as published by the Free Software Foundation, 
-either version 3 of the License, or (at your option) any later version.
+```
+Loki (daemonized): Simple IOC and YARA Scanner
+Copyright (c) 2015-2023 Florian Roth
+Copyright (c) 2023-2024 c0m4r
 
-This program is distributed in the hope that it will be useful, 
-but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-You should have received a copy of the GNU General Public License 
-along with this program. If not, see http://www.gnu.org/licenses/
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
 
 ## DISCLAIMER
 
