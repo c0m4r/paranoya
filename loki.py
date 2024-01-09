@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
 
 """
-Loki - Simple IOC Scanner Copyright (c) 2015 Florian Roth
-Loki (daemonized) - Simple IOC and YARA Scanner fork (c) 2023 c0m4r
+Loki (daemonized): Simple IOC and YARA Scanner
+Copyright (c) 2015-2023 Florian Roth
+Copyright (c) 2023-2024 c0m4r
 
-https://github.com/c0m4r/Loki-daemonized
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Licensed under GPL 3.0
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import argparse
 import datetime
 import os
 import platform
-import psutil
 import re
 import socket
 import stat
@@ -26,6 +35,9 @@ import signal as signal_module
 from bisect import bisect_left
 from collections import Counter
 from subprocess import Popen, PIPE, run
+
+# Psutil
+import psutil
 
 # yara-python module
 import yara
