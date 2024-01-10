@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+#!/usr/bin/env python
 """
 Loki (daemonized): Simple IOC and YARA Scanner
 Copyright (c) 2015-2023 Florian Roth

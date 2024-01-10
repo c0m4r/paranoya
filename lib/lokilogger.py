@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Loki (daemonized): Simple IOC and YARA Scanner
 Copyright (c) 2015-2023 Florian Roth
