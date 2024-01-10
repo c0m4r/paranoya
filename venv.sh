@@ -16,22 +16,13 @@ enter_venv() {
     /usr/bin/env $SHELL
 }
 
-# Looking for pip
-if which pip3 ; then
-    PIP_BIN="pip3"
-elif which pip ; then
-    PIP_BIN="pip"
-else
-    echo "pip3 or pip not found"
-fi
-
 # Looking for python
 if which python3 ; then
     PYTHON_BIN="python3"
 elif which python ; then
     PYTHON_BIN="python"
 else
-    echo "python3 or python not found"
+    echo "python not found"
 fi
 
 if [ ! -e pyvenv.cfg ]; then
@@ -39,9 +30,9 @@ if [ ! -e pyvenv.cfg ]; then
     $PYTHON_BIN -m venv .
     source bin/activate
     print "Upgrading pip and tools"
-    $PIP_BIN install --upgrade pip setuptools wheel || true
+    $PYTHON_BIN -m pip install --upgrade pip setuptools wheel || true
     print "Installing pip modules"
-    $PIP_BIN install -r requirements.txt
+    $PYTHON_BIN -m pip install -r requirements.txt
     enter_venv
 else
     source bin/activate
