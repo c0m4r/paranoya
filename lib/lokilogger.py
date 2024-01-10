@@ -52,7 +52,7 @@ class LokiLogger:
     warnings = 0
     notices = 0
     messagecount = 0
-    only_relevant = False
+    silent = False
     debug = False
     linesep = "\n"
 
@@ -62,7 +62,7 @@ class LokiLogger:
         log_file: str,
         hostname: str,
         csv: bool,
-        only_relevant: bool,
+        silent: bool,
         debug: bool,
     ):
         self.version = __version__
@@ -70,7 +70,7 @@ class LokiLogger:
         self.log_file = log_file
         self.hostname = hostname
         self.csv = csv
-        self.only_relevant = only_relevant
+        self.silent = silent
         self.debug = debug
 
         # Colorization
@@ -96,7 +96,7 @@ class LokiLogger:
             self.notices += 1
         self.messagecount += 1
 
-        if self.only_relevant:
+        if self.silent:
             if mes_type not in ("ALERT", "WARNING"):
                 return
 
