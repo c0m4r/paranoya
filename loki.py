@@ -1831,7 +1831,7 @@ def main():
         default=False,
     )
     parser.add_argument(
-        "--onlyrelevant",
+        "--silent",
         action="store_true",
         help="Only print warnings or alerts",
         default=False,
@@ -1944,7 +1944,7 @@ if __name__ == "__main__":
         args.logfile,
         getHostname(os_platform),
         args.csv,
-        args.onlyrelevant,
+        args.silent,
         args.debug,
     )
 
