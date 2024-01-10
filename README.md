@@ -72,7 +72,7 @@ python3 -m venv .
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install -r requirements.txt
 ./upgrader.py --sigsonly
-python loki.py --nolog --intense -p ./test
+./loki.py --nolog --intense -p ./test
 deactivate
 ```
 
