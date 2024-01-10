@@ -82,7 +82,7 @@ class LokiLogger:
         if not self.csv:
             self.print_welcome()
 
-    def log(self, mes_type, module, message) -> None:
+    def log(self, mes_type: str, module: str, message: str) -> None:
         """
         log
         """
@@ -116,51 +116,45 @@ class LokiLogger:
             )
             self.log_to_stdout(message, mes_type)
 
-    def log_format(self, type, message, *args) -> str:
+    def log_format(self, message: str, *args: str) -> str:
         """
         log format
         """
         return message.format(*args)
 
-    def set_color(self, mes_type: str, message):
+    def set_color(self, mes_type: str, message: str) -> tuple[str, str]:
+        """
+        set color
+        """
         if mes_type == "NOTICE":
-            base_color = Fore.CYAN + "" + Back.BLACK
-            high_color = Fore.BLACK + "" + Back.CYAN
+            base_color = Fore.CYAN
         elif mes_type == "INFO":
-            base_color = Fore.GREEN + "" + Back.BLACK
-            high_color = Fore.BLACK + "" + Back.GREEN
+            base_color = Fore.GREEN
         elif mes_type == "WARNING":
-            base_color = Fore.YELLOW + "" + Back.BLACK
-            high_color = Fore.BLACK + "" + Back.YELLOW
+            base_color = Fore.YELLOW
         elif mes_type == "ALERT":
-            base_color = Fore.RED + "" + Back.BLACK
-            high_color = Fore.BLACK + "" + Back.RED
+            base_color = Fore.RED
         elif mes_type == "DEBUG":
-            base_color = Fore.WHITE + "" + Back.BLACK
-            high_color = Fore.BLACK + "" + Back.WHITE
+            base_color = Fore.WHITE
         elif mes_type == "ERROR":
-            base_color = Fore.MAGENTA + "" + Back.BLACK
-            high_color = Fore.WHITE + "" + Back.MAGENTA
+            base_color = Fore.MAGENTA
         elif mes_type == "RESULT":
             if "clean" in message.lower():
-                high_color = Fore.BLACK + Back.GREEN
-                base_color = Fore.GREEN + Back.BLACK
+                base_color = Fore.GREEN
             elif "suspicious" in message.lower():
-                high_color = Fore.BLACK + Back.YELLOW
-                base_color = Fore.YELLOW + Back.BLACK
+                base_color = Fore.YELLOW
             else:
-                high_color = Fore.BLACK + Back.RED
-                base_color = Fore.RED + Back.BLACK
+                base_color = Fore.RED
+        high_color = base_color
         return high_color, base_color
 
-    def log_to_stdout(self, message, mes_type):
+    def log_to_stdout(self, message: str, mes_type: str) -> None:
         """
         log to stdout
         """
         if self.csv:
             print(
                 self.log_format(
-                    self.STDOUT_CSV,
                     "{0},{1},{2},{3}",
                     get_syslog_timestamp(),
                     self.hostname,
@@ -173,8 +167,8 @@ class LokiLogger:
             try:
                 reset_all = Style.NORMAL + Fore.RESET
                 key_color = Fore.WHITE
-                base_color = Back.BLACK + Fore.WHITE
-                high_color = Fore.WHITE + Back.BLACK
+                base_color = Fore.WHITE
+                high_color = Back.RESET
 
                 high_color, base_color = self.set_color(mes_type, message)
 
@@ -190,27 +184,19 @@ class LokiLogger:
                 # Colorize Key Words
                 colorer = re.compile(r"([A-Z_0-9]{2,}:)\s", re.VERBOSE)
                 message = colorer.sub(
-                    key_color + Style.BRIGHT + r"\1 " + base_color + Style.NORMAL,
+                    key_color + r"\1 " + base_color + Style.NORMAL,
                     message,
                 )
 
                 # Print to console
                 if mes_type == "RESULT":
-                    res_message = "\b\b%s %s" % (mes_type, message)
-                    print(base_color + " " + res_message + " " + Back.BLACK)
+                    res_message = f"\b\b{mes_type} {message}"
+                    print(base_color + " " + res_message + " ")
                     print(Fore.WHITE + " " + Style.NORMAL)
                 else:
                     sys.stdout.write(
-                        "%s%s\b\b%s %s%s%s%s\n"
-                        % (
-                            reset_all,
-                            base_color,
-                            mes_type,
-                            message,
-                            Back.BLACK,
-                            Fore.WHITE,
-                            Style.NORMAL,
-                        )
+                        f"{reset_all}{base_color}\b\b{mes_type} "
+                        f"{message}{Back.RESET}{Fore.WHITE}{Style.NORMAL}\n"
                     )
 
             except Exception:
@@ -219,7 +205,7 @@ class LokiLogger:
                     sys.exit(1)
                 print("Cannot print to cmd line - formatting error")
 
-    def log_to_file(self, message, mes_type, module):
+    def log_to_file(self, message: str, mes_type: str, module: str) -> None:
         """
         log to file
         """
@@ -229,7 +215,6 @@ class LokiLogger:
                 if self.csv:
                     logfile.write(
                         self.log_format(
-                            self.FILE_CSV,
                             "{0},{1},{2},{3},{4}{5}",
                             get_syslog_timestamp(),
                             self.hostname,
@@ -242,7 +227,6 @@ class LokiLogger:
                 else:
                     logfile.write(
                         self.log_format(
-                            self.FILE_LINE,
                             "{0} {1} LOKI: {2}: MODULE: {3} MESSAGE: {4}{5}",
                             get_syslog_timestamp(),
                             self.hostname,
@@ -256,7 +240,7 @@ class LokiLogger:
             if self.debug:
                 traceback.print_exc()
                 sys.exit(1)
-            print("Cannot print line to log file {0}".format(self.log_file))
+            print(f"Cannot print line to log file {self.log_file}")
 
     def print_welcome(self) -> None:
         """
@@ -266,36 +250,34 @@ class LokiLogger:
             termsize = get_terminal_size().columns
         except Exception:
             termsize = 80
-        print(str(Back.WHITE))
-        print(" ".ljust(79) + Back.BLACK + Style.BRIGHT)
+        print(str(Style.BRIGHT))
         if termsize > 80:
             print(
-                r"      __   ____  __ ______     __                         _            __"
+                rf"    {Fore.GREEN}__   ____  __ ______{Fore.RESET}     "
+                rf"{Fore.RED}__                         _            __{Fore.RESET}"
             )
             print(
-                r"     / /  / __ \/ //_/  _/ ___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /"
+                rf"   {Fore.GREEN}/ /  / __ \/ //_/  _/{Fore.RESET} "
+                rf"{Fore.RED}___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /{Fore.RESET}"
             )
             print(
-                r"    / /__/ /_/ / ,< _/ /  / _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / "
+                rf"  {Fore.GREEN}/ /__/ /_/ / ,< _/ /{Fore.RESET}  "
+                rf"{Fore.RED}/ _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / {Fore.RESET}"
             )
             print(
-                r"   /____/\____/_/|_/___/  \_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  "
+                rf" {Fore.GREEN}/____/\____/_/|_/___/{Fore.RESET}  "
+                rf"{Fore.RED}\_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  {Fore.RESET}"
             )
         else:
-            print("   ")
-            print(r"   Loki (daemonized)")
-        print("   YARA and IOC Scanner")
-        print("  ")
-        print("   Copyright (c) 2014-2023 Florian Roth")
-        print("   Copyright (c) 2023-2024 c0m4r")
-        print(f"   version {__version__}")
-        print("  ")
-        print("   GNU General Public License v3.0")
-        print("  ")
-        print("   DISCLAIMER - USE AT YOUR OWN RISK & DON'T BE EVIL")
-        print(str(Back.WHITE))
-        print(" ".ljust(79) + Back.BLACK + Fore.GREEN)
-        print(Fore.WHITE + "" + Back.BLACK)
+            print(r" Loki (daemonized)")
+        print(" YARA and IOC Scanner")
+        print("")
+        print(" Copyright (c) 2014-2023 Florian Roth")
+        print(" Copyright (c) 2023-2024 c0m4r")
+        print(f" version {__version__}\n")
+        print(" GNU General Public License v3.0\n")
+        print(" DISCLAIMER - USE AT YOUR OWN RISK & DON'T BE EVIL")
+        print(Back.RESET)
 
 
 def get_syslog_timestamp() -> str:
