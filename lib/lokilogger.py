@@ -32,7 +32,7 @@ from os import get_terminal_size
 from colorama import Fore, Back, Style
 from colorama import init
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 
 class LokiLogger:
