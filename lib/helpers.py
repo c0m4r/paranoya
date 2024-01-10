@@ -1,5 +1,8 @@
 """
-Loki (daemonized): Simple IOC and YARA Scanner
+Loki (daemonized) lib/helpers.py
+https://github.com/c0m4r/Loki-daemonized
+
+Loki (daemonized): Simple IOC and YARA Scanner for Linux
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 

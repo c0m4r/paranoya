@@ -11,4 +11,4 @@ RUN /bin/bash -c "source bin/activate \
  && pip3 install --no-cache-dir --upgrade pip setuptools wheel \
  && pip3 install -r requirements.txt \
  && ./upgrader.py --sigsonly"
-CMD [ "/bin/bash", "-c", "source bin/activate && python3 loki.py -d --listen-host 0.0.0.0 --nolog --force --intense --nolog --csv"]
+CMD [ "/bin/bash", "-c", "source bin/activate && python3 loki.py -d --listen-host 0.0.0.0 --nolog --intense --csv"]

@@ -34,7 +34,7 @@ update() {
 	cd $workdir
 	stop
 	. bin/activate
-	./upgrader.py --sigsonly --nolog
+	./upgrader.py --sigsonly
 	deactivate
 	start
 }

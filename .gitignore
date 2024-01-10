@@ -4,11 +4,13 @@
 /*.cache
 /*.log
 /addons/flatpak/flatpak-pip-generator
+/addons/flatpak/.flatpak-builder
 /bin
 /include
 /lib/__pycache__
 /lib/python3.11
 /lib64
 /loki.pid
+/okrutnik.sh
 /pyvenv.cfg
 /signature-base
