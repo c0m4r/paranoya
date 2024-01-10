@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Colors
 ORANGE="\e[1;33m"
@@ -7,6 +7,13 @@ ENDCOLOR="\e[0m"
 # Color print function
 function print() {
     echo -e "${ORANGE}${1}${ENDCOLOR}"
+}
+
+# Enter venv function
+function enter_venv() {
+    print "Entering venv"
+    PATH=$(pwd):$PATH
+    /usr/bin/env $SHELL
 }
 
 # Looking for pip
@@ -30,14 +37,11 @@ fi
 if [ ! -e pyvenv.cfg ]; then
     print "Creating venv, this might take a while..."
     $PYTHON_BIN -m venv .
-    print 'Entering venv (type: "deactivate" to exit)'
     source bin/activate
-    ls -la
     print "Upgrading pip and tools"
-    $BIN_PIP install --upgrade pip setuptools wheel || true
+    $PIP_BIN install --upgrade pip setuptools wheel || true
     print "Installing pip modules"
-    $BIN_PIP install -r requirements.txt
-else
-    print 'Entering venv (type "deactivate" to exit)'
-    source bin/activate
+    $PIP_BIN install -r requirements.txt
 fi
+
+enter_venv
