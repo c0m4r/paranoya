@@ -42,6 +42,7 @@ if [ ! -e pyvenv.cfg ]; then
     $PIP_BIN install --upgrade pip setuptools wheel || true
     print "Installing pip modules"
     $PIP_BIN install -r requirements.txt
+    enter_venv
 else
     source bin/activate
     enter_venv
