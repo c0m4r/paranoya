@@ -19,6 +19,9 @@ A clear and concise description of any alternative solutions or features you've 
 **Your eenvironment (please complete the following information):**
  - Distro+Version: [e.g. Alpine Linux 3.19]
  - CPU arch: [e.g. x86_64 / aarch64 / other]
+ - Python version: [e.g. 3.11]
+ - Env: [e.g. system / venv / compiled]
+ - Container: [e.g. none, docker, flatpak]
  - C library: [e.g. glibc / musl]
  - Terminal [e.g. xterm, terminator, gnome-terminal]
  - Loki version [e.g. 2.0.0]
