@@ -68,12 +68,12 @@ dnf install gcc git openssl-devel python3 python3-devel python3-pip
 cd /opt
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
-python3 -m venv .
+pytho -m venv .
 . bin/activate
-pip3 install --upgrade pip setuptools wheel
-pip3 install -r requirements.txt
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
 ./upgrader.py --sigsonly
-python3 loki.py --nolog --intense --force -p ./test
+python loki.py --nolog --intense -p ./test
 deactivate
 ```
 
@@ -136,7 +136,7 @@ Start as a daemon and bind on default localhost:1337
 ```
 cd Loki-daemonized
 . bin/activate
-python3 loki.py -d -s 20000 --noindicator --csv --nolog --intense --force &> loki.log &
+python loki.py -d -s 20000 --noindicator --csv --nolog --intense &> loki.log &
 deactivate
 ```
 
