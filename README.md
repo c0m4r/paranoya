@@ -135,7 +135,7 @@ Start as a daemon and bind on default localhost:1337
 ```
 cd Loki-daemonized
 . bin/activate
-python loki.py -d -s 20000 --noindicator --csv --nolog --intense &> loki.log &
+./loki.py -d -s 20000 --noindicator --csv --nolog --intense &> loki.log &
 deactivate
 ```
 
