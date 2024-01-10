@@ -19,12 +19,13 @@ A clear and concise description of what you expected to happen
 **Screenshots**
 If applicable, add screenshots to help explain your problem
 
-**Eenvironment (please complete the following information):**
+**Your eenvironment (please complete the following information):**
  - Distro+Version: [e.g. Alpine Linux 3.19]
  - CPU arch: [e.g. x86_64 / aarch64 / other]
  - C library: [e.g. glibc / musl]
  - Terminal [e.g. xterm, terminator, gnome-terminal]
  - Loki version [e.g. 2.0.0]
+ - Additional info: [if applicable]
 
 **Additional context**
 Add any other context about the problem here
