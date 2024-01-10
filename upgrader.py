@@ -276,7 +276,7 @@ class LOKIUpdater:
         data = response_info.json()
         if "zipball_url" in data:
             return str(data["zipball_url"])
-        elif "message" in data:
+        if "message" in data:
             log("ERROR", "GITHUB", data)
             sys.exit(1)
         return ""
