@@ -21,6 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import argparse
+import glob
 import os
 import platform
 import sys
@@ -29,7 +30,8 @@ from os.path import exists
 from traceback import print_exc as trace
 from urllib.parse import urlparse
 from shutil import copyfileobj
-from signal import signal, SIGPIPE, SIG_DFL
+from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
+from types import FrameType
 from typing import IO
 from zipfile import ZipFile
 
@@ -76,6 +78,9 @@ def needs_update(sig_url: str) -> bool:
     Check if Loki needs update
     """
     try:
+        if not os.path.exists("./signature-base"):
+            for filename in glob.glob("./_*.cache"):
+                os.remove(filename)
         o = urlparse(sig_url)
         path = o.path.split("/")
         branch = path[4].split(".")[0]
@@ -414,7 +419,16 @@ def get_application_path() -> str:
         return ""
 
 
+def sig_handler(signal_name: int, frame: FrameType) -> None:
+    print("Upgrade process interrupted, exiting.")
+    sys.exit(0)
+
+
 if __name__ == "__main__":
+    # Signal handlers
+    signal(SIGINT, sig_handler)
+    signal(SIGTERM, sig_handler)
+
     # Parse Arguments
     parser = argparse.ArgumentParser(description="Loki - Upgrader")
     parser.add_argument(
