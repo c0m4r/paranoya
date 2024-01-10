@@ -11,7 +11,7 @@ function print() {
 
 # Enter venv function
 function enter_venv() {
-    print "Entering venv"
+    print "Entering venv via ${SHELL}"
     PATH=$(pwd):$PATH
     /usr/bin/env $SHELL
 }
