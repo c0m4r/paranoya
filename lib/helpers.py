@@ -31,18 +31,20 @@ import traceback
 # Helper Functions -------------------------------------------------------------
 
 
-def generateHashes(filedata):
+def generateHashes(filedata: bytes) -> tuple[str, str, str]:
     try:
         md5 = hashlib.md5()
         sha1 = hashlib.sha1()
         sha256 = hashlib.sha256()
+
         md5.update(filedata)
         sha1.update(filedata)
         sha256.update(filedata)
+
         return md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest()
     except Exception:
         traceback.print_exc()
-        return 0, 0, 0
+        return "0", "0", "0"
 
 
 def getExcludedMountpoints():
