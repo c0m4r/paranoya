@@ -19,7 +19,7 @@ A clear and concise description of what you expected to happen
 **Screenshots**
 If applicable, add screenshots to help explain your problem
 
-**Your eenvironment (please complete the following information):**
+**Your environment (please complete the following information):**
  - Distro+Version: [e.g. Alpine Linux 3.19]
  - CPU arch: [e.g. x86_64 / aarch64 / other]
  - Python version: [e.g. 3.11]
