@@ -5,12 +5,12 @@ ORANGE="\e[1;33m"
 ENDCOLOR="\e[0m"
 
 # Color print function
-function print() {
+print() {
     echo -e "${ORANGE}${1}${ENDCOLOR}"
 }
 
 # Enter venv function
-function enter_venv() {
+enter_venv() {
     print "Entering venv via ${SHELL}"
     PATH=$(pwd):$PATH
     /usr/bin/env $SHELL

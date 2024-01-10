@@ -30,7 +30,7 @@ ORANGE="\e[1;33m"
 ENDCOLOR="\e[0m"
 
 # Color print function
-function print() {
+print() {
     echo -e "${ORANGE}${1}${ENDCOLOR}"
 }
 
