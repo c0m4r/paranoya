@@ -142,6 +142,7 @@ cp CHANGELOG dist/
 # Include addons
 if [[ "${WITH_ADDONS}" && -d addons ]]; then
     cp -r addons dist/
+    rm -rf dist/addons/img
 fi
 
 # Include signature-base
@@ -151,9 +152,12 @@ fi
 
 # Include source files
 if [[ "${WITH_SOURCE}" ]]; then
-    cp *.py dist/
+    cp ./*.py dist/
     mkdir dist/lib
     cp lib/*.py dist/lib/
+    cp venv.sh dist/
+    cp build.sh dist/
+    cp requirements.txt dist/
 fi
 
 # Include test samples
