@@ -911,7 +911,7 @@ class Loki:
 
             process_info = (
                 "PID: %s NAME: %s OWNER: %s STATUS: %s BIN: %s CMD: %s PATH: %s TTY: %s"
-                % (str(pid), name, owner, status, bin, cmd, path, tty)
+                % (str(pid), name, owner, status, bin, cmd.strip(), path, tty)
             )
 
             # Print info -------------------------------------------------------
