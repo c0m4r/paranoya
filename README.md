@@ -18,7 +18,7 @@
 </div>
 
 A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), rewritten for Linux and modified to support single file scans, 
-as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#Changes).
+as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#New-features).
 
 ## Dependencies
 
@@ -167,21 +167,7 @@ Possible responses:
 
 In `--auth` mode it will respond with `authorization required` if authkey was not sent or `unauthorized` if authkey is invalid.
 
-## Comparison
-
-A brief comparison to illustrate the key differences between Loki and Loki-daemonized.
-
-| Feature | Loki (daemonized) | Loki |
-| --- | --- | --- |
-| OS | Linux only | Multi-platform (mainly Windows) |
-| Oneshot mode | ✅ | ✅ |
-| Directory scan | ✅ | ✅ |
-| Daemon mode | ✅ | - |
-| Linux procscan | ✅ | - |
-| Single-file scan | ✅ | - |
-| By-hash user excludes | ✅ | - |
-
-## Changes
+## New features
 
 * Focuses on Linux
 * Single file scan if given path is a file
