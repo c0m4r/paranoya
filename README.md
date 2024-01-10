@@ -65,13 +65,12 @@ dnf install gcc git openssl-devel python3 python3-devel python3-pip
 #### Manual
 
 ```
-cd /opt
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
-python -m venv . || python3 -m venv .
+python3 -m venv .
 . bin/activate
-pip install --upgrade pip setuptools wheel
-pip install -r requirements.txt
+python3 -m pip install --upgrade pip setuptools wheel
+python3 -m pip install -r requirements.txt
 ./upgrader.py --sigsonly
 python loki.py --nolog --intense -p ./test
 deactivate
