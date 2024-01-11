@@ -122,16 +122,10 @@ sed -i \
 
 # PyInstaller
 print "Build (5/8): pyinstaller loki"
-pyinstaller -F \
-    --hidden-import lib.lokilogger \
-    --hidden-import lib.helpers \
-    --paths=lib/site-packages \
-    --paths=lib loki.py
+pyinstaller -F loki.py
 
 print "Build (6/8): pyinstaller upgrader"
-pyinstaller -F \
-    --paths=lib/site-packages \
-    --paths=lib upgrader.py
+pyinstaller -F upgrader.py
 
 print "Build (7/8): pyinstaller client"
 pyinstaller -F client.py
