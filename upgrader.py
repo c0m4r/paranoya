@@ -419,8 +419,12 @@ def get_application_path() -> str:
         return ""
 
 
-def sig_handler(signal_name: int, frame: FrameType) -> None:
+def sig_handler(signal_name: int, frame: FrameType | None) -> None:
+    """
+    signal handler
+    """
     print("Upgrade process interrupted, exiting.")
+    print(signal_name, frame)
     sys.exit(0)
 
 
