@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2024-01-11
+
+### Added
+
+- deployment script deploy.sh which installs deps and venv
+- venv autosetup and detection
+- upgrader script signal handling
+- custom modules import validation
+- new local module: lib/venv.py
+
+### Changed
+
+- loki no longer changes background inside the terminal
+
+### Fixed
+
+- stripping empty space in cmdline
+- cache files preventing upgrade if signature-base is not present
+
+### Removed
+
+- venv.sh replaced with deploy.sh
+
 ## [3.0.0] - 2024-01-10
 
 ### Added
