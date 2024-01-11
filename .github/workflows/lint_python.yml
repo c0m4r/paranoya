@@ -19,9 +19,6 @@ jobs:
         with:
           python-version: '3.12.1'
       - run: |
-          apt-get update
-          apt-get -y install wget
-      - run: |
           wget https://raw.githubusercontent.com/c0m4r/okrutnik/main/okrutnik.sh
           chmod +x okrutnik.sh
           ./okrutnik.sh --install
