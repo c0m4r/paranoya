@@ -36,10 +36,13 @@ from types import FrameType
 from typing import IO
 from zipfile import ZipFile
 
+# Loki modules
 from lib.venv import venv_check
 
-venv_check()
+# venv before loading custom modules
+venv_check(__file__)
 
+# Custom modules
 try:
     import requests
     from colorama import Fore, Style

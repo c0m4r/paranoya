@@ -39,7 +39,6 @@ from collections import Counter
 from subprocess import Popen, PIPE, run
 
 # LOKI modules
-from lib.venv import venv_check
 from lib.lokilogger import codecs, LokiLogger, get_syslog_timestamp
 from lib.helpers import (
     generateHashes,
@@ -52,9 +51,12 @@ from lib.helpers import (
     getAgeString,
     getHostname,
 )
+from lib.venv import venv_check
 
-venv_check()
+# venv before loading custom modules
+venv_check(__file__)
 
+# Custom modules
 try:
     import psutil
     import yara
