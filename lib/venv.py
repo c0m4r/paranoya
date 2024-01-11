@@ -49,3 +49,4 @@ def venv_check(loki_script_name: str) -> None:
         venv_ready = venv_setup(loki_venv_site)
         if not venv_ready:
             print(f"{loki_venv_path} not found")
+            print("Consider using ./deploy.sh to deploy venv")
