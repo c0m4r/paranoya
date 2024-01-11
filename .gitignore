@@ -3,9 +3,14 @@
 /__pycache__
 /*.cache
 /*.log
+/*.tar.gz
+/*.spec
+/*.zip
 /addons/flatpak/flatpak-pip-generator
 /addons/flatpak/.flatpak-builder
 /bin
+/build
+/dist
 /include
 /lib/__pycache__
 /lib/python3*

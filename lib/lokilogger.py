@@ -27,6 +27,7 @@ import sys
 import traceback
 
 from os import get_terminal_size
+
 from lib.venv import venv_check
 
 # venv before loading custom modules
