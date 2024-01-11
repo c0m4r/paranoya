@@ -172,13 +172,9 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
   * Process connections: for now, it only shows detected connections per process
   * Process Masquerading Detection: reports non-empty /proc/PID/maps of processes that uses square brackets in their cmdlines
 
-## Screenshots
+## Screenshot
 
-![/addons/img/loki-daemonized-screen3.png](/addons/img/loki-daemonized-screen3.png)
-
-With auth:
-
-![/addons/img/loki-daemonized-screen2.png](/addons/img/loki-daemonized-screen2.png)
+![/addons/img/loki-daemonized-screen3.png](/addons/img/loki-daemonized-screen-3.1.0.png)
 
 ## Usage
 
