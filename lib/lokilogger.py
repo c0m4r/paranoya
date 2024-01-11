@@ -32,9 +32,13 @@ from lib.venv import venv_check
 # venv before loading custom modules
 venv_check("lib")
 
-# Modules
-from colorama import Fore, Back, Style
-from colorama import init
+# Custom modules
+try:
+    from colorama import Fore, Back, Style
+    from colorama import init
+except Exception as e:
+    print(e)
+    sys.exit(0)
 
 __version__ = "3.0.0"
 
