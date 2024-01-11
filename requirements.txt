@@ -1,4 +1,5 @@
 colorama
+progressbar2
 psutil
 requests
 yara-python

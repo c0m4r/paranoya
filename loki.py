@@ -61,6 +61,7 @@ venv_check(__file__)
 try:
     import psutil
     import yara
+    import progressbar
 except Exception as e:
     print(e)
     sys.exit(0)
@@ -225,6 +226,9 @@ class Loki:
     filetype_magics = {}
     max_filetype_magics = 0
 
+    bar_iter = 0
+    bar_iter_max = 10000
+
     # Predefined paths to skip
     LINUX_PATH_SKIPS_START = set(
         [
@@ -349,6 +353,24 @@ class Loki:
             )
         )
 
+    def file_list_gen(self, path):
+        matches = []
+        iter = 0
+        logger.log("INFO", "Init", "Processing files to scan, this might take a while.")
+        for root, dirnames, filenames in os.walk(path, followlinks=False):
+            for filename in filenames:
+                matches.append(os.path.join(root, filename))
+                iter += 1
+                if iter > self.bar_iter_max:
+                    logger.log(
+                        "INFO",
+                        "Init",
+                        "File list too large, progress will be unavailable",
+                    )
+                    return matches
+        logger.log("INFO", "Init", "Processing done")
+        return matches
+
     def scan_path(self, path):
         """
         scan path
@@ -359,6 +381,10 @@ class Loki:
             files = [path]
             loki.scan_path_files(root, directories, files)
             return
+
+        if args.progress and not args.silent and not args.noindicator:
+            files_all = self.file_list_gen(path)
+            files_all_len = len(files_all)
 
         # Check if path exists
         if not os.path.exists(path):
@@ -379,6 +405,18 @@ class Loki:
                     % skip,
                 )
                 return
+
+        if args.progress and not args.silent and not args.noindicator:
+            if files_all_len <= self.bar_iter_max:
+                bar = progressbar.ProgressBar(
+                    max_value=files_all_len, redirect_stdout=True
+                )
+            else:
+                bar = progressbar.ProgressBar(
+                    max_value=progressbar.UnknownLength, redirect_stdout=True
+                )
+        else:
+            bar = None
 
         for root, directories, files in os.walk(
             path, onerror=walk_error, followlinks=False
@@ -406,9 +444,9 @@ class Loki:
                     newDirectories.append(dir)
             directories[:] = newDirectories
 
-            loki.scan_path_files(root, directories, files)
+            loki.scan_path_files(root, directories, files, bar)
 
-    def scan_path_files(self, root, directories, files):
+    def scan_path_files(self, root, directories, files, bar):
         """
         scan path files
         """
@@ -418,6 +456,9 @@ class Loki:
         # Loop through files
         for filename in files:
             try:
+                if args.progress and not args.silent and not args.noindicator:
+                    self.bar_iter += 1
+                    bar.update(self.bar_iter)
                 # Findings
                 reasons = []
                 # Total Score
@@ -1902,6 +1943,12 @@ def main():
         "--version",
         action="store_true",
         help="Shows welcome text and version of loki, then exit",
+        default=False,
+    )
+    parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="Show a progress bar (experimental)",
         default=False,
     )
 
