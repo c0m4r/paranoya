@@ -30,7 +30,7 @@ jobs:
       - run: black --diff .
       - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
       - run: pip install -r requirements.txt
-      - run: mypy --exclude 'lib64' . || true
+      - run: mypy --install-types --non-interactive --exclude 'lib64' . || true
       - run: pylama *.py lib/*.py || true
       - run: pylint *.py lib/*.py || true
       - run: safety check --ignore 62044
