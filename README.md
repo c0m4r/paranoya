@@ -33,31 +33,31 @@ as well as a daemon mode to accept scans in client/server manner. It also includ
 #### Alpine Linux
 
 ```
-apk add gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-pip
+apk add bash gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-pip
 ```
 
 #### Arch Linux
 
 ```
-pacman -S gcc git python3 python-devtools python-pip
+pacman -S bash gcc git python3 python-devtools python-pip
 ```
 
 #### Void Linux
 
 ```
-xbps-install -Sy gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv
+xbps-install -Sy bash gcc git openssl-devel python3 python3-devel python3-pip
 ```
 
 #### Debian / Ubuntu / Linux Mint
 
 ```
-apt -y install build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
+apt -y install bash build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
 ```
 
 #### Rocky Linux / AlmaLinux
 
 ```
-dnf install gcc git openssl-devel python3 python3-devel python3-pip
+dnf install bash gcc git openssl-devel python3 python3-devel python3-pip
 ```
 
 ## Installation
