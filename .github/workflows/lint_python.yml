@@ -18,9 +18,17 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.12.1'
-      - run: pip install --upgrade pip
-      - run: pip install --upgrade setuptools wheel
-      - run: pip install black codespell mypy pytest ruff safety pylama pylint
+      - run: |
+          apt-get update
+          apt-get -y install wget
+      - run: |
+          wget https://raw.githubusercontent.com/c0m4r/okrutnik/main/okrutnik.sh
+          chmod +x okrutnik.sh
+          ./okrutnik.sh --install
+      - run: ./okrutnik.sh lib/*.py || true
+      - run: ./okrutnik.sh upgrader.py
+      - run: ./okrutnik.sh client.py
+      - run: ./okrutnik.sh loki.py
       - run: ruff .
       - run: black --diff .
       - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
@@ -29,7 +37,8 @@ jobs:
       - run: pylama *.py lib/*.py || true
       - run: pylint *.py lib/*.py || true
       - run: safety check --ignore 62044
-      - run: timeout -s TERM 10 python ./loki.py -d || true
-      - run: python ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
-      - run: python ./loki.py --noprocs --noindicator --dontwait --debug --intense -p ./test
-      - run: python ./loki.py --noprocs --noindicator --dontwait --debug --csv -p ./test
+      - run: ./deploy.sh
+      - run: timeout -s TERM 10 ./loki.py -d || true
+      - run: ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
+      - run: ./loki.py --noprocs --noindicator --dontwait --debug --intense -p ./test
+      - run: ./loki.py --noprocs --noindicator --dontwait --debug --csv -p ./test
