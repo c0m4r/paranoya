@@ -67,13 +67,8 @@ dnf install bash gcc git openssl-devel python3 python3-devel python3-pip
 ```
 git clone https://github.com/c0m4r/Loki-daemonized.git
 cd Loki-daemonized
-python3 -m venv .
-. bin/activate
-python3 -m pip install --upgrade pip setuptools wheel
-python3 -m pip install -r requirements.txt
-./upgrader.py --sigsonly
+./deploy.sh
 ./loki.py --nolog --intense -p ./test
-deactivate
 ```
 
 #### Docker
@@ -133,10 +128,7 @@ See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wik
 Start as a daemon and bind on default localhost:1337
 
 ```
-cd Loki-daemonized
-. bin/activate
-./loki.py -d -s 20000 --noindicator --csv --nolog --intense &> loki.log &
-deactivate
+./loki.py -d -s 20000 --noindicator --csv --nolog --intense
 ```
 
 You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
