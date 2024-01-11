@@ -96,11 +96,11 @@ print "Building Loki (daemonized)"
 echo "${VERSION}-$(arch) 🚀"
 
 print "Build (1/8): venv"
-if [[ ! -e pyvenv.cfg ]]; then
-    python -m venv .
+if [[ ! -e venv/pyvenv.cfg ]]; then
+    ./deploy.sh
 fi
 
-source bin/activate
+source venv/bin/activate
 
 print "Build (2/8): upgrade tools"
 pip install pyinstaller black ruff
@@ -113,6 +113,12 @@ ruff -v ./*.py ./lib/*.py
 
 rm -rf build/
 rm -rf dist/
+
+# Disable venv_check
+sed -i \
+    -e 's/^venv_check/\#venv_check/g;' \
+    -e 's/^from\ lib.venv/\#from\ lib.venv/g;' \
+    *.py lib/*.py
 
 # PyInstaller
 print "Build (5/8): pyinstaller loki"
@@ -129,6 +135,12 @@ pyinstaller -F \
 
 print "Build (7/8): pyinstaller client"
 pyinstaller -F client.py
+
+# Enable venv_check back
+sed -i \
+    -e 's/^\#\ venv_check/venv_check/g;' \
+    -e 's/^\#\ from\ lib.venv/from\ lib.venv/g;' \
+    *.py lib/*.py
 
 # Create packages
 print "Build (8/8): packaging"
