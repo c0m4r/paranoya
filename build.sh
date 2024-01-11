@@ -118,7 +118,7 @@ rm -rf dist/
 sed -i \
     -e 's/^venv_check/\#venv_check/g;' \
     -e 's/^from\ lib.venv/\#from\ lib.venv/g;' \
-    *.py lib/*.py
+    ./*.py lib/*.py
 
 # PyInstaller
 print "Build (5/8): pyinstaller loki"
@@ -142,7 +142,7 @@ sed -i \
     -e 's/^\#venv_check/venv_check/g;' \
     -e 's/^\#\ from\ lib.venv/from\ lib.venv/g;' \
     -e 's/^\#from\ lib.venv/from\ lib.venv/g;' \
-    *.py lib/*.py
+    ./*.py lib/*.py
 
 # Create packages
 print "Build (8/8): packaging"
