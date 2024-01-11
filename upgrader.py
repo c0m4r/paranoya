@@ -25,6 +25,7 @@ import glob
 import os
 import platform
 import sys
+
 from io import BytesIO
 from os.path import exists
 from traceback import print_exc as trace
@@ -35,9 +36,16 @@ from types import FrameType
 from typing import IO
 from zipfile import ZipFile
 
-# Modules
-import requests
-from colorama import Fore, Style
+from lib.venv import venv_check
+
+venv_check()
+
+try:
+    import requests
+    from colorama import Fore, Style
+except Exception as e:
+    print(e)
+    sys.exit(0)
 
 signal(SIGPIPE, SIG_DFL)
 

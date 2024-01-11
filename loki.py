@@ -38,13 +38,8 @@ from bisect import bisect_left
 from collections import Counter
 from subprocess import Popen, PIPE, run
 
-# Psutil
-import psutil
-
-# yara-python module
-import yara
-
 # LOKI modules
+from lib.venv import venv_check
 from lib.lokilogger import codecs, LokiLogger, get_syslog_timestamp
 from lib.helpers import (
     generateHashes,
@@ -57,6 +52,15 @@ from lib.helpers import (
     getAgeString,
     getHostname,
 )
+
+venv_check()
+
+try:
+    import psutil
+    import yara
+except Exception as e:
+    print(e)
+    sys.exit(0)
 
 # Platform
 os_platform = "linux"
