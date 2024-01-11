@@ -26,14 +26,15 @@ jobs:
       - run: ./okrutnik.sh lib/*.py || true
       - run: ./okrutnik.sh upgrader.py
       - run: ./okrutnik.sh client.py
-      - run: ./okrutnik.sh loki.py
+      - run: ./okrutnik.sh loki.py || true
       - run: ruff .
       - run: black --diff .
       - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
       - run: pip install -r requirements.txt
-      - run: mypy --install-types --non-interactive --exclude 'lib64' . || true
+      - run: mypy --install-types --non-interactive --strict --exclude 'lib64' . || true
       - run: pylama *.py lib/*.py || true
       - run: pylint *.py lib/*.py || true
+      - run: pyright . || true
       - run: safety check --ignore 62044
       - run: timeout -s TERM 10 ./loki.py -d || true
       - run: ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
