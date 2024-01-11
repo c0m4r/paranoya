@@ -1,6 +1,6 @@
 <div align="center">
 
-![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-icon.png)
+![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-header.png)
 
 ## Loki (daemonized) - Simple IOC and YARA scanner for Linux
 
