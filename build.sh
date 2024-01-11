@@ -139,7 +139,9 @@ pyinstaller -F client.py
 # Enable venv_check back
 sed -i \
     -e 's/^\#\ venv_check/venv_check/g;' \
+    -e 's/^\#venv_check/venv_check/g;' \
     -e 's/^\#\ from\ lib.venv/from\ lib.venv/g;' \
+    -e 's/^\#from\ lib.venv/from\ lib.venv/g;' \
     *.py lib/*.py
 
 # Create packages
@@ -178,8 +180,12 @@ if [[ "${WITH_TEST}" ]]; then
 fi
 
 mv dist Loki-daemonized-"${VERSION}"-"$(arch)"
-zip -r -9 -T Loki-daemonized-"${VERSION}"-"$(arch)".zip Loki-daemonized-"${VERSION}"-"$(arch)"
-tar -I "gzip -9" -cvf Loki-daemonized-"${VERSION}"-"$(arch)".tar.gz Loki-daemonized-"${VERSION}"-"$(arch)"
+if command -v zip &>/dev/null ; then
+    zip -r -9 -T Loki-daemonized-"${VERSION}"-"$(arch)".zip Loki-daemonized-"${VERSION}"-"$(arch)"
+fi
+if command -v tar &>/dev/null && command -v gzip &>/dev/null ; then
+    tar -I "gzip -9" -cvf Loki-daemonized-"${VERSION}"-"$(arch)".tar.gz Loki-daemonized-"${VERSION}"-"$(arch)"
+fi
 mv Loki-daemonized-"${VERSION}"-"$(arch)" dist
 
 print "Build complete 🎉"
