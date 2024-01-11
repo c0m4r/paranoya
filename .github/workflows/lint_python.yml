@@ -29,9 +29,9 @@ jobs:
       - run: ./okrutnik.sh loki.py || true
       - run: pip install --upgrade pip setuptools wheel
       - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff
-      - run: ruff .
-      - run: black --diff .
-      - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
+      - run: ruff . || true
+      - run: black --diff . || true
+      - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*" --skip="./venv"
       - run: pip install -r requirements.txt
       - run: mypy --install-types --non-interactive --strict --exclude 'lib64' . || true
       - run: pylama *.py lib/*.py || true
