@@ -27,6 +27,8 @@ jobs:
       - run: ./okrutnik.sh upgrader.py
       - run: ./okrutnik.sh client.py
       - run: ./okrutnik.sh loki.py || true
+      - run: pip install --upgrade pip setuptools wheel
+      - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff
       - run: ruff .
       - run: black --diff .
       - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*"
