@@ -24,6 +24,7 @@ as well as a daemon mode to accept scans in client/server manner. It also includ
 
 [Python3](https://www.python.org/) 
 | [colorama](https://pypi.org/project/colorama/) 
+| [progressbar2](https://pypi.org/project/progressbar2/) 
 | [psutil](https://pypi.org/project/psutil/) 
 | [requests](https://pypi.org/project/requests/) 
 | [yara-python](https://pypi.org/project/yara-python/) 
