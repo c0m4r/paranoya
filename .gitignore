@@ -13,5 +13,5 @@
 /loki.pid
 /okrutnik.sh
 /pyvenv.cfg
-/venv/pyenv.cfg
+/venv
 /signature-base
