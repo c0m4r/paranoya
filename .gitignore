@@ -8,9 +8,10 @@
 /bin
 /include
 /lib/__pycache__
-/lib/python3.11
+/lib/python3*
 /lib64
 /loki.pid
 /okrutnik.sh
 /pyvenv.cfg
+/venv/pyenv.cfg
 /signature-base
