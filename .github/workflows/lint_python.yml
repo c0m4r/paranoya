@@ -38,7 +38,11 @@ jobs:
       - run: pylint *.py lib/*.py || true
       - run: pyright . || true
       - run: safety check --ignore 62044
-      - run: timeout -s TERM 10 ./loki.py -d || true
+      - run: ./loki.py -d &
+      - run: sleep 5
+      - run: ./client.py -p LICENSE
+      - run: ./client.py -p ./test
+      - run: kill -TERM $(cat loki.pid)
       - run: ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
       - run: ./loki.py --noprocs --noindicator --dontwait --debug --intense -p ./test
       - run: ./loki.py --noprocs --noindicator --dontwait --debug --csv -p ./test
