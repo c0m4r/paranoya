@@ -23,10 +23,10 @@ jobs:
           wget https://raw.githubusercontent.com/c0m4r/okrutnik/main/okrutnik.sh
           chmod +x okrutnik.sh
           ./okrutnik.sh --install
-      - run: ./okrutnik.sh lib/*.py || true
+      - run: ./okrutnik.sh --ignore lib/*.py || true
       - run: ./okrutnik.sh upgrader.py
       - run: ./okrutnik.sh client.py
-      - run: ./okrutnik.sh loki.py || true
+      - run: ./okrutnik.sh --ignore loki.py || true
       - run: pip install --upgrade pip setuptools wheel
       - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff safety
       - run: ruff . || true
