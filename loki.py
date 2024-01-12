@@ -53,7 +53,6 @@ from lib.helpers import (
 )
 
 from lib.constants import (
-    OS_PLATFORM,
     EVIL_EXTENSIONS,
     SCRIPT_EXTENSIONS,
     SCRIPT_TYPES,
@@ -115,20 +114,6 @@ class Loki:
     bar_iter = 0
     bar_iter_max = 10000
 
-    # Predefined paths to skip
-    LINUX_PATH_SKIPS_START = set(
-        [
-            "/proc",
-            "/dev",
-            "/sys/kernel/debug",
-            "/sys/kernel/slab",
-            "/sys/devices",
-            "/usr/src/linux",
-        ]
-    )
-    MOUNTED_DEVICES = set(["/media", "/volumes"])
-    LINUX_PATH_SKIPS_END = set(["/initctl"])
-
     def __init__(self, intense_mode):
         # Scan Mode
         self.intense_mode = intense_mode
@@ -145,7 +130,7 @@ class Loki:
                 "The 'signature-base' subdirectory doesn't exist or is empty. "
                 "Trying to retrieve the signature database automatically.",
             )
-            updateLoki(sigsOnly=True)
+            update_loki(sigs_only=True)
 
         # Excludes
         self.initialize_excludes(
@@ -154,12 +139,22 @@ class Loki:
 
         # Static excludes
         if not args.force:
+            linux_path_skips_start = set(
+                [
+                    "/proc",
+                    "/dev",
+                    "/sys/kernel/debug",
+                    "/sys/kernel/slab",
+                    "/sys/devices",
+                    "/usr/src/linux",
+                ]
+            )
             if args.alldrives:
-                self.start_excludes = self.LINUX_PATH_SKIPS_START
+                self.start_excludes = linux_path_skips_start
             else:
                 self.start_excludes = (
-                    self.LINUX_PATH_SKIPS_START
-                    | self.MOUNTED_DEVICES
+                    linux_path_skips_start
+                    | set(["/media", "/volumes"])
                     | set(loki_get_excluded_mountpoints())
                 )
 
@@ -365,36 +360,24 @@ class Loki:
                         logger.log("DEBUG", "FileScan", f"Skipping element {file_path}")
                         skip_it = True
 
-                # Linux directory skip
-                if OS_PLATFORM == "linux":
-                    # Skip paths that end with ..
-                    for skip in self.LINUX_PATH_SKIPS_END:
-                        if (
-                            file_path.endswith(skip)
-                            and self.LINUX_PATH_SKIPS_END[skip] == 0
-                        ):
-                            logger.log("INFO", "FileScan", f"Skipping {skip} element")
-                            self.LINUX_PATH_SKIPS_END[skip] = 1
-                            skip_it = True
-
-                    # File mode
-                    try:
-                        mode = os.stat(file_path).st_mode
-                        if (
-                            stat.S_ISCHR(mode)
-                            or stat.S_ISBLK(mode)
-                            or stat.S_ISFIFO(mode)
-                            or stat.S_ISLNK(mode)
-                            or stat.S_ISSOCK(mode)
-                        ):
-                            continue
-                    except Exception:
-                        logger.log(
-                            "DEBUG",
-                            "FileScan",
-                            f"Skipping element {file_path} does not exist or is a broken symlink",
-                        )
+                # File mode
+                try:
+                    mode = os.stat(file_path).st_mode
+                    if (
+                        stat.S_ISCHR(mode)
+                        or stat.S_ISBLK(mode)
+                        or stat.S_ISFIFO(mode)
+                        or stat.S_ISLNK(mode)
+                        or stat.S_ISSOCK(mode)
+                    ):
                         continue
+                except Exception:
+                    logger.log(
+                        "DEBUG",
+                        "FileScan",
+                        f"Skipping element {file_path} does not exist or is a broken symlink",
+                    )
+                    continue
 
                 # Skip
                 if skip_it:
@@ -738,7 +721,7 @@ class Loki:
         try:
             for rules in self.yara_rules:
                 # Yara Rule Match
-                EXTERNALS = self.yara_externals(
+                externals = self.yara_externals(
                     False,
                     file_name.decode("utf-8"),
                     file_path.decode("utf-8"),
@@ -748,7 +731,7 @@ class Loki:
                 )
                 matches = rules.match(
                     data=file_data,
-                    externals=EXTERNALS,
+                    externals=externals,
                 )
 
                 # If matched
@@ -923,7 +906,7 @@ class Loki:
         """
         try:
             # Limits
-            MAXIMUM_CONNECTIONS = 20
+            max_connections = 20
 
             # Counter
             connection_count = 0
@@ -1008,7 +991,7 @@ class Loki:
                     )
 
                 # Maximum connection output
-                if connection_count > MAXIMUM_CONNECTIONS:
+                if connection_count > max_connections:
                     logger.log(
                         "NOTICE",
                         "ProcessScan",
@@ -1213,7 +1196,7 @@ class Loki:
         """
         initialize yara rules
         """
-        yaraRules = ""
+        yara_rules = ""
         rule_count = 0
 
         try:
@@ -1231,7 +1214,7 @@ class Loki:
                     for file in files:
                         try:
                             # Full Path
-                            yaraRuleFile = os.path.join(root, file)
+                            yara_rule_file = os.path.join(root, file)
 
                             if file in args.disable_yara_files.split(","):
                                 logger.log(
@@ -1254,15 +1237,15 @@ class Loki:
                             if extension != ".yar" and extension != ".yara":
                                 continue
 
-                            with open(yaraRuleFile, "r", encoding="utf-8") as yfile:
+                            with open(yara_rule_file, "r", encoding="utf-8") as yfile:
                                 yara_rule_data = yfile.read()
 
                             # Test Compile
                             try:
-                                EXTERNALS = self.yara_externals(True)
-                                compiledRules = yara.compile(
+                                externals = self.yara_externals(True)
+                                compiled_rules = yara.compile(
                                     source=yara_rule_data,
-                                    externals=EXTERNALS,
+                                    externals=externals,
                                 )
                                 logger.log(
                                     "DEBUG", "Init", f"Initializing Yara rule {file}"
@@ -1281,14 +1264,14 @@ class Loki:
                                 continue
 
                             # Add the rule
-                            yaraRules += yara_rule_data
+                            yara_rules += yara_rule_data
 
                         except Exception:
                             logger.log(
                                 "ERROR",
                                 "Init",
                                 "Error reading signature file %s ERROR: %s"
-                                % (yaraRuleFile, sys.exc_info()[1]),
+                                % (yara_rule_file, sys.exc_info()[1]),
                             )
                             if logger.debug:
                                 traceback.print_exc()
@@ -1300,10 +1283,10 @@ class Loki:
                     "Init",
                     "Initializing all YARA rules at once (composed string of all rule files)",
                 )
-                EXTERNALS = self.yara_externals(True)
-                compiledRules = yara.compile(
-                    source=yaraRules,
-                    externals=EXTERNALS,
+                externals = self.yara_externals(True)
+                compiled_rules = yara.compile(
+                    source=yara_rules,
+                    externals=externals,
                 )
                 logger.log("INFO", "Init", f"Initialized {rule_count} Yara rules")
             except Exception:
@@ -1317,7 +1300,7 @@ class Loki:
                 sys.exit(1)
 
             # Add as Lokis YARA rules
-            self.yara_rules.append(compiledRules)
+            self.yara_rules.append(compiled_rules)
 
         except Exception:
             logger.log("ERROR", "Init", "Error reading signature folder /signatures/")
@@ -1571,19 +1554,19 @@ def get_application_path():
             sys.exit(1)
 
 
-def updateLoki(sigsOnly):
+def update_loki(sigs_only: bool) -> None:
     """
     update loki
     """
     logger.log("INFO", "Update", "Starting separate updater process ...")
-    pArgs = []
+    p_args = []
 
     # Updater
     if os.path.exists(os.path.join(get_application_path(), "upgrader.py")):
-        pArgs.append(args.python)
-        pArgs.append("upgrader.py")
+        p_args.append(args.python)
+        p_args.append("upgrader.py")
     elif os.path.exists(os.path.join(get_application_path(), "upgrader")):
-        pArgs.append("./upgrader")
+        p_args.append("./upgrader")
     else:
         logger.log(
             "ERROR",
@@ -1591,13 +1574,13 @@ def updateLoki(sigsOnly):
             "Cannot find upgrader in the current working directory.",
         )
 
-    if sigsOnly:
-        pArgs.append("--sigsonly")
-        p = Popen(pArgs, shell=False)
+    if sigs_only:
+        p_args.append("--sigsonly")
+        p = Popen(p_args, shell=False)
         p.communicate()
     else:
-        pArgs.append("--detached")
-        Popen(pArgs, shell=False)
+        p_args.append("--detached")
+        Popen(p_args, shell=False)
 
 
 def walk_error(err):
@@ -1719,7 +1702,7 @@ if __name__ == "__main__":
 
     # Update
     if args.update:
-        updateLoki(sigsOnly=False)
+        update_loki(sigs_only=False)
         sys.exit(0)
 
     # Platform info
@@ -1746,11 +1729,7 @@ if __name__ == "__main__":
     # Loki
     loki = Loki(args.intense)
 
-    # Check if admin
-    isAdmin = False
-
     if os.geteuid() == 0:
-        isAdmin = True
         logger.log("INFO", "Init", "Current user is root - very good")
     else:
         logger.log(
@@ -1761,16 +1740,14 @@ if __name__ == "__main__":
         )
 
     # Scan Processes --------------------------------------------------
-    resultProc = False
-    if not args.noprocscan and OS_PLATFORM == "linux":
-        if isAdmin:
-            loki.scan_processes_linux()
-        else:
-            logger.log(
-                "NOTICE",
-                "Init",
-                "Skipping process memory check. User has no admin rights.",
-            )
+    if not args.noprocscan and os.geteuid() == 0:
+        loki.scan_processes_linux()
+    else:
+        logger.log(
+            "NOTICE",
+            "Init",
+            "Skipping process memory check. User has no admin rights.",
+        )
 
     # Scan Path -------------------------------------------------------
     if not args.nofilescan:

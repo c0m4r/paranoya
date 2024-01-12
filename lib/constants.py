@@ -2,8 +2,6 @@
 Loki constants
 """
 
-OS_PLATFORM = "linux"
-
 # Predefined Evil Extensions
 EVIL_EXTENSIONS = [
     ".vbs",
