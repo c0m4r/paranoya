@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import argparse
+import codecs
 import datetime
 import ipaddress
 import os
@@ -39,20 +40,27 @@ from collections import Counter
 from subprocess import Popen, PIPE, run
 
 # LOKI modules
-from lib.lokilogger import codecs, LokiLogger, get_syslog_timestamp
+from lib.lokilogger import LokiLogger, get_syslog_timestamp
 from lib.helpers import (
-    generateHashes,
-    getExcludedMountpoints,
-    printProgress,
-    transformOS,
-    replaceEnvVars,
-    get_file_type,
-    removeNonAsciiDrop,
-    getAgeString,
-    getHostname,
+    loki_generate_hashes,
+    loki_get_excluded_mountpoints,
+    loki_print_progress,
+    loki_transform_os,
+    loki_replace_env_vars,
+    loki_get_file_type,
+    loki_remove_non_ascii_drop,
+    loki_get_age_string,
 )
 
-from lib.venv import venv_check
+from lib.constants import (
+    OS_PLATFORM,
+    EVIL_EXTENSIONS,
+    SCRIPT_EXTENSIONS,
+    SCRIPT_TYPES,
+    HASH_WHITELIST,
+)
+
+from lib.lokivenv import venv_check
 
 # venv before loading custom modules
 venv_check(__file__)
@@ -65,128 +73,6 @@ try:
 except Exception as e:
     print(e)
     sys.exit(0)
-
-# Platform
-os_platform = "linux"
-
-# Predefined Evil Extensions
-EVIL_EXTENSIONS = [
-    ".vbs",
-    ".ps",
-    ".ps1",
-    ".rar",
-    ".tmp",
-    ".bas",
-    ".bat",
-    ".chm",
-    ".cmd",
-    ".com",
-    ".cpl",
-    ".sh",
-    ".crt",
-    ".dll",
-    ".exe",
-    ".hta",
-    ".js",
-    ".lnk",
-    ".msc",
-    ".ocx",
-    ".pcd",
-    ".pif",
-    ".pot",
-    ".pdf",
-    ".reg",
-    ".scr",
-    ".sct",
-    ".sys",
-    ".url",
-    ".vb",
-    ".vbe",
-    ".wsc",
-    ".wsf",
-    ".wsh",
-    ".ct",
-    ".t",
-    ".input",
-    ".war",
-    ".jsp",
-    ".jspx",
-    ".php",
-    ".asp",
-    ".aspx",
-    ".doc",
-    ".docx",
-    ".pdf",
-    ".xls",
-    ".xlsx",
-    ".ppt",
-    ".pptx",
-    ".tmp",
-    ".log",
-    ".dump",
-    ".pwd",
-    ".w",
-    ".txt",
-    ".conf",
-    ".cfg",
-    ".conf",
-    ".config",
-    ".psd1",
-    ".psm1",
-    ".ps1xml",
-    ".clixml",
-    ".psc1",
-    ".pssc",
-    ".pl",
-    ".www",
-    ".rdp",
-    ".jar",
-    ".docm",
-    ".sys",
-]
-
-SCRIPT_EXTENSIONS = [
-    ".asp",
-    ".vbs",
-    ".ps1",
-    ".bas",
-    ".bat",
-    ".js",
-    ".vb",
-    ".vbe",
-    ".wsc",
-    ".wsf",
-    ".wsh",
-    ".jsp",
-    ".jspx",
-    ".php",
-    ".asp",
-    ".aspx",
-    ".psd1",
-    ".psm1",
-    ".ps1xml",
-    ".clixml",
-    ".psc1",
-    ".pssc",
-    ".pl",
-    ".sh",
-]
-
-SCRIPT_TYPES = ["VBS", "PHP", "JSP", "ASP", "BATCH"]
-
-HASH_WHITELIST = [  # Empty file
-    int("d41d8cd98f00b204e9800998ecf8427e", 16),
-    int("da39a3ee5e6b4b0d3255bfef95601890afd80709", 16),
-    int("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", 16),
-    # One byte line break file (Unix) 0x0a
-    int("68b329da9893e34099c7d8ad5cb9c940", 16),
-    int("adc83b19e793491b1c6ea0fd8b46cd9f32e592fc", 16),
-    int("01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b", 16),
-    # One byte line break file (Windows) 0x0d0a
-    int("81051bcc2cf1bedf378224b0a93e2877", 16),
-    int("ba8ab5a0280b953aa97435ff8946cbcbb2755a27", 16),
-    int("7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6", 16),
-]
 
 
 def ioc_contains(sorted_list, value):
@@ -216,9 +102,9 @@ class Loki:
     yara_rule_directories = []
 
     # Excludes (list of regex that match within the whole path) (user-defined via excludes.cfg)
-    fullExcludes = []
+    full_excludes = []
     # Platform specific excludes (match the beginning of the full path) (not user-defined)
-    startExcludes = []
+    start_excludes = []
     # Excludes hash (md5, sha1 and sha256)
     excludes_hash = []
 
@@ -269,12 +155,12 @@ class Loki:
         # Static excludes
         if not args.force:
             if args.alldrives:
-                self.startExcludes = self.LINUX_PATH_SKIPS_START
+                self.start_excludes = self.LINUX_PATH_SKIPS_START
             else:
-                self.startExcludes = (
+                self.start_excludes = (
                     self.LINUX_PATH_SKIPS_START
                     | self.MOUNTED_DEVICES
-                    | set(getExcludedMountpoints())
+                    | set(loki_get_excluded_mountpoints())
                 )
 
         # Set IOC path
@@ -299,8 +185,7 @@ class Loki:
         logger.log(
             "INFO",
             "Init",
-            "File Name Characteristics initialized with %s regex patterns"
-            % len(self.filename_iocs),
+            f"File Name Characteristics initialized with {len(self.filename_iocs)} regex patterns",
         )
 
         # C2 based IOCs (all files in iocs that contain 'c2')
@@ -308,8 +193,7 @@ class Loki:
         logger.log(
             "INFO",
             "Init",
-            "C2 server indicators initialized with %s elements"
-            % len(self.c2_server.keys()),
+            f"C2 server indicators initialized with {len(self.c2_server.keys())} elements",
         )
 
         # Hash based IOCs (all files in iocs that contain 'hash')
@@ -317,20 +201,17 @@ class Loki:
         logger.log(
             "INFO",
             "Init",
-            "Malicious MD5 Hashes initialized with %s hashes"
-            % len(self.hashes_md5.keys()),
+            f"Malicious MD5 Hashes initialized with {len(self.hashes_md5.keys())} hashes",
         )
         logger.log(
             "INFO",
             "Init",
-            "Malicious SHA1 Hashes initialized with %s hashes"
-            % len(self.hashes_sha1.keys()),
+            f"Malicious SHA1 Hashes initialized with {len(self.hashes_sha1.keys())} hashes",
         )
         logger.log(
             "INFO",
             "Init",
-            "Malicious SHA256 Hashes initialized with %s hashes"
-            % len(self.hashes_sha256.keys()),
+            f"Malicious SHA256 Hashes initialized with {len(self.hashes_sha256.keys())} hashes",
         )
 
         # Hash based False Positives (all files in iocs that contain 'hash' and 'falsepositive')
@@ -338,8 +219,7 @@ class Loki:
         logger.log(
             "INFO",
             "Init",
-            "False Positive Hashes initialized with %s hashes"
-            % len(self.false_hashes.keys()),
+            f"False Positive Hashes initialized with {len(self.false_hashes.keys())} hashes",
         )
 
         # Compile Yara Rules
@@ -388,21 +268,18 @@ class Loki:
 
         # Check if path exists
         if not os.path.exists(path):
-            logger.log(
-                "ERROR", "FileScan", "None Existing Scanning Path %s ...  " % path
-            )
+            logger.log("ERROR", "FileScan", f"None Existing Scanning Path {path} ...  ")
             return
 
         # Startup
-        logger.log("INFO", "FileScan", "Scanning Path %s ...  " % path)
+        logger.log("INFO", "FileScan", f"Scanning Path {path} ...  ")
         # Platform specific excludes
-        for skip in self.startExcludes:
+        for skip in self.start_excludes:
             if path.startswith(skip):
                 logger.log(
                     "INFO",
                     "FileScan",
-                    "Skipping %s directory [fixed excludes] (try using --force or --alldrives)"
-                    % skip,
+                    f"Skipping {skip} directory [fixed excludes] (try using --force or --alldrives)",
                 )
                 return
 
@@ -430,13 +307,13 @@ class Loki:
                 completePath = os.path.join(root, dir).lower() + os.sep
 
                 # Platform specific excludes
-                for skip in self.startExcludes:
+                for skip in self.start_excludes:
                     if completePath.startswith(skip):
                         logger.log(
                             "INFO",
                             "FileScan",
-                            "Skipping %s directory [fixed excludes] "
-                            "(try using --force or --alldrives)" % skip,
+                            f"Skipping {skip} directory [fixed excludes] "
+                            "(try using --force or --alldrives)",
                         )
                         skipIt = True
 
@@ -465,43 +342,41 @@ class Loki:
                 total_score = 0
 
                 # Get the file and path
-                filePath = os.path.join(root, filename)
-                fpath = os.path.split(filePath)[0]
+                file_path = os.path.join(root, filename)
+                fpath = os.path.split(file_path)[0]
                 # Clean the values for YARA matching
                 # > due to errors when Unicode characters are passed to the match function as
                 #   external variables
-                filePathCleaned = fpath.encode("ascii", errors="replace")
-                fileNameCleaned = filename.encode("ascii", errors="replace")
+                file_path_cleaned = fpath.encode("ascii", errors="replace")
+                file_name_cleaned = filename.encode("ascii", errors="replace")
 
                 # Get Extension
-                extension = os.path.splitext(filePath)[1].lower()
+                extension = os.path.splitext(file_path)[1].lower()
 
                 # Skip marker
                 skipIt = False
 
                 # User defined excludes
-                for skip in self.fullExcludes:
-                    if skip.search(filePath):
-                        logger.log(
-                            "DEBUG", "FileScan", "Skipping element %s" % filePath
-                        )
+                for skip in self.full_excludes:
+                    if skip.search(file_path):
+                        logger.log("DEBUG", "FileScan", f"Skipping element {file_path}")
                         skipIt = True
 
                 # Linux directory skip
-                if os_platform == "linux":
+                if OS_PLATFORM == "linux":
                     # Skip paths that end with ..
                     for skip in self.LINUX_PATH_SKIPS_END:
                         if (
-                            filePath.endswith(skip)
+                            file_path.endswith(skip)
                             and self.LINUX_PATH_SKIPS_END[skip] == 0
                         ):
-                            logger.log("INFO", "FileScan", "Skipping %s element" % skip)
+                            logger.log("INFO", "FileScan", f"Skipping {skip} element")
                             self.LINUX_PATH_SKIPS_END[skip] = 1
                             skipIt = True
 
                     # File mode
                     try:
-                        mode = os.stat(filePath).st_mode
+                        mode = os.stat(file_path).st_mode
                         if (
                             stat.S_ISCHR(mode)
                             or stat.S_ISBLK(mode)
@@ -514,8 +389,7 @@ class Loki:
                         logger.log(
                             "DEBUG",
                             "FileScan",
-                            "Skipping element %s does not exist or is a broken symlink"
-                            % (filePath),
+                            f"Skipping element {file_path} does not exist or is a broken symlink",
                         )
                         continue
 
@@ -527,27 +401,27 @@ class Loki:
                 c += 1
 
                 if not args.noindicator:
-                    printProgress(c)
+                    loki_print_progress(c)
 
                 # Skip program directory
-                if self.app_path.lower() in filePath.lower():
+                if self.app_path.lower() in file_path.lower():
                     logger.log(
                         "DEBUG",
                         "FileScan",
-                        "Skipping file in program directory FILE: %s" % filePathCleaned,
+                        f"Skipping file in program directory FILE: {file_path_cleaned}",
                     )
                     continue
 
-                fileSize = os.stat(filePath).st_size
+                fileSize = os.stat(file_path).st_size
                 # print file_size
 
                 # File Name Checks -------------------------------------------------
                 for fioc in self.filename_iocs:
-                    match = fioc["regex"].search(filePath)
+                    match = fioc["regex"].search(file_path)
                     if match:
                         # Check for False Positive
                         if fioc["regex_fp"]:
-                            match_fp = fioc["regex_fp"].search(filePath)
+                            match_fp = fioc["regex_fp"].search(file_path)
                             if match_fp:
                                 continue
                         # Create Reason
@@ -566,8 +440,8 @@ class Loki:
                 hashString = ""
 
                 # Evaluate Type
-                fileType = get_file_type(
-                    filePath, self.filetype_magics, self.max_filetype_magics, logger
+                fileType = loki_get_file_type(
+                    file_path, self.filetype_magics, self.max_filetype_magics, logger
                 )
 
                 # Fast Scan Mode - non intense
@@ -581,7 +455,7 @@ class Loki:
                         logger.log(
                             "INFO",
                             "FileScan",
-                            "Skipping file due to fast scan mode: %s" % fileNameCleaned,
+                            f"Skipping file due to fast scan mode: {file_name_cleaned}",
                         )
                     do_intense_check = False
 
@@ -608,15 +482,13 @@ class Loki:
                     logger.log(
                         "INFO",
                         "FileScan",
-                        "Scanning %s TYPE: %s SIZE: %s"
-                        % (fileNameCleaned, fileType, fileSize),
+                        f"Scanning {file_name_cleaned} TYPE: {fileType} SIZE: {fileSize}",
                     )
                 elif args.printall:
                     logger.log(
                         "INFO",
                         "FileScan",
-                        "Checking %s TYPE: %s SIZE: %s"
-                        % (fileNameCleaned, fileType, fileSize),
+                        f"Checking {file_name_cleaned} TYPE: {fileType} SIZE: {fileSize}",
                     )
 
                 if print_filesize_info and args.printall:
@@ -625,18 +497,18 @@ class Loki:
                         "FileScan",
                         "Skipping file due to file size: %s TYPE: %s SIZE: %s "
                         "CURRENT SIZE LIMIT(kilobytes): %d"
-                        % (fileNameCleaned, fileType, fileSize, fileSizeLimit),
+                        % (file_name_cleaned, fileType, fileSize, fileSizeLimit),
                     )
 
                 # Hash Check -------------------------------------------------------
                 # Do the check
                 if do_intense_check:
-                    fileData = self.get_file_data(filePath)
+                    fileData = self.get_file_data(file_path)
 
                     # First bytes
                     firstBytesString = "%s / %s" % (
                         fileData[:20].hex(),
-                        removeNonAsciiDrop(fileData[:20]),
+                        loki_remove_non_ascii_drop(fileData[:20]),
                     )
 
                     # Hash Eval
@@ -647,7 +519,7 @@ class Loki:
                     sha1 = 0
                     sha256 = 0
 
-                    md5, sha1, sha256 = generateHashes(fileData)
+                    md5, sha1, sha256 = loki_generate_hashes(fileData)
                     md5_num = int(md5, 16)
                     sha1_num = int(sha1, 16)
                     sha256_num = int(sha256, 16)
@@ -669,7 +541,7 @@ class Loki:
                         logger.log(
                             "DEBUG",
                             "FileScan",
-                            "Skipping element %s excluded by hash" % (filePath),
+                            f"Skipping element {file_path} excluded by hash",
                         )
                         continue
 
@@ -697,7 +569,7 @@ class Loki:
                         matchLevel = "Suspicious"
 
                     # Hash string
-                    hashString = "MD5: %s SHA1: %s SHA256: %s" % (md5, sha1, sha256)
+                    hashString = f"MD5: {md5} SHA1: {sha1} SHA256: {sha256}"
 
                     if matchType:
                         reasons.append(
@@ -712,8 +584,7 @@ class Loki:
                             logger.log(
                                 "DEBUG",
                                 "FileScan",
-                                "Performing character analysis on file %s ... "
-                                % filePath,
+                                f"Performing character analysis on file {file_path} ... ",
                             )
                             message, score = self.script_stats_analysis(fileData)
                             if message:
@@ -728,7 +599,7 @@ class Loki:
                             "INFO",
                             "FileScan",
                             "Scanning memory dump file %s"
-                            % fileNameCleaned.decode("utf-8"),
+                            % file_name_cleaned.decode("utf-8"),
                         )
 
                     # Scan the read data
@@ -743,8 +614,8 @@ class Loki:
                         ) in self.scan_data(
                             fileData=fileData,
                             fileType=fileType,
-                            fileName=fileNameCleaned,
-                            filePath=filePathCleaned,
+                            fileName=file_name_cleaned,
+                            file_path=file_path_cleaned,
                             extension=extension,
                             md5=md5,  # legacy rule support
                         ):
@@ -767,20 +638,20 @@ class Loki:
                         logger.log(
                             "ERROR",
                             "FileScan",
-                            "Cannot YARA scan file: %s" % filePathCleaned,
+                            f"Cannot YARA scan file: {file_path_cleaned}",
                         )
 
                 # Info Line -----------------------------------------------------------------------
                 fileInfo = (
                     "FILE: %s SCORE: %s TYPE: %s SIZE: %s FIRST_BYTES: %s %s %s "
                     % (
-                        filePath,
+                        file_path,
                         total_score,
                         fileType,
                         fileSize,
                         firstBytesString,
                         hashString,
-                        getAgeString(filePath),
+                        loki_get_age_string(file_path),
                     )
                 )
 
@@ -812,7 +683,13 @@ class Loki:
                     sys.exit(1)
 
     def yara_externals(
-        self, dummy, fileName=b"-", filePath=b"-", extension=b"-", fileType="-", md5="-"
+        self,
+        dummy,
+        fileName=b"-",
+        file_path=b"-",
+        extension=b"-",
+        fileType="-",
+        md5="-",
     ):
         """
         yara externals
@@ -829,7 +706,7 @@ class Loki:
         else:
             return {
                 "filename": fileName,
-                "filepath": filePath,
+                "filepath": file_path,
                 "extension": extension,
                 "filetype": fileType,
                 "md5": md5,
@@ -841,7 +718,7 @@ class Loki:
         fileData,
         fileType="-",
         fileName=b"-",
-        filePath=b"-",
+        file_path=b"-",
         extension=b"-",
         md5="-",
     ):
@@ -855,7 +732,7 @@ class Loki:
                 EXTERNALS = self.yara_externals(
                     False,
                     fileName.decode("utf-8"),
-                    filePath.decode("utf-8"),
+                    file_path.decode("utf-8"),
                     extension,
                     fileType,
                     md5,
@@ -938,8 +815,7 @@ class Loki:
                 logger.log(
                     "DEBUG",
                     "ProcessScan",
-                    "Skipping Process PID: %s as it just exited and no longer exists"
-                    % (str(pid)),
+                    f"Skipping Process PID: {str(pid)} as it just exited and no longer exists",
                 )
                 continue
             owner = psutil.Process(process).username()
@@ -950,7 +826,7 @@ class Loki:
                 logger.log(
                     "WARNING",
                     "ProcessScan",
-                    "Process PID: %s NAME: %s STATUS: %s" % (str(pid), name, status),
+                    f"Process PID: {str(pid)} NAME: {name} STATUS: {status}",
                 )
                 continue
             path = psutil.Process(process).cwd()
@@ -963,7 +839,7 @@ class Loki:
             )
 
             # Print info -------------------------------------------------------
-            logger.log("INFO", "ProcessScan", "Process %s" % process_info)
+            logger.log("INFO", "ProcessScan", f"Process {process_info}")
 
             # Process Masquerading Detection -----------------------------------
 
@@ -1138,7 +1014,7 @@ class Loki:
             logger.log(
                 "INFO",
                 "ProcessScan",
-                "Process %s does not exist anymore or cannot be accessed" % str(pid),
+                f"Process {str(pid)} does not exist anymore or cannot be accessed",
             )
 
     def check_c2(self, remote_system):
@@ -1218,7 +1094,7 @@ class Loki:
 
                                 except Exception:
                                     logger.log(
-                                        "ERROR", "Init", "Cannot read line: %s" % line
+                                        "ERROR", "Init", f"Cannot read line: {line}"
                                     )
                                     if logger.debug:
                                         sys.exit(1)
@@ -1226,7 +1102,7 @@ class Loki:
                     logger.log("ERROR", "Init", "No such file or directory")
         except Exception:
             traceback.print_exc()
-            logger.log("ERROR", "Init", "Error reading Hash file: %s" % ioc_filename)
+            logger.log("ERROR", "Init", f"Error reading Hash file: {ioc_filename}")
 
     def initialize_filename_iocs(self, ioc_directory):
         """
@@ -1275,17 +1151,17 @@ class Loki:
                                     regex = line
 
                                 # Replace environment variables
-                                regex = replaceEnvVars(regex)
+                                regex = loki_replace_env_vars(regex)
 
                                 # OS specific transforms
-                                regex = transformOS(regex)
+                                regex = loki_transform_os(regex)
 
                                 # If false positive definition exists
                                 regex_fp_comp = None
                                 if "regex_fp" in locals():
                                     # Replacements
-                                    regex_fp = replaceEnvVars(regex_fp)
-                                    regex_fp = transformOS(regex_fp)
+                                    regex_fp = loki_replace_env_vars(regex_fp)
+                                    regex_fp = loki_transform_os(regex_fp)
                                     # String regex as key - value is compiled regex
                                     # of false positive values
                                     regex_fp_comp = re.compile(regex_fp)
@@ -1301,7 +1177,7 @@ class Loki:
 
                             except Exception:
                                 logger.log(
-                                    "ERROR", "Init", "Error reading line: %s" % line
+                                    "ERROR", "Init", f"Error reading line: {line}"
                                 )
                                 if logger.debug:
                                     traceback.print_exc()
@@ -1309,12 +1185,12 @@ class Loki:
 
         except Exception:
             if "ioc_filename" in locals():
-                logger.log("ERROR", "Init", "Error reading IOC file: %s" % ioc_filename)
+                logger.log("ERROR", "Init", f"Error reading IOC file: {ioc_filename}")
             else:
                 logger.log(
                     "ERROR",
                     "Init",
-                    "Error reading files from IOC folder: %s" % ioc_directory,
+                    f"Error reading files from IOC folder: {ioc_directory}",
                 )
                 logger.log(
                     "ERROR",
@@ -1380,7 +1256,7 @@ class Loki:
                                     externals=EXTERNALS,
                                 )
                                 logger.log(
-                                    "DEBUG", "Init", "Initializing Yara rule %s" % file
+                                    "DEBUG", "Init", f"Initializing Yara rule {file}"
                                 )
                                 rule_count += 1
                             except Exception:
@@ -1420,7 +1296,7 @@ class Loki:
                     source=yaraRules,
                     externals=EXTERNALS,
                 )
-                logger.log("INFO", "Init", "Initialized %d Yara rules" % rule_count)
+                logger.log("INFO", "Init", f"Initialized {rule_count} Yara rules")
             except Exception:
                 traceback.print_exc()
                 logger.log(
@@ -1486,9 +1362,7 @@ class Loki:
                             except Exception:
                                 if logger.debug:
                                     traceback.print_exc()
-                                logger.log(
-                                    "ERROR", "Init", "Cannot read line: %s" % line
-                                )
+                                logger.log("ERROR", "Init", f"Cannot read line: {line}")
 
                     # Debug
                     if logger.debug:
@@ -1518,7 +1392,7 @@ class Loki:
             if logger.debug:
                 traceback.print_exc()
                 sys.exit(1)
-            logger.log("ERROR", "Init", "Error reading Hash file: %s" % ioc_filename)
+            logger.log("ERROR", "Init", f"Error reading Hash file: {ioc_filename}")
 
     def initialize_filetype_magics(self, filetype_magics_file):
         """
@@ -1546,14 +1420,14 @@ class Loki:
                     self.filetype_magics[sig] = description
 
                 except Exception:
-                    logger.log("ERROR", "Init", "Cannot read line: %s" % line)
+                    logger.log("ERROR", "Init", f"Cannot read line: {line}")
 
         except Exception:
             if logger.debug:
                 traceback.print_exc()
                 sys.exit(1)
             logger.log(
-                "ERROR", "Init", "Error reading Hash file: %s" % filetype_magics_file
+                "ERROR", "Init", f"Error reading Hash file: {filetype_magics_file}"
             )
 
     def initialize_excludes(self, excludes_file):
@@ -1587,32 +1461,32 @@ class Loki:
                         regex = re.compile(line, re.IGNORECASE)
                         excludes.append(regex)
                 except Exception:
-                    logger.log("ERROR", "Init", "Cannot compile regex: %s" % line)
+                    logger.log("ERROR", "Init", f"Cannot compile regex: {line}")
 
-            self.fullExcludes = excludes
+            self.full_excludes = excludes
             self.excludes_hash = excludes_hash
 
         except Exception:
             if logger.debug:
                 traceback.print_exc()
             logger.log(
-                "NOTICE", "Init", "Error reading excludes file: %s" % excludes_file
+                "NOTICE", "Init", f"Error reading excludes file: {excludes_file}"
             )
 
-    def get_file_data(self, filePath):
+    def get_file_data(self, file_path):
         """
         get file data
         """
         fileData = b""
         try:
             # Read file complete
-            with open(filePath, "rb") as f:
+            with open(file_path, "rb") as f:
                 fileData = f.read()
         except Exception:
             if logger.debug:
                 traceback.print_exc()
             logger.log(
-                "DEBUG", "FileScan", "Cannot open file %s (access denied)" % filePath
+                "DEBUG", "FileScan", f"Cannot open file {file_path} (access denied)"
             )
         finally:
             return fileData
@@ -1660,7 +1534,7 @@ class Loki:
             anomaly_score += 40
         for ac, count in anomal_char_stats.iteritems():
             if (count / char_stats["alpha"]) > 0.05:
-                anomalies.append("symbol count of '%s' very high" % ac)
+                anomalies.append(f"symbol count of '{ac}' very high")
                 anomaly_score += 40
 
         # Generate message
@@ -1959,7 +1833,7 @@ def main():
         sys.exit(1)
 
     filename = "loki_%s_%s.log" % (
-        getHostname(os_platform),
+        os.uname().nodename,
         datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
     )
     if args.logfolder and args.logfile:
@@ -1998,7 +1872,6 @@ if __name__ == "__main__":
     logger = LokiLogger(
         args.nolog,
         args.logfile,
-        getHostname(os_platform),
         args.csv,
         args.silent,
         args.debug,
@@ -2027,7 +1900,7 @@ if __name__ == "__main__":
         "NOTICE",
         "Init",
         "Starting Loki Scan VERSION: {3} SYSTEM: {0} TIME: {1} PLATFORM: {2}".format(
-            getHostname(os_platform),
+            os.uname().nodename,
             get_syslog_timestamp(),
             platform_full,
             logger.version,
@@ -2053,7 +1926,7 @@ if __name__ == "__main__":
 
     # Scan Processes --------------------------------------------------
     resultProc = False
-    if not args.noprocscan and os_platform == "linux":
+    if not args.noprocscan and OS_PLATFORM == "linux":
         if isAdmin:
             loki.scan_processes_linux()
         else:
@@ -2180,7 +2053,7 @@ if __name__ == "__main__":
                             "Finished LOKI Scan CLIENT: %s SYSTEM: %s TIME: %s"
                             % (
                                 clientid,
-                                getHostname(os_platform),
+                                os.uname().nodename,
                                 get_syslog_timestamp(),
                             ),
                         )
@@ -2243,5 +2116,5 @@ if __name__ == "__main__":
         "NOTICE",
         "Results",
         "Finished LOKI Scan SYSTEM: %s TIME: %s"
-        % (getHostname(os_platform), get_syslog_timestamp()),
+        % (os.uname().nodename, get_syslog_timestamp()),
     )

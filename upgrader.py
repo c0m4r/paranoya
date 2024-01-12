@@ -37,7 +37,7 @@ from typing import IO
 from zipfile import ZipFile
 
 # Loki modules
-from lib.venv import venv_check
+from lib.lokivenv import venv_check
 
 # venv before loading custom modules
 venv_check(__file__)

@@ -28,42 +28,50 @@ import sys
 import time
 import traceback
 
+
 # Helper Functions -------------------------------------------------------------
 
 
-def generateHashes(filedata: bytes) -> tuple[str, str, str]:
+def loki_generate_hashes(filedata: bytes) -> tuple[str, str, str]:
+    """
+    generate hashes
+    """
     try:
-        md5 = hashlib.md5()
-        sha1 = hashlib.sha1()
-        sha256 = hashlib.sha256()
+        md5 = hashlib.md5()  # nosec
+        sha1 = hashlib.sha1()  # nosec
+        sha256 = hashlib.sha256()  # nosec
 
-        md5.update(filedata)
-        sha1.update(filedata)
-        sha256.update(filedata)
+        md5.update(filedata)  # nosec
+        sha1.update(filedata)  # nosec
+        sha256.update(filedata)  # nosec
 
-        return md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest()
+        return md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest()  # nosec
     except Exception:
         traceback.print_exc()
         return "0", "0", "0"
 
 
-def getExcludedMountpoints():
+def loki_get_excluded_mountpoints() -> list[str]:
+    """
+    get excluded mountpoints
+    """
     excludes = []
     try:
-        mtab = open("/etc/mtab", "r")
-        for mpoint in mtab:
-            options = mpoint.split(" ")
-            if not options[0].startswith("/dev/"):
-                if not options[1] == "/":
-                    excludes.append(options[1])
+        with open("/etc/mtab", "r", encoding="utf-8") as mtab:
+            for mpoint in mtab:
+                options = mpoint.split(" ")
+                if not options[0].startswith("/dev/"):
+                    if not options[1] == "/":
+                        excludes.append(options[1])
     except Exception:
         print("Error while reading /etc/mtab")
-    finally:
-        mtab.close()
     return excludes
 
 
-def printProgress(i):
+def loki_print_progress(i: int) -> None:
+    """
+    print progress indicator
+    """
     if (i % 4) == 0:
         sys.stdout.write("\b/")
     elif (i % 4) == 1:
@@ -75,13 +83,19 @@ def printProgress(i):
     sys.stdout.flush()
 
 
-def transformOS(regex):
+def loki_transform_os(regex: str) -> str:
+    """
+    transform os specific characters
+    """
     regex = regex.replace(r"\\", r"/")
     regex = regex.replace(r"C:", "")
     return regex
 
 
-def replaceEnvVars(path):
+def loki_replace_env_vars(path: str) -> str:
+    """
+    replace os specific env vars
+    """
     # Setting new path to old path for default
     new_path = path
 
@@ -102,21 +116,29 @@ def replaceEnvVars(path):
         new_path = path.replace("\\SystemRoot", os.environ["SystemRoot"])
 
     if path[:8].lower() == "system32":
-        new_path = path.replace("system32", "%s\\System32" % os.environ["SystemRoot"])
+        envsysroot = os.environ["SystemRoot"]
+        new_path = path.replace("system32", f"{envsysroot}\\System32")
 
     return new_path
 
 
-def get_file_type(filePath, filetype_sigs, max_filetype_magics, logger):
+def loki_get_file_type(
+    file_path: str, filetype_sigs, max_filetype_magics, logger
+) -> str:
+    """
+    get file type
+    """
     try:
         # Reading bytes from file
-        res_full = open(filePath, "rb", os.O_RDONLY).read(max_filetype_magics)
-        # Checking sigs
-        for sig in filetype_sigs:
-            bytes_to_read = int(len(str(sig)) / 2)
-            res = res_full[:bytes_to_read]
-            if res == bytes.fromhex(sig):
-                return filetype_sigs[sig]
+        with open(file_path, "rb", os.O_RDONLY) as f:
+            # Reading bytes from file
+            res_full = f.read(max_filetype_magics)
+            # Checking sigs
+            for sig in filetype_sigs:
+                bytes_to_read = int(len(str(sig)) / 2)
+                res = res_full[:bytes_to_read]
+                if res == bytes.fromhex(sig):
+                    return str(filetype_sigs[sig])
         return "UNKNOWN"
     except Exception:
         if logger.debug:
@@ -124,37 +146,26 @@ def get_file_type(filePath, filetype_sigs, max_filetype_magics, logger):
         return "UNKNOWN"
 
 
-def removeNonAscii(s, stripit=False):
-    nonascii = "error"
-    try:
-        try:
-            printable = set(string.printable)
-            filtered_string = filter(lambda x: x in printable, s.decode("utf-8"))
-            nonascii = "".join(filtered_string)
-        except Exception:
-            traceback.print_exc()
-            nonascii = s.hex()
-    except Exception:
-        traceback.print_exc()
-        pass
-    return nonascii
-
-
-def removeNonAsciiDrop(s):
+def loki_remove_non_ascii_drop(s) -> str:
+    """
+    remove non-ascii
+    """
     nonascii = "error"
     try:
         # Generate a new string without disturbing characters
         printable = set(string.printable)
-        nonascii = filter(lambda x: x in printable, s)
+        nonascii = str(filter(lambda x: x in printable, s))
     except Exception:
         traceback.print_exc()
-        pass
     return nonascii
 
 
-def getAge(filePath):
+def loki_get_age(file_path: str) -> tuple[float, float, float]:
+    """
+    get age
+    """
     try:
-        stats = os.stat(filePath)
+        stats = os.stat(file_path)
 
         # Created
         ctime = stats.st_ctime
@@ -171,29 +182,20 @@ def getAge(filePath):
     return (ctime, mtime, atime)
 
 
-def getAgeString(filePath):
-    (ctime, mtime, atime) = getAge(filePath)
+def loki_get_age_string(file_path: str) -> str:
+    """
+    get age string
+    """
+    (ctime, mtime, atime) = loki_get_age(file_path)
     timestring = ""
     try:
-        timestring = "CREATED: %s MODIFIED: %s ACCESSED: %s" % (
-            time.ctime(ctime),
-            time.ctime(mtime),
-            time.ctime(atime),
+        timestring = (
+            f"CREATED: {time.ctime(ctime)} "
+            f"MODIFIED: {time.ctime(mtime)} "
+            f"ACCESSED: {time.ctime(atime)}"
         )
     except Exception:
         timestring = (
             "CREATED: not_available MODIFIED: not_available ACCESSED: not_available"
         )
     return timestring
-
-
-def getHostname(os_platform):
-    """
-    Generate and return a hostname
-    :return:
-    """
-    # Computername
-    if os_platform == "linux" or os_platform == "macos":
-        return os.uname()[1]
-    else:
-        return os.environ["COMPUTERNAME"]

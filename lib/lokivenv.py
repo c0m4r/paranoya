@@ -31,8 +31,7 @@ def venv_setup(loki_venv_site: str) -> bool:
     if os.path.exists(loki_venv_site):
         sys.path.insert(0, loki_venv_site)
         return True
-    else:
-        return False
+    return False
 
 
 # venv detection

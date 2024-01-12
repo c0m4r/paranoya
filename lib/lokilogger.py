@@ -22,13 +22,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import codecs
 import datetime
+import os
 import re
 import sys
 import traceback
 
-from os import get_terminal_size
-
-from lib.venv import venv_check
+from lib.lokivenv import venv_check
 
 # venv before loading custom modules
 venv_check("lib")
@@ -58,7 +57,6 @@ class LokiLogger:
     no_log_file = False
     log_file = "loki.log"
     csv = False
-    hostname = "NOTSET"
     alerts = 0
     warnings = 0
     notices = 0
@@ -71,7 +69,6 @@ class LokiLogger:
         self,
         no_log_file: bool,
         log_file: str,
-        hostname: str,
         csv: bool,
         silent: bool,
         debug: bool,
@@ -79,7 +76,6 @@ class LokiLogger:
         self.version = __version__
         self.no_log_file = no_log_file
         self.log_file = log_file
-        self.hostname = hostname
         self.csv = csv
         self.silent = silent
         self.debug = debug
@@ -166,7 +162,7 @@ class LokiLogger:
                 self.log_format(
                     "{0},{1},{2},{3}",
                     get_syslog_timestamp(),
-                    self.hostname,
+                    os.uname().nodename,
                     mes_type,
                     message,
                 )
@@ -226,7 +222,7 @@ class LokiLogger:
                         self.log_format(
                             "{0},{1},{2},{3},{4}{5}",
                             get_syslog_timestamp(),
-                            self.hostname,
+                            os.uname().nodename,
                             mes_type,
                             module,
                             message,
@@ -238,7 +234,7 @@ class LokiLogger:
                         self.log_format(
                             "{0} {1} LOKI: {2}: MODULE: {3} MESSAGE: {4}{5}",
                             get_syslog_timestamp(),
-                            self.hostname,
+                            os.uname().nodename,
                             mes_type.title(),
                             module,
                             message,
@@ -256,7 +252,7 @@ class LokiLogger:
         print welcome
         """
         try:
-            termsize = get_terminal_size().columns
+            termsize = os.get_terminal_size().columns
         except Exception:
             termsize = 80
         print(str(Style.BRIGHT))
