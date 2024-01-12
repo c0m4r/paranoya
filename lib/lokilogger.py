@@ -247,6 +247,49 @@ class LokiLogger:
                 sys.exit(1)
             print(f"Cannot print line to log file {self.log_file}")
 
+    def print_results(self) -> None:
+        """
+        print results
+        """
+        # Result
+        self.log(
+            "NOTICE",
+            "Results",
+            "Results: {0} alerts, {1} warnings, {2} notices".format(
+                self.alerts, self.warnings, self.notices
+            ),
+        )
+        if self.alerts:
+            self.log("RESULT", "Results", "Indicators detected!")
+            self.log(
+                "RESULT",
+                "Results",
+                "Loki recommends checking the elements on virustotal.com "
+                "or Google and triage with a professional tool like "
+                "THOR https://nextron-systems.com/thor in corporate networks.",
+            )
+        elif self.warnings:
+            self.log("RESULT", "Results", "Suspicious objects detected!")
+            self.log(
+                "RESULT",
+                "Results",
+                "Loki recommends a deeper analysis of the suspicious objects.",
+            )
+        else:
+            self.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN.")
+
+        self.log(
+            "INFO",
+            "Results",
+            "Please report false positives via https://github.com/Neo23x0/signature-base",
+        )
+        self.log(
+            "NOTICE",
+            "Results",
+            "Finished LOKI Scan SYSTEM: %s TIME: %s"
+            % (os.uname().nodename, get_syslog_timestamp()),
+        )
+
     def print_welcome(self) -> None:
         """
         print welcome
