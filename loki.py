@@ -21,7 +21,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import argparse
 import codecs
 import datetime
 import ipaddress
@@ -40,6 +39,7 @@ from collections import Counter
 from subprocess import Popen, PIPE, run
 
 # LOKI modules
+from lib.lokiargs import parser
 from lib.lokilogger import LokiLogger, get_syslog_timestamp
 from lib.helpers import (
     loki_generate_hashes,
@@ -234,14 +234,17 @@ class Loki:
         )
 
     def file_list_gen(self, path):
+        """
+        file list gen
+        """
         matches = []
-        iter = 0
+        flg_iter = 0
         logger.log("INFO", "Init", "Processing files to scan, this might take a while.")
-        for root, dirnames, filenames in os.walk(path, followlinks=False):
+        for root, _, filenames in os.walk(path, followlinks=False):
             for filename in filenames:
                 matches.append(os.path.join(root, filename))
-                iter += 1
-                if iter > self.bar_iter_max:
+                flg_iter += 1
+                if flg_iter > self.bar_iter_max:
                     logger.log(
                         "INFO",
                         "Init",
@@ -285,26 +288,26 @@ class Loki:
 
         if args.progress and not args.silent and not args.noindicator:
             if files_all_len <= self.bar_iter_max:
-                bar = progressbar.ProgressBar(
+                progress_bar = progressbar.ProgressBar(
                     max_value=files_all_len, redirect_stdout=True
                 )
             else:
-                bar = progressbar.ProgressBar(
+                progress_bar = progressbar.ProgressBar(
                     max_value=progressbar.UnknownLength, redirect_stdout=True
                 )
         else:
-            bar = None
+            progress_bar = None
 
         for root, directories, files in os.walk(
             path, onerror=walk_error, followlinks=False
         ):
             # Skip paths that start with ..
             new_directories = []
-            for dir in directories:
+            for dirname in directories:
                 skip_it = False
 
                 # Generate a complete path for comparisons
-                complete_path = os.path.join(root, dir).lower() + os.sep
+                complete_path = os.path.join(root, dirname).lower() + os.sep
 
                 # Platform specific excludes
                 for skip in self.start_excludes:
@@ -318,12 +321,12 @@ class Loki:
                         skip_it = True
 
                 if not skip_it:
-                    new_directories.append(dir)
+                    new_directories.append(dirname)
             directories[:] = new_directories
 
-            loki.scan_path_files(root, directories, files, bar)
+            loki.scan_path_files(root, directories, files, progress_bar)
 
-    def scan_path_files(self, root, directories, files, bar):
+    def scan_path_files(self, root, directories, files, progress_bar=None):
         """
         scan path files
         """
@@ -335,7 +338,7 @@ class Loki:
             try:
                 if args.progress and not args.silent and not args.noindicator:
                     self.bar_iter += 1
-                    bar.update(self.bar_iter)
+                    progress_bar.update(self.bar_iter)
                 # Findings
                 reasons = []
                 # Total Score
@@ -1657,172 +1660,8 @@ def sigterm_handler(signal_name, frame):
 
 def main():
     """
-    Argument parsing function
-    :return:
+    main
     """
-
-    # Parse Arguments
-    parser = argparse.ArgumentParser(description="Loki - Simple IOC Scanner")
-    parser.add_argument("-p", help="Path to scan", metavar="path", default="/")
-    parser.add_argument(
-        "-s",
-        help="Maximum file size to check in KB (default 5000 KB)",
-        metavar="kilobyte",
-        default=5000,
-    )
-    parser.add_argument("-l", "--logfile", default="")
-    parser.add_argument("-a", help="Alert score", metavar="alert-level", default=100)
-    parser.add_argument("-w", help="Warning score", metavar="warning-level", default=60)
-    parser.add_argument("-n", help="Notice score", metavar="notice-level", default=40)
-    parser.add_argument(
-        "-d", help="Run as a daemon", action="store_true", default=False
-    )
-    parser.add_argument(
-        "--pidfile", help="Pid file path (default: loki.pid)", default="loki.pid"
-    )
-    parser.add_argument(
-        "--listen-host",
-        help="Listen host for daemon mode (default: localhost)",
-        default="localhost",
-    )
-    parser.add_argument(
-        "--listen-port",
-        help="Listen port for daemon mode (default: 1337)",
-        type=int,
-        default=1337,
-    )
-    parser.add_argument("--auth", help="Auth key, only in daemon mode", default="")
-    parser.add_argument(
-        "--disable-yara-files",
-        help="Comma separated list of yara files to disable",
-        default="",
-    )
-    parser.add_argument(
-        "--alldrives",
-        action="store_true",
-        help="Scan all drives (including network drives and removable media)",
-        default=False,
-    )
-    parser.add_argument(
-        "--printall",
-        action="store_true",
-        help="Print all files that are scanned",
-        default=False,
-    )
-    parser.add_argument(
-        "--allreasons",
-        action="store_true",
-        help="Print all reasons that caused the score",
-        default=False,
-    )
-    parser.add_argument(
-        "--noprocscan", action="store_true", help="Skip the process scan", default=False
-    )
-    parser.add_argument(
-        "--nofilescan", action="store_true", help="Skip the file scan", default=False
-    )
-    parser.add_argument(
-        "--scriptanalysis",
-        action="store_true",
-        help="Statistical analysis for scripts to detect obfuscated code (beta)",
-        default=False,
-    )
-    parser.add_argument(
-        "--rootkit", action="store_true", help="Skip the rootkit check", default=False
-    )
-    parser.add_argument(
-        "--noindicator",
-        action="store_true",
-        help="Do not show a progress indicator",
-        default=False,
-    )
-    parser.add_argument(
-        "--dontwait", action="store_true", help="Do not wait on exit", default=False
-    )
-    parser.add_argument(
-        "--intense",
-        action="store_true",
-        help="Intense scan mode (also scan unknown file types and all extensions)",
-        default=False,
-    )
-    parser.add_argument(
-        "--csv",
-        action="store_true",
-        help="Write CSV log format to STDOUT (machine processing)",
-        default=False,
-    )
-    parser.add_argument(
-        "--silent",
-        action="store_true",
-        help="Only print warnings or alerts",
-        default=False,
-    )
-    parser.add_argument(
-        "--nolog",
-        action="store_true",
-        help="Don't write a local log file",
-        default=False,
-    )
-    parser.add_argument(
-        "--update",
-        action="store_true",
-        default=False,
-        help='Update the signatures from the "signature-base" sub repository',
-    )
-    parser.add_argument(
-        "--debug", action="store_true", default=False, help="Debug output"
-    )
-    parser.add_argument(
-        "--maxworkingset",
-        type=int,
-        default=200,
-        help="Maximum working set size of processes to scan (in MB, default 100 MB)",
-    )
-    parser.add_argument(
-        "--logfolder",
-        help="Folder to use for logging when log file is not specified",
-        metavar="log-folder",
-        default="",
-    )
-    parser.add_argument(
-        "--python",
-        action="store",
-        help="Override default python path",
-        default="python",
-    )
-    parser.add_argument(
-        "--nolisten",
-        action="store_true",
-        help="Dot not show listening connections",
-        default=False,
-    )
-    parser.add_argument(
-        "--excludeprocess",
-        action="append",
-        help="Specify an executable name to exclude from scans,"
-        " can be used multiple times",
-        default=[],
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force the scan on a certain folder "
-        "(even if excluded with hard exclude in LOKI's code",
-        default=False,
-    )
-    parser.add_argument(
-        "--version",
-        action="store_true",
-        help="Shows welcome text and version of loki, then exit",
-        default=False,
-    )
-    parser.add_argument(
-        "--progress",
-        action="store_true",
-        help="Show a progress bar (experimental)",
-        default=False,
-    )
-
     args = parser.parse_args()
 
     if args.nolog and (args.logfile or args.logfolder):
@@ -2077,41 +1916,4 @@ if __name__ == "__main__":
         else:
             loki.scan_path(defaultPath)
 
-    # Result
-    logger.log(
-        "NOTICE",
-        "Results",
-        "Results: {0} alerts, {1} warnings, {2} notices".format(
-            logger.alerts, logger.warnings, logger.notices
-        ),
-    )
-    if logger.alerts:
-        logger.log("RESULT", "Results", "Indicators detected!")
-        logger.log(
-            "RESULT",
-            "Results",
-            "Loki recommends checking the elements on virustotal.com "
-            "or Google and triage with a professional tool like "
-            "THOR https://nextron-systems.com/thor in corporate networks.",
-        )
-    elif logger.warnings:
-        logger.log("RESULT", "Results", "Suspicious objects detected!")
-        logger.log(
-            "RESULT",
-            "Results",
-            "Loki recommends a deeper analysis of the suspicious objects.",
-        )
-    else:
-        logger.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN.")
-
-    logger.log(
-        "INFO",
-        "Results",
-        "Please report false positives via https://github.com/Neo23x0/signature-base",
-    )
-    logger.log(
-        "NOTICE",
-        "Results",
-        "Finished LOKI Scan SYSTEM: %s TIME: %s"
-        % (os.uname().nodename, get_syslog_timestamp()),
-    )
+    logger.print_results()
