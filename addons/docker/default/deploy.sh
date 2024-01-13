@@ -1,5 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
+# Look for docker compose
 if docker compose version 2> /dev/null ; then
     DOCKER_COMPOSE="docker compose"
 elif docker-compose version 2> /dev/null ; then
@@ -8,6 +9,11 @@ else
     echo "Docker compose not found :("
     exit 1
 fi
+
+# Is docker running?
+set -e
+${DOCKER_COMPOSE} ps > /dev/null
+set +e
 
 if [ ! "$(${DOCKER_COMPOSE} ls --format json)" == "[]" ]; then
     echo -e "Already deployed.\n
