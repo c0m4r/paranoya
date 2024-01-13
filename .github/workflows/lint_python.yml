@@ -22,7 +22,7 @@ jobs:
       - run: |
           wget https://raw.githubusercontent.com/c0m4r/okrutnik/main/okrutnik.sh
           chmod +x okrutnik.sh
-          ./okrutnik.sh --install
+          ./okrutnik.sh --install -r requirements.txt
       - run: ./okrutnik.sh --ignore lib/*.py || true
       - run: ./okrutnik.sh upgrader.py
       - run: ./okrutnik.sh client.py
