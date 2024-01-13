@@ -127,7 +127,7 @@ class Loki:
             logger.log(
                 "NOTICE",
                 "Init",
-                "The 'signature-base' subdirectory doesn't exist or is empty. "
+                f"The 'signature-base' subdirectory doesn't exist or is empty. "
                 "Trying to retrieve the signature database automatically.",
             )
             update_loki(sigs_only=True)
@@ -160,12 +160,12 @@ class Loki:
 
         # Set IOC path
         self.ioc_path = os.path.join(
-            self.app_path, "signature-base/iocs/".replace("/", os.sep)
+            self.app_path, f"signature-base/iocs/".replace("/", os.sep)
         )
 
         # Yara rule directories
         self.yara_rule_directories.append(
-            os.path.join(self.app_path, "signature-base/yara".replace("/", os.sep))
+            os.path.join(self.app_path, args.custom.replace("/", os.sep))
         )
         self.yara_rule_directories.append(
             os.path.join(self.app_path, "signature-base/iocs/yara".replace("/", os.sep))
@@ -1302,8 +1302,6 @@ class Loki:
                                     % (file, sys.exc_info()[1]),
                                 )
                                 traceback.print_exc()
-                                if logger.debug:
-                                    sys.exit(1)
                                 continue
 
                             # Add the rule

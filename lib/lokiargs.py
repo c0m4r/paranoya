@@ -167,3 +167,9 @@ parser.add_argument(
     help="Force Loki to follow symlinks (be aware: may lead to RAM overflow)",
     default=False,
 )
+parser.add_argument(
+    "--custom",
+    action="store",
+    help="Custom yara ruleset dir, f.e. signature-custom/yara/name (default: signature-base/yara)",
+    default="signature-base/yara",
+)

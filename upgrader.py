@@ -22,8 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import argparse
 import glob
+import hashlib
 import os
 import platform
+import re
 import sys
 
 from io import BytesIO
@@ -37,7 +39,7 @@ from typing import IO
 from zipfile import ZipFile
 
 # Loki modules
-from lib.lokivenv import venv_check
+from lib.venv import venv_check
 
 # venv before loading custom modules
 venv_check(__file__)
@@ -106,7 +108,7 @@ def needs_update(sig_url: str) -> bool:
             + "/commits/"
             + branch
         )
-        response_info = requests.get(url=url, timeout=5)
+        response_info = requests.get(url=url, timeout=30)
         j = response_info.json()
         sha = j["sha"]
         cache = "_".join(path) + ".cache"
@@ -134,6 +136,21 @@ class LOKIUpdater:
         "https://github.com/Neo23x0/signature-base/archive/master.zip",
         "https://github.com/reversinglabs/reversinglabs-yara-rules/archive/develop.zip",
     ]
+
+    UPDATE_URL_SIGS_STANDALONE: dict[str, dict[str, str]] = {
+        "elastic": {
+            "sig_url": "https://github.com/elastic/protections-artifacts/archive/master.zip",
+        },
+        "Yara-Rules": {
+            "sig_url": "https://github.com/Yara-Rules/rules/archive/master.zip",
+        },
+        "PhishingKit": {
+            "sig_url": "https://github.com/t4d/PhishingKit-Yara-Rules/archive/master.zip",
+        },
+        "Yara Forge": {
+            "sig_url": "https://github.com/YARAHQ/yara-forge/releases/latest/download/yara-forge-rules-full.zip",
+        },
+    }
 
     UPDATE_URL_LOKI: str = (
         "https://api.github.com/repos/c0m4r/Loki-daemonized/releases/latest"
@@ -180,7 +197,7 @@ class LOKIUpdater:
         # Downloading current repository
         try:
             log("INFO", "Upgrader", f"Downloading {sig_url} ...")
-            return requests.get(url=sig_url, timeout=5)
+            return requests.get(url=sig_url, timeout=30)
         except Exception:
             if self.debug:
                 trace()
@@ -284,11 +301,50 @@ class LOKIUpdater:
             else:
                 log("INFO", "Upgrader", f"{sig_url} is up to date.")
 
+    def update_standalone_signatures(self, force: bool) -> None:
+        """
+        update standalone signatures
+        """
+        out_dir = "signature-custom/yara"
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        for key, val in self.UPDATE_URL_SIGS_STANDALONE.items():
+            sig_name = key
+            sig_url = val["sig_url"]
+
+            sig_url_hash = hashlib.md5(sig_url.encode("utf-8")).hexdigest()  # nosec
+            sig_name_strip = re.sub("[^A-Za-z0-9]+", "", sig_name)
+            cache_file_name = f"_{sig_name_strip}_{sig_url_hash}.cache"
+
+            if not os.path.exists(cache_file_name) or force:
+                log(
+                    "INFO",
+                    "Upgrader",
+                    f"Extracting {sig_name} from {sig_url} to {out_dir}",
+                )
+
+                with ZipFile(
+                    BytesIO(
+                        requests.get(sig_url, allow_redirects=True, timeout=30).content
+                    )
+                ) as zip_update:
+                    for zip_file_path in zip_update.namelist():
+                        if zip_file_path.endswith((".yar", ".yara")):
+                            zip_update.extract(zip_file_path, out_dir)
+
+                with open(
+                    cache_file_name, "w", encoding="utf-8"
+                ) as cache_file:
+                    cache_file.close()
+            else:
+                log("INFO", "Upgrader", f"{cache_file_name} exists, skipping {sig_url}")
+
     def get_loki_zip_file_url(self) -> str:
         """
         Get latest Loki zipfile download url from github api
         """
-        response_info = requests.get(url=self.UPDATE_URL_LOKI, timeout=5)
+        response_info = requests.get(url=self.UPDATE_URL_LOKI, timeout=30)
         data = response_info.json()
         if "zipball_url" in data:
             return str(data["zipball_url"])
@@ -340,7 +396,7 @@ class LOKIUpdater:
                 sys.exit(1)
             else:
                 log("INFO", "Upgrader", f"Downloading latest release {zip_url} ...")
-                rq = requests.get(url=zip_url, timeout=5)
+                rq = requests.get(url=zip_url, timeout=30)
                 return rq
         except Exception:
             if self.debug:
@@ -482,6 +538,7 @@ if __name__ == "__main__":
     if not args.progonly:
         log("INFO", "Upgrader", "Updating Signatures ...")
         updater.update_signatures(args.force, args.debug)
+        updater.update_standalone_signatures(args.force)
 
     log("INFO", "Upgrader", "Update complete")
 
