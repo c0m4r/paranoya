@@ -321,6 +321,173 @@ class Loki:
 
             loki.scan_path_files(root, directories, files, progress_bar)
 
+    def perform_intense_check(
+        self,
+        file_path,
+        file_type,
+        file_name_cleaned,
+        file_path_cleaned,
+        extension,
+        reasons,
+        total_score,
+    ):
+        """
+        Perform intense check
+        """
+        # Hash Check -------------------------------------------------------
+        # Do the check
+        file_data = self.get_file_data(file_path)
+
+        # First bytes
+        first_bytes_string = "%s / %s" % (
+            file_data[:20].hex(),
+            loki_remove_non_ascii_drop(file_data[:20]),
+        )
+
+        # Hash Eval
+        match_type = None
+        match_desc = None
+        match_hash = None
+        md5 = 0
+        sha1 = 0
+        sha256 = 0
+
+        md5, sha1, sha256 = loki_generate_hashes(file_data)
+        md5_num = int(md5, 16)
+        sha1_num = int(sha1, 16)
+        sha256_num = int(sha256, 16)
+
+        # False Positive Hash
+        if (
+            md5_num in self.false_hashes.keys()
+            or sha1_num in self.false_hashes.keys()
+            or sha256_num in self.false_hashes.keys()
+        ):
+            return False, None, None, None, None, None
+
+        # Skip exclude hash
+        if (
+            md5 in self.excludes_hash
+            or sha1 in self.excludes_hash
+            or sha256 in self.excludes_hash
+        ):
+            logger.log(
+                "DEBUG",
+                "FileScan",
+                f"Skipping element {file_path} excluded by hash",
+            )
+            return False, None, None, None, None, None
+
+        # Malware Hash
+        match_score = 100
+        match_level = "Malware"
+        if ioc_contains(self.hashes_md5_list, md5_num):
+            match_type = "MD5"
+            match_desc = self.hashes_md5[md5_num]
+            match_hash = md5
+            match_score = self.hashes_scores[md5_num]
+        if ioc_contains(self.hashes_sha1_list, sha1_num):
+            match_type = "SHA1"
+            match_desc = self.hashes_sha1[sha1_num]
+            match_hash = sha1
+            match_score = self.hashes_scores[sha1_num]
+        if ioc_contains(self.hashes_sha256_list, sha256_num):
+            match_type = "SHA256"
+            match_desc = self.hashes_sha256[sha256_num]
+            match_hash = sha256
+            match_score = self.hashes_scores[sha256_num]
+
+        # If score is low change the description
+        if match_score < 80:
+            match_level = "Suspicious"
+
+        # Hash string
+        hash_string = f"MD5: {md5} SHA1: {sha1} SHA256: {sha256}"
+
+        if match_type:
+            reasons.append(
+                "%s Hash TYPE: %s HASH: %s SUBSCORE: %d DESC: %s"
+                % (
+                    match_level,
+                    match_type,
+                    match_hash,
+                    match_score,
+                    match_desc,
+                )
+            )
+            total_score += match_score
+
+        # Script Anomalies Check
+        if args.scriptanalysis:
+            if extension in SCRIPT_EXTENSIONS or type in SCRIPT_TYPES:
+                logger.log(
+                    "DEBUG",
+                    "FileScan",
+                    f"Performing character analysis on file {file_path} ... ",
+                )
+                message, score = self.script_stats_analysis(file_data)
+                if message:
+                    reasons.append("%s SCORE: %s" % (message, score))
+                    total_score += score
+
+        # Yara Check -------------------------------------------------------
+
+        # Memory Dump Scan
+        if file_type == "MDMP":
+            logger.log(
+                "INFO",
+                "FileScan",
+                "Scanning memory dump file %s" % file_name_cleaned.decode("utf-8"),
+            )
+
+        # Scan the read data
+        try:
+            for (
+                score,
+                rule,
+                description,
+                reference,
+                matched_strings,
+                author,
+            ) in self.scan_data(
+                file_data=file_data,
+                file_type=file_type,
+                file_name=file_name_cleaned,
+                file_path=file_path_cleaned,
+                extension=extension,
+                md5=md5,  # legacy rule support
+            ):
+                # Message
+                message = (
+                    "Yara Rule MATCH: %s SUBSCORE: %s "
+                    "DESCRIPTION: %s REF: %s AUTHOR: %s"
+                    % (rule, score, description, reference, author)
+                )
+                # Matches
+                if len(matched_strings) > 0:
+                    message += " MATCHES: %s" % ", ".join(matched_strings)
+
+                total_score += score
+                reasons.append(message)
+
+            return (
+                True,
+                file_data,
+                total_score,
+                first_bytes_string,
+                hash_string,
+                reasons,
+            )
+
+        except Exception:
+            if logger.debug:
+                traceback.print_exc()
+            logger.log(
+                "ERROR",
+                "FileScan",
+                f"Cannot YARA scan file: {file_path_cleaned}",
+            )
+
     def scan_path_files(self, root, directories, files, progress_bar=None):
         """
         scan path files
@@ -486,152 +653,26 @@ class Loki:
                         % (file_name_cleaned, file_type, file_size, file_size_limit),
                     )
 
-                # Hash Check -------------------------------------------------------
-                # Do the check
                 if do_intense_check:
-                    file_data = self.get_file_data(file_path)
-
-                    # First bytes
-                    first_bytes_string = "%s / %s" % (
-                        file_data[:20].hex(),
-                        loki_remove_non_ascii_drop(file_data[:20]),
+                    (
+                        proceed,
+                        file_data,
+                        total_score,
+                        first_bytes_string,
+                        hash_string,
+                        reasons,
+                    ) = self.perform_intense_check(
+                        file_path,
+                        file_type,
+                        file_name_cleaned,
+                        file_path_cleaned,
+                        extension,
+                        reasons,
+                        total_score,
                     )
 
-                    # Hash Eval
-                    match_type = None
-                    match_desc = None
-                    match_hash = None
-                    md5 = 0
-                    sha1 = 0
-                    sha256 = 0
-
-                    md5, sha1, sha256 = loki_generate_hashes(file_data)
-                    md5_num = int(md5, 16)
-                    sha1_num = int(sha1, 16)
-                    sha256_num = int(sha256, 16)
-
-                    # False Positive Hash
-                    if (
-                        md5_num in self.false_hashes.keys()
-                        or sha1_num in self.false_hashes.keys()
-                        or sha256_num in self.false_hashes.keys()
-                    ):
+                    if not proceed:
                         continue
-
-                    # Skip exclude hash
-                    if (
-                        md5 in self.excludes_hash
-                        or sha1 in self.excludes_hash
-                        or sha256 in self.excludes_hash
-                    ):
-                        logger.log(
-                            "DEBUG",
-                            "FileScan",
-                            f"Skipping element {file_path} excluded by hash",
-                        )
-                        continue
-
-                    # Malware Hash
-                    match_score = 100
-                    match_level = "Malware"
-                    if ioc_contains(self.hashes_md5_list, md5_num):
-                        match_type = "MD5"
-                        match_desc = self.hashes_md5[md5_num]
-                        match_hash = md5
-                        match_score = self.hashes_scores[md5_num]
-                    if ioc_contains(self.hashes_sha1_list, sha1_num):
-                        match_type = "SHA1"
-                        match_desc = self.hashes_sha1[sha1_num]
-                        match_hash = sha1
-                        match_score = self.hashes_scores[sha1_num]
-                    if ioc_contains(self.hashes_sha256_list, sha256_num):
-                        match_type = "SHA256"
-                        match_desc = self.hashes_sha256[sha256_num]
-                        match_hash = sha256
-                        match_score = self.hashes_scores[sha256_num]
-
-                    # If score is low change the description
-                    if match_score < 80:
-                        match_level = "Suspicious"
-
-                    # Hash string
-                    hash_string = f"MD5: {md5} SHA1: {sha1} SHA256: {sha256}"
-
-                    if match_type:
-                        reasons.append(
-                            "%s Hash TYPE: %s HASH: %s SUBSCORE: %d DESC: %s"
-                            % (
-                                match_level,
-                                match_type,
-                                match_hash,
-                                match_score,
-                                match_desc,
-                            )
-                        )
-                        total_score += match_score
-
-                    # Script Anomalies Check
-                    if args.scriptanalysis:
-                        if extension in SCRIPT_EXTENSIONS or type in SCRIPT_TYPES:
-                            logger.log(
-                                "DEBUG",
-                                "FileScan",
-                                f"Performing character analysis on file {file_path} ... ",
-                            )
-                            message, score = self.script_stats_analysis(file_data)
-                            if message:
-                                reasons.append("%s SCORE: %s" % (message, score))
-                                total_score += score
-
-                    # Yara Check -------------------------------------------------------
-
-                    # Memory Dump Scan
-                    if file_type == "MDMP":
-                        logger.log(
-                            "INFO",
-                            "FileScan",
-                            "Scanning memory dump file %s"
-                            % file_name_cleaned.decode("utf-8"),
-                        )
-
-                    # Scan the read data
-                    try:
-                        for (
-                            score,
-                            rule,
-                            description,
-                            reference,
-                            matched_strings,
-                            author,
-                        ) in self.scan_data(
-                            file_data=file_data,
-                            file_type=file_type,
-                            file_name=file_name_cleaned,
-                            file_path=file_path_cleaned,
-                            extension=extension,
-                            md5=md5,  # legacy rule support
-                        ):
-                            # Message
-                            message = (
-                                "Yara Rule MATCH: %s SUBSCORE: %s "
-                                "DESCRIPTION: %s REF: %s AUTHOR: %s"
-                                % (rule, score, description, reference, author)
-                            )
-                            # Matches
-                            if len(matched_strings) > 0:
-                                message += " MATCHES: %s" % ", ".join(matched_strings)
-
-                            total_score += score
-                            reasons.append(message)
-
-                    except Exception:
-                        if logger.debug:
-                            traceback.print_exc()
-                        logger.log(
-                            "ERROR",
-                            "FileScan",
-                            f"Cannot YARA scan file: {file_path_cleaned}",
-                        )
 
                 # Info Line -----------------------------------------------------------------------
                 file_info = (
