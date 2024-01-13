@@ -90,7 +90,7 @@ so running in docker should be as simple as:
 
 ```
 git clone https://github.com/c0m4r/Loki-daemonized.git
-cd Loki-daemonized/docker/default
+cd Loki-daemonized/addons/docker/default
 docker compose up -d
 ```
 
