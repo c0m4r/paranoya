@@ -40,7 +40,7 @@ except Exception as e:
     print(e)
     sys.exit(0)
 
-__version__ = "3.2.1-beta"
+__version__ = "3.2.1"
 
 
 class LokiLogger:
