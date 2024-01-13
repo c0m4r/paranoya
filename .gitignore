@@ -1,3 +1,4 @@
+/.okrutnik_venv
 /.pytest_cache
 /.ruff_cache
 /__pycache__
