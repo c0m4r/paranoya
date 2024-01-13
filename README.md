@@ -100,7 +100,13 @@ There are also other [Dockerfiles](/addons/docker) available, based on different
 
 #### Flatpak
 
-DIY flatpak-builder files available [here](/addons/flatpak). Simply hit `./build.sh`.
+DIY flatpak-builder files available [here](/addons/flatpak).
+
+```
+git clone https://github.com/c0m4r/Loki-daemonized.git
+cd Loki-daemonized/addons/flatpak
+./build.sh
+```
 
 Once it's ready, you can run Loki, passing arguments you need.
 
