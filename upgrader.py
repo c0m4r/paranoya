@@ -148,7 +148,8 @@ class LOKIUpdater:
             "sig_url": "https://github.com/t4d/PhishingKit-Yara-Rules/archive/master.zip",
         },
         "Yara Forge": {
-            "sig_url": "https://github.com/YARAHQ/yara-forge/releases/latest/download/yara-forge-rules-full.zip",
+            "sig_url": "https://github.com/YARAHQ/yara-forge"
+            "/releases/latest/download/yara-forge-rules-full.zip",
         },
     }
 
@@ -333,9 +334,7 @@ class LOKIUpdater:
                         if zip_file_path.endswith((".yar", ".yara")):
                             zip_update.extract(zip_file_path, out_dir)
 
-                with open(
-                    cache_file_name, "w", encoding="utf-8"
-                ) as cache_file:
+                with open(cache_file_name, "w", encoding="utf-8") as cache_file:
                     cache_file.close()
             else:
                 log("INFO", "Upgrader", f"{cache_file_name} exists, skipping {sig_url}")

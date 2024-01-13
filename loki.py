@@ -127,7 +127,7 @@ class Loki:
             logger.log(
                 "NOTICE",
                 "Init",
-                f"The 'signature-base' subdirectory doesn't exist or is empty. "
+                "The 'signature-base' subdirectory doesn't exist or is empty. "
                 "Trying to retrieve the signature database automatically.",
             )
             update_loki(sigs_only=True)
@@ -1252,7 +1252,9 @@ class Loki:
                     "Processing YARA rules folder {0}".format(yara_rule_directory),
                 )
                 for root, directories, files in os.walk(
-                    yara_rule_directory, onerror=walk_error, followlinks=args.followlinks
+                    yara_rule_directory,
+                    onerror=walk_error,
+                    followlinks=args.followlinks,
                 ):
                     for file in files:
                         try:
