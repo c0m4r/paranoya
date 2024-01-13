@@ -1542,7 +1542,6 @@ class Loki:
 
         # Check the characters
         for char in c.most_common():
-            print(char)
             if char[0] in anomal_chars:
                 anomal_char_stats[char[0]] = char[1]
             if str(char[0]).isupper():
