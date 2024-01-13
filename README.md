@@ -203,7 +203,7 @@ See: [Usage](https://github.com/c0m4r/Loki-daemonized/wiki/Usage)
 ## License
 
 ```
-Loki (daemonized): Simple IOC and YARA Scanner
+Loki (daemonized): Simple IOC and YARA Scanner for Linux
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
