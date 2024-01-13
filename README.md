@@ -63,7 +63,8 @@ xbps-install -Sy bash gcc git openssl-devel python3 python3-devel
 #### Debian / Ubuntu / Linux Mint
 
 ```
-apt -y install bash build-essential git libssl-dev python3 python3-dev python3-pip python3-venv
+apt -y install gcc git libssl-dev python3 python3-dev python3-venv
+update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 ```
 
 #### Rocky Linux / AlmaLinux
