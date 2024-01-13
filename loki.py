@@ -160,7 +160,7 @@ class Loki:
 
         # Set IOC path
         self.ioc_path = os.path.join(
-            self.app_path, f"signature-base/iocs/".replace("/", os.sep)
+            self.app_path, "signature-base/iocs/".replace("/", os.sep)
         )
 
         # Yara rule directories
