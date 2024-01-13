@@ -22,14 +22,25 @@ as well as a daemon mode to accept scans in client/server manner. It also includ
 
 ## Dependencies
 
-[Python3](https://www.python.org/) 
-| [colorama](https://pypi.org/project/colorama/) 
+#### Python modules
+
+[colorama](https://pypi.org/project/colorama/) 
 | [progressbar2](https://pypi.org/project/progressbar2/) 
 | [psutil](https://pypi.org/project/psutil/) 
 | [requests](https://pypi.org/project/requests/) 
-| [yara-python](https://pypi.org/project/yara-python/) 
-| [signature-base](https://github.com/Neo23x0/signature-base) 
+| [yara-python](https://pypi.org/project/yara-python/)
+
+#### Base YARA rules
+
+[Neo23x0/signature-base](https://github.com/Neo23x0/signature-base) 
 | [reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
+
+#### Custom YARA rules
+
+[elastic/protections-artifacts](https://github.com/elastic/protections-artifacts) 
+| [Yara-Rules](https://github.com/Yara-Rules/rules) 
+| [PhishingKit-Yara-Rules](https://github.com/t4d/PhishingKit-Yara-Rules) 
+| [YARAHQ/yara-forge](https://github.com/YARAHQ/yara-forge)
 
 #### Alpine Linux
 
@@ -172,6 +183,12 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
   * File Name Checks: works with signature-base/iocs/filename-iocs.txt (note: linux iocs missing by default)
   * Process connections: for now, it only shows detected connections per process
   * Process Masquerading Detection: reports non-empty /proc/PID/maps of processes that uses square brackets in their cmdlines
+* Progress bar (experimental) can be enabled with --progress
+* Force Loki to follow symlinks (be aware: may lead to RAM overflow) with --followlinks
+* Custom yara rules sources
+  * Some additional YARA rule sources have been added and you can also choose your own
+  * Custom yara ruleset dir can be set with --custom signature-custom/yara/name
+  * To avoid conflicts between rules, it's recommended to use only single source at a time
 
 ## Screenshot
 
