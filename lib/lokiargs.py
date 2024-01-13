@@ -161,3 +161,9 @@ parser.add_argument(
     help="Show a progress bar (experimental)",
     default=False,
 )
+parser.add_argument(
+    "--followlinks",
+    action="store_true",
+    help="Force Loki to follow symlinks (be aware: may lead to RAM overflow)",
+    default=False,
+)

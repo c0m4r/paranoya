@@ -235,7 +235,7 @@ class Loki:
         matches = []
         flg_iter = 0
         logger.log("INFO", "Init", "Processing files to scan, this might take a while.")
-        for root, _, filenames in os.walk(path, followlinks=False):
+        for root, _, filenames in os.walk(path, followlinks=args.followlinks):
             for filename in filenames:
                 matches.append(os.path.join(root, filename))
                 flg_iter += 1
@@ -257,6 +257,8 @@ class Loki:
             root = ""
             directories = ""
             files = [path]
+            # Disable progress bar for single file scan
+            args.progress = False
             loki.scan_path_files(root, directories, files)
             return
 
@@ -294,7 +296,7 @@ class Loki:
             progress_bar = None
 
         for root, directories, files in os.walk(
-            path, onerror=walk_error, followlinks=False
+            path, onerror=walk_error, followlinks=args.followlinks
         ):
             # Skip paths that start with ..
             new_directories = []
@@ -1250,7 +1252,7 @@ class Loki:
                     "Processing YARA rules folder {0}".format(yara_rule_directory),
                 )
                 for root, directories, files in os.walk(
-                    yara_rule_directory, onerror=walk_error, followlinks=False
+                    yara_rule_directory, onerror=walk_error, followlinks=args.followlinks
                 ):
                     for file in files:
                         try:
@@ -1540,15 +1542,16 @@ class Loki:
 
         # Check the characters
         for char in c.most_common():
+            print(char)
             if char[0] in anomal_chars:
                 anomal_char_stats[char[0]] = char[1]
-            if char[0].isupper():
+            if str(char[0]).isupper():
                 char_stats["upper"] += char[1]
-            elif char[0].islower():
+            elif str(char[0]).islower():
                 char_stats["lower"] += char[1]
-            elif char[0].isdigit():
+            elif str(char[0]).isdigit():
                 char_stats["numbers"] += char[1]
-            elif char[0].isspace():
+            elif str(char[0]).isspace():
                 char_stats["spaces"] += char[1]
             else:
                 char_stats["symbols"] += char[1]
@@ -1565,7 +1568,7 @@ class Loki:
         if char_stats["symbols"] > char_stats["alpha"]:
             anomalies.append("more symbols than alphanum chars")
             anomaly_score += 40
-        for ac, count in anomal_char_stats.iteritems():
+        for ac, count in anomal_char_stats.items():
             if (count / char_stats["alpha"]) > 0.05:
                 anomalies.append(f"symbol count of '{ac}' very high")
                 anomaly_score += 40
