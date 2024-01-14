@@ -243,6 +243,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
-## DISCLAIMER
+## Funding
 
-> USE AT YOUR OWN RISK & DON'T BE EVIL
+If you found this software helpful, please consider [making donation](https://en.wosp.org.pl/fundacja/jak-wspierac-wosp/wesprzyj-online) to a charity on my behalf. Thank you.
