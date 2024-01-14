@@ -86,7 +86,14 @@ cd Loki-daemonized
 
 #### Docker
 
-This repo comes with predefined docker files. The default one is based on [official python image](https://hub.docker.com/_/python), 
+Now available on [Docker hub](https://hub.docker.com/r/c0m4r/loki-daemonized).
+
+```
+docker run --name loki -v /tmp:/tmp -p 127.0.0.1:1337:1337 -d c0m4r/loki-daemonized
+```
+
+You can also build the image yourself. This repo comes with predefined docker files. 
+The default one is based on [official python image](https://hub.docker.com/_/python), 
 so running in docker should be as simple as:
 
 ```
@@ -95,7 +102,8 @@ cd Loki-daemonized/addons/docker/default
 docker compose up -d
 ```
 
-However, to be able to scan anything outside docker you have to mount a volume pointing to a specific directory. Change docker-compose.yml accordingly.
+However, to be able to scan anything outside docker you have to mount a volume pointing to a specific directory. 
+Change docker-compose.yml accordingly.
 
 There are also other [Dockerfiles](/addons/docker) available, based on different Linux distros.
 
@@ -116,7 +124,8 @@ flatpak run org.flatpak.Loki-daemonized --intense -p ./test
 ```
 
 Keep in mind that even though there is `--filesystem=host` set, 
-some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) under Flatpak Sandbox, preventing Loki from scanning them.
+some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) 
+under Flatpak Sandbox, preventing Loki from scanning them.
 
 In order to scan one of them use an override. An example for /tmp dir:
 
@@ -150,7 +159,8 @@ Start as a daemon and bind on default localhost:1337
 ./loki.py -d -s 20000 --noindicator --csv --nolog --intense
 ```
 
-You can also change default bind address/port with `--listen-host` and `--listen-port` args. Check `--help` for details.
+You can also change default bind address/port with `--listen-host` 
+and `--listen-port` args. Check `--help` for details.
 
 Check example [init files](/addons/etc) for OpenRC and systemd integration.
 
@@ -181,11 +191,15 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
 
 * Rewritten for Linux
 * Single file scan if given path is a file
-* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337` accepting scans requested from client.py
-  * PID file `loki.pid` is created in the program directory if running in daemon mode, you change its path with `--pidfile /path/to/pidfile`
-  * Optional auth key `--auth somethingRandomHere` in daemon mode (just a dumb string authorization, can be intercepted and read from the process list)
+* Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337`
+  accepting scans requested from client.py
+  * PID file `loki.pid` is created in the program directory if running in daemon mode,
+    you change its path with `--pidfile /path/to/pidfile`
+  * Optional auth key `--auth somethingRandomHere` in daemon mode
+    (just a dumb string authorization, can be intercepted and read from the process list)
 * You can disable one or more yara files, f.e. `--disable-yara-files apt_vpnfilter.yar,yara_mixed_ext_vars.yar`
-* Exclude files by hash as proposed by [rafaelarcanjo](https://github.com/rafaelarcanjo) in [Neo23x0/Loki/pull/204](https://github.com/Neo23x0/Loki/pull/204). See: [excludes.cfg](/config/excludes.cfg)
+* Exclude files by hash as proposed by [rafaelarcanjo](https://github.com/rafaelarcanjo)
+  in [Neo23x0/Loki/pull/204](https://github.com/Neo23x0/Loki/pull/204). See: [excludes.cfg](/config/excludes.cfg)
 * Initial implementation of process scanning under Linux (scan_processes_linux()):
   * File Name Checks: works with signature-base/iocs/filename-iocs.txt (note: linux iocs missing by default)
   * Process connections: for now, it only shows detected connections per process
