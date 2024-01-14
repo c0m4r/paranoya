@@ -56,7 +56,7 @@ if [[ "$KERNEL_ARCH" == "x86_64" ]]; then
 
     # Void x86_64
     VOID_DLNAME="void-x86_64-ROOTFS-20230628.tar.xz"
-    VOID_ROOTFS="https://repo-default.voidlinux.org/live/current/void-x86_64-ROOTFS-20230628.tar.xz"
+    VOID_ROOTFS="https://repo-default.voidlinux.org/live/20230628/void-x86_64-ROOTFS-20230628.tar.xz"
     VOID_SHA256="8e20003b663bc4a9c4dbe3383e3ac94a7bcf051e47f433c63c24bd639ca19334 void-x86_64-ROOTFS-20230628.tar.xz"
 elif [[ "$KERNEL_ARCH" == "aarch64" ]]; then
     # Alpine aarch64
@@ -66,7 +66,7 @@ elif [[ "$KERNEL_ARCH" == "aarch64" ]]; then
 
     # Void aarch64
     VOID_DLNAME="void-aarch64-ROOTFS-20230628.tar.xz"
-    VOID_ROOTFS="https://repo-default.voidlinux.org/live/current/void-aarch64-ROOTFS-20230628.tar.xz"
+    VOID_ROOTFS="https://repo-default.voidlinux.org/live/20230628/void-aarch64-ROOTFS-20230628.tar.xz"
     VOID_SHA256="d6d10addd669d4d458e57ea38fc73086aedf911b6d702e5b4ea97cade08cbc6f void-aarch64-ROOTFS-20230628.tar.xz"
 fi
 
