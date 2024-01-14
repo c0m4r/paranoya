@@ -64,6 +64,12 @@ elif [[ "$KERNEL_ARCH" == "aarch64" ]]; then
     ALPINE_ROOTFS="https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/alpine-minirootfs-3.19.0-aarch64.tar.gz"
     ALPINE_SHA256="ee6d3597c078e50a837a2d124594c439957fbd9e653d1286afb355c43370d0d1 alpine-minirootfs-3.19.0-aarch64.tar.gz"
 
+    # Arch ARM
+    # https://archlinuxarm.org/platforms/armv8/generic
+    #ARCH_DLNAME="ArchLinuxARM-aarch64-latest.tar.gz"
+    #ARCH_ROOTFS="http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
+    #ARCH_SHA256="43767c1fe8abaddff240395b75aea03919b7d33ab1bbca3ae0c2f3839527ad19 ArchLinuxARM-aarch64-latest.tar.gz"
+
     # Void aarch64
     VOID_DLNAME="void-aarch64-ROOTFS-20230628.tar.xz"
     VOID_ROOTFS="https://repo-default.voidlinux.org/live/20230628/void-aarch64-ROOTFS-20230628.tar.xz"
