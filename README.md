@@ -18,7 +18,7 @@
 </div>
 
 A fork of [Loki - Simple IOC and YARA Scanner](https://github.com/Neo23x0/Loki), rewritten for Linux and modified to support single file scans, 
-as well as a daemon mode to accept scans in client/server manner. It also includes some [other improvements](#New-features).
+as well as a daemon mode to accept scans in a client/server manner. It also includes some [other improvements](#New-features).
 
 ## Dependencies
 
@@ -86,15 +86,15 @@ cd Loki-daemonized
 
 #### Docker
 
-Now available on [Docker hub](https://hub.docker.com/r/c0m4r/loki-daemonized).
+Now available on the [Docker hub](https://hub.docker.com/r/c0m4r/loki-daemonized).
 
 ```
 docker run --name loki -v /tmp:/tmp -p 127.0.0.1:1337:1337 -d c0m4r/loki-daemonized
 ```
 
-You can also build the image yourself. This repo comes with predefined docker files. 
-The default one is based on [official python image](https://hub.docker.com/_/python), 
-so running in docker should be as simple as:
+You can also build the image yourself. This repo comes with predefined Docker files. 
+The default one is based on an [official Python image](https://hub.docker.com/_/python), 
+so running it should be as simple as:
 
 ```
 git clone https://github.com/c0m4r/Loki-daemonized.git
@@ -102,14 +102,15 @@ cd Loki-daemonized/addons/docker/default
 docker compose up -d
 ```
 
-However, to be able to scan anything outside docker you have to mount a volume pointing to a specific directory. 
+However, to be able to scan anything outside of Docker, 
+you have to mount a volume pointing to a specific directory. 
 Change docker-compose.yml accordingly.
 
-There are also other [Dockerfiles](/addons/docker) available, based on different Linux distros.
+There are other [Dockerfiles](/addons/docker) available, based on different Linux distros.
 
 #### Flatpak
 
-DIY flatpak-builder files available [here](/addons/flatpak).
+DIY flatpak-builder files are available [here](/addons/flatpak).
 
 ```
 git clone https://github.com/c0m4r/Loki-daemonized.git
@@ -117,7 +118,7 @@ cd Loki-daemonized/addons/flatpak
 ./build.sh
 ```
 
-Once it's ready, you can run Loki, passing arguments you need.
+Once it's ready, you can run Loki, passing the arguments you need.
 
 ```
 flatpak run org.flatpak.Loki-daemonized --intense -p ./test
@@ -127,7 +128,7 @@ Keep in mind that even though there is `--filesystem=host` set,
 some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) 
 under Flatpak Sandbox, preventing Loki from scanning them.
 
-In order to scan one of them use an override. An example for /tmp dir:
+In order to scan one of them, use an override. An example for /tmp dir:
 
 ```
 flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
@@ -135,7 +136,7 @@ flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
 
 #### Compiled
 
-For binary version of Loki-daemonized and its tools use ./build.sh script.
+For the binary version of Loki-daemonized and its tools, use ./build.sh script.
 
 However, when possible, you should use bare python under venv, 
 as it will allow you to get the latest versions of python modules and keep them up-to-date, 
@@ -153,7 +154,7 @@ See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wik
 
 #### Server
 
-Start as a daemon and bind on default localhost:1337
+Start as a daemon and bind on the default localhost:1337
 
 ```
 ./loki.py -d -s 20000 --noindicator --csv --nolog --intense
@@ -170,7 +171,7 @@ Check example [init files](/addons/etc) for OpenRC and systemd integration.
 ./client.py -p /path/to/scan
 ```
 
-As for now the server accepts plain path and an optional space-separated authkey.
+As of now, the server accepts a plain path and an optional space-separated auth key.
 
 ```
 echo "./test" | nc localhost 1337 ; echo
@@ -190,7 +191,7 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
 ## New features
 
 * Rewritten for Linux
-* Single file scan if given path is a file
+* A single file scan if a given path is a file
 * Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337`
   accepting scans requested from client.py
   * PID file `loki.pid` is created in the program directory if running in daemon mode,
@@ -209,7 +210,7 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
 * Custom yara rules sources
   * Some additional YARA rule sources have been added and you can also choose your own
   * Custom yara ruleset dir can be set with --custom signature-custom/yara/name
-  * To avoid conflicts between rules, it's recommended to use only single source at a time
+  * To avoid conflicts between rules, it's recommended to use only one source at a time
 
 ## Screenshot
 
