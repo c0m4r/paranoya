@@ -1684,6 +1684,41 @@ def sigterm_handler(signal_name, frame):
     sys.exit(0)
 
 
+def get_platform() -> str:
+    """
+    Get platform full name
+    """
+    try:
+        for key, val in platform.freedesktop_os_release().items():
+            if key == "PRETTY_NAME":
+                platform_pretty_name = val
+    except Exception as e:
+        if args.debug:
+            print(e)
+        platform_pretty_name = platform.system()
+
+    platform_machine = platform.machine()
+    platform_full = platform_pretty_name + " (" + platform_machine + ")"
+
+    return platform_full
+
+
+def print_start_info() -> None:
+    """
+    Print start info
+    """
+    logger.log(
+        "NOTICE",
+        "Init",
+        "Starting Loki (daemonized) VERSION: {3} SYSTEM: {0} TIME: {1} PLATFORM: {2}".format(
+            os.uname().nodename,
+            get_syslog_timestamp(),
+            get_platform(),
+            logger.version,
+        ),
+    )
+
+
 def main():
     """
     main
@@ -1743,26 +1778,7 @@ if __name__ == "__main__":
     if args.version:
         sys.exit(0)
 
-    # Platform info
-    try:
-        for key, val in platform.freedesktop_os_release().items():
-            if key == "PRETTY_NAME":
-                platform_pretty_name = val
-    except Exception:
-        platform_pretty_name = platform.system()
-    platform_machine = platform.machine()
-    platform_full = platform_pretty_name + " (" + platform_machine + ")"
-
-    logger.log(
-        "NOTICE",
-        "Init",
-        "Starting Loki Scan VERSION: {3} SYSTEM: {0} TIME: {1} PLATFORM: {2}".format(
-            os.uname().nodename,
-            get_syslog_timestamp(),
-            platform_full,
-            logger.version,
-        ),
-    )
+    print_start_info()
 
     # Loki
     loki = Loki(args.intense)
