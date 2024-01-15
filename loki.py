@@ -1845,12 +1845,8 @@ def print_start_info() -> None:
     logger.log(
         "NOTICE",
         "Init",
-        "Starting Loki (daemonized) VERSION: {3} SYSTEM: {0} TIME: {1} PLATFORM: {2}".format(
-            os.uname().nodename,
-            get_syslog_timestamp(),
-            get_platform(),
-            logger.version,
-        ),
+        f"Starting Loki (daemonized) VERSION: {logger.version} SYSTEM: {os.uname().nodename}"
+        f" TIME: {get_syslog_timestamp()} PLATFORM: {get_platform()}",
     )
 
 
