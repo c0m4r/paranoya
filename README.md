@@ -222,6 +222,37 @@ Run a program with --help to view usage information.
 
 See: [Usage](https://github.com/c0m4r/Loki-daemonized/wiki/Usage)
 
+## Custom signatures
+
+Apart from the signature-base there are some example 
+custom signature rulesets being pulled by the upgrader script.
+
+Custom signatures can be used independently as a supplement, 
+but you should avoid mixing the rule sources, as this may lead to conflicts between rules.
+
+Use `--custom` to point the scanner to a different directory where the rules are stored. 
+It will process all the .yar and .yara stored in that directory; don't point to a file, as this won't work.
+
+Example usage of the custom ruleset:
+
+```
+./loki.py --intense --progress -p ./sample/webshell/ --custom signature-custom/yara/protections-artifacts-main/
+```
+
+These additional custom YARA rules has been prooven to work* with Loki:
+
+* [SupportIntelligence/Icewater](https://github.com/SupportIntelligence/Icewater)
+* [intezer/yara-rules](https://github.com/intezer/yara-rules)
+* [jeFF0Falltrades/YARA-Signatures](https://github.com/jeFF0Falltrades/YARA-Signatures)
+* [evthehermit/YaraRules](https://github.com/kevthehermit/YaraRules)
+* [MalGamy/YARA_Rules](https://github.com/MalGamy/YARA_Rules)
+* [advanced-threat-research/Yara-Rules](https://github.com/advanced-threat-research/Yara-Rules)
+* [securitymagic/yara](https://github.com/securitymagic/yara)
+* [telekom-security/malware_analysis](https://github.com/telekom-security/malware_analysis)
+* [tenable/yara-rules](https://github.com/tenable/yara-rules)
+
+\* That doesn't mean they will actually detect something; just that they are processed properly by the yara-python
+
 ## License
 
 ```
