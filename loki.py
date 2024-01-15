@@ -839,7 +839,7 @@ class Loki:
         except Exception:
             traceback.print_exc()
 
-    def scan_processes_linux(self):
+    def scan_processes_linux(self) -> None:
         """
         scan processes linux
         """
@@ -1239,7 +1239,7 @@ class Loki:
                 )
             sys.exit(1)
 
-    def initialize_yara_rules(self):
+    def initialize_yara_rules(self) -> None:
         """
         initialize yara rules
         """
@@ -1355,7 +1355,7 @@ class Loki:
                 traceback.print_exc()
                 sys.exit(1)
 
-    def initialize_hash_iocs(self, ioc_directory, false_positive=False):
+    def initialize_hash_iocs(self, ioc_directory, false_positive=False) -> None:
         """
         initialize hash iocs
         """
@@ -1433,7 +1433,7 @@ class Loki:
                 sys.exit(1)
             logger.log("ERROR", "Init", f"Error reading Hash file: {ioc_filename}")
 
-    def initialize_filetype_magics(self, filetype_magics_file):
+    def initialize_filetype_magics(self, filetype_magics_file) -> None:
         """
         initialize filetype magics
         """
@@ -1469,7 +1469,7 @@ class Loki:
                 "ERROR", "Init", f"Error reading Hash file: {filetype_magics_file}"
             )
 
-    def initialize_excludes(self, excludes_file):
+    def initialize_excludes(self, excludes_file) -> None:
         """
         initialize_excludes
         """
@@ -1686,7 +1686,7 @@ class Loki:
                 client_socket.close()
                 return False
 
-    def run_daemon(self):
+    def run_daemon(self) -> None:
         """
         Daemon mode
         """
@@ -1761,7 +1761,7 @@ def update_loki(sigs_only: bool) -> None:
         Popen(p_args, shell=False)
 
 
-def walk_error(err):
+def walk_error(err) -> None:
     """
     walk error
     """
@@ -1769,7 +1769,7 @@ def walk_error(err):
         print("Directory walk error")
 
 
-def save_pidfile():
+def save_pidfile() -> None:
     """
     save pidfile
     """
@@ -1786,7 +1786,7 @@ def save_pidfile():
             fpid.close()
 
 
-def remove_pidfile():
+def remove_pidfile() -> None:
     """
     remove pidfile
     """
@@ -1794,7 +1794,7 @@ def remove_pidfile():
         os.remove(args.pidfile)
 
 
-def sigint_handler(signal_name, frame):
+def sigint_handler(signal_name, frame) -> None:
     """
     SIGINT handler
     """
@@ -1810,7 +1810,7 @@ def sigint_handler(signal_name, frame):
     sys.exit(0)
 
 
-def sigterm_handler(signal_name, frame):
+def sigterm_handler(signal_name, frame) -> None:
     """
     SIGTERM handler
     """
