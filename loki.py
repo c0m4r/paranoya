@@ -279,7 +279,8 @@ class Loki:
                 logger.log(
                     "INFO",
                     "FileScan",
-                    f"Skipping {skip} directory [fixed excludes] (try using --force or --alldrives)",
+                    f"Skipping {skip} directory [fixed excludes]"
+                    " (try using --force or --alldrives)",
                 )
                 return
 
@@ -1579,6 +1580,134 @@ class Loki:
 
         return "", 0
 
+    def handle_client(self, client_socket, address):
+        """
+        handle client
+        """
+        size = 2048
+        while True:
+            try:
+                clientid = threading.current_thread().name
+                threading.current_thread().message = ""
+                data = client_socket.recv(size)
+                scan_path = data.decode().split(" ")[0]
+                if args.auth:
+                    server_authkey = args.auth
+                    try:
+                        client_authkey = data.decode().split(" ")[1]
+                    except Exception:
+                        logger.log(
+                            "NOTICE",
+                            "Auth",
+                            "Client "
+                            + str(address[0])
+                            + ":"
+                            + str(address[1])
+                            + " no valid authorization",
+                        )
+                        client_socket.send("authorization required".encode())
+                        client_socket.close()
+                        return False
+
+                    if client_authkey.strip() == server_authkey:
+                        logger.log(
+                            "NOTICE",
+                            "Auth",
+                            "Client "
+                            + str(address[0])
+                            + ":"
+                            + str(address[1])
+                            + " accepted",
+                        )
+                    else:
+                        logger.log(
+                            "NOTICE",
+                            "Auth",
+                            "Client "
+                            + str(address[0])
+                            + ":"
+                            + str(address[1])
+                            + " unauthorized",
+                        )
+                        client_socket.send("unauthorized".encode())
+                        client_socket.close()
+                        return False
+                logger.log(
+                    "INFO",
+                    "Init",
+                    "Received: "
+                    + data.decode().strip()
+                    + " from: "
+                    + str(address[0])
+                    + ":"
+                    + str(address[1]),
+                )
+                self.scan_path(scan_path.strip())
+
+                # Result
+                if threading.current_thread().message == "ALERT":
+                    logger.log(
+                        "RESULT",
+                        "Results",
+                        "Indicators detected! (Client: " + clientid + ")",
+                    )
+                    client_socket.send("RESULT: Indicators detected!".encode())
+                elif threading.current_thread().message == "WARNING":
+                    logger.log(
+                        "RESULT",
+                        "Results",
+                        "Suspicious objects detected! (Client: " + clientid + ")",
+                    )
+                    client_socket.send("RESULT: Suspicious objects detected!".encode())
+                else:
+                    logger.log(
+                        "RESULT",
+                        "Results",
+                        "SYSTEM SEEMS TO BE CLEAN. (Client: " + clientid + ")",
+                    )
+                    client_socket.send("RESULT: SYSTEM SEEMS TO BE CLEAN.".encode())
+
+                logger.log(
+                    "NOTICE",
+                    "Results",
+                    "Finished LOKI Scan CLIENT: %s SYSTEM: %s TIME: %s"
+                    % (
+                        clientid,
+                        os.uname().nodename,
+                        get_syslog_timestamp(),
+                    ),
+                )
+                client_socket.close()
+                return False
+            except socket.error:
+                client_socket.close()
+                return False
+
+    def run_daemon(self):
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            server.bind((args.listen_host, args.listen_port))
+        except Exception as strerror:
+            logger.log("ERROR", "Init", "{0}".format(strerror))
+            server.close()
+            sys.exit(1)
+        save_pidfile()
+        server.listen(5)
+
+        logger.log(
+            "NOTICE",
+            "Init",
+            "Listening on " + args.listen_host + ":" + str(args.listen_port),
+        )
+        while True:
+            client, addr = server.accept()
+            threading.Thread(
+                target=self.handle_client,
+                args=(client, addr),
+                name=str(addr[0]) + ":" + str(addr[1]),
+            ).start()
+
 
 def get_application_path():
     """
@@ -1723,9 +1852,9 @@ def main():
     """
     main
     """
-    args = parser.parse_args()
+    args_tmp = parser.parse_args()
 
-    if args.nolog and (args.logfile or args.logfolder):
+    if args_tmp.nolog and (args_tmp.logfile or args_tmp.logfolder):
         print("The --logfolder and -l directives are not compatible with --nolog")
         sys.exit(1)
 
@@ -1733,21 +1862,21 @@ def main():
         os.uname().nodename,
         datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
     )
-    if args.logfolder and args.logfile:
+    if args_tmp.logfolder and args_tmp.logfile:
         print(
             "Must specify either log folder with --logfolder, which uses the default filename, "
             "or log file with -l. Log file can be an absolute path"
         )
         sys.exit(1)
-    elif args.logfolder:
-        args.logfolder = os.path.abspath(args.logfolder)
-        args.logfile = os.path.join(args.logfolder, filename)
-    elif not args.logfile:
-        args.logfile = filename
+    elif args_tmp.logfolder:
+        args_tmp.logfolder = os.path.abspath(args_tmp.logfolder)
+        args_tmp.logfile = os.path.join(args_tmp.logfolder, filename)
+    elif not args_tmp.logfile:
+        args_tmp.logfile = filename
 
-    args.excludeprocess = [x.lower() for x in args.excludeprocess]
+    args_tmp.excludeprocess = [x.lower() for x in args_tmp.excludeprocess]
 
-    return args
+    return args_tmp
 
 
 # MAIN ################################################################
@@ -1803,148 +1932,11 @@ if __name__ == "__main__":
             "Skipping process memory check. User has no admin rights.",
         )
 
-    # Scan Path -------------------------------------------------------
-    if not args.nofilescan:
-        # Set default
-        defaultPath = args.p
+    # Scan Mode -------------------------------------------------------
+    if args.d:
+        loki.run_daemon()
 
-        # Daemon mode
-        if args.d is True:
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            try:
-                server.bind((args.listen_host, args.listen_port))
-            except Exception as strerror:
-                logger.log("ERROR", "Init", "{0}".format(strerror))
-                server.close()
-                sys.exit(1)
-            save_pidfile()
-            server.listen(5)
-
-            def handle_client(client_socket, address):
-                """
-                handle client
-                """
-                size = 2048
-                while True:
-                    try:
-                        clientid = threading.current_thread().name
-                        threading.current_thread().message = ""
-                        data = client_socket.recv(size)
-                        scan_path = data.decode().split(" ")[0]
-                        if args.auth:
-                            server_authkey = args.auth
-                            try:
-                                client_authkey = data.decode().split(" ")[1]
-                            except Exception:
-                                logger.log(
-                                    "NOTICE",
-                                    "Auth",
-                                    "Client "
-                                    + str(address[0])
-                                    + ":"
-                                    + str(address[1])
-                                    + " no valid authorization",
-                                )
-                                client_socket.send("authorization required".encode())
-                                client_socket.close()
-                                return False
-
-                            if client_authkey.strip() == server_authkey:
-                                logger.log(
-                                    "NOTICE",
-                                    "Auth",
-                                    "Client "
-                                    + str(address[0])
-                                    + ":"
-                                    + str(address[1])
-                                    + " accepted",
-                                )
-                            else:
-                                logger.log(
-                                    "NOTICE",
-                                    "Auth",
-                                    "Client "
-                                    + str(address[0])
-                                    + ":"
-                                    + str(address[1])
-                                    + " unauthorized",
-                                )
-                                client_socket.send("unauthorized".encode())
-                                client_socket.close()
-                                return False
-                        logger.log(
-                            "INFO",
-                            "Init",
-                            "Received: "
-                            + data.decode().strip()
-                            + " from: "
-                            + str(address[0])
-                            + ":"
-                            + str(address[1]),
-                        )
-                        loki.scan_path(scan_path.strip())
-
-                        # Result
-                        if threading.current_thread().message == "ALERT":
-                            logger.log(
-                                "RESULT",
-                                "Results",
-                                "Indicators detected! (Client: " + clientid + ")",
-                            )
-                            client_socket.send("RESULT: Indicators detected!".encode())
-                        elif threading.current_thread().message == "WARNING":
-                            logger.log(
-                                "RESULT",
-                                "Results",
-                                "Suspicious objects detected! (Client: "
-                                + clientid
-                                + ")",
-                            )
-                            client_socket.send(
-                                "RESULT: Suspicious objects detected!".encode()
-                            )
-                        else:
-                            logger.log(
-                                "RESULT",
-                                "Results",
-                                "SYSTEM SEEMS TO BE CLEAN. (Client: " + clientid + ")",
-                            )
-                            client_socket.send(
-                                "RESULT: SYSTEM SEEMS TO BE CLEAN.".encode()
-                            )
-
-                        logger.log(
-                            "NOTICE",
-                            "Results",
-                            "Finished LOKI Scan CLIENT: %s SYSTEM: %s TIME: %s"
-                            % (
-                                clientid,
-                                os.uname().nodename,
-                                get_syslog_timestamp(),
-                            ),
-                        )
-                        client_socket.close()
-                        return False
-                    except socket.error:
-                        client_socket.close()
-                        return False
-
-            logger.log(
-                "NOTICE",
-                "Init",
-                "Listening on " + args.listen_host + ":" + str(args.listen_port),
-            )
-            while True:
-                client, addr = server.accept()
-                threading.Thread(
-                    target=handle_client,
-                    args=(client, addr),
-                    name=str(addr[0]) + ":" + str(addr[1]),
-                ).start()
-
-        # Oneshot mode
-        else:
-            loki.scan_path(defaultPath)
+    if not args.d and not args.nofilescan:
+        loki.scan_path(args.p)
 
     logger.print_results()
