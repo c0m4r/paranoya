@@ -144,6 +144,9 @@ class LOKIUpdater:
         "PhishingKit": {
             "sig_url": "https://github.com/t4d/PhishingKit-Yara-Rules/archive/master.zip",
         },
+        "malpedia": {
+            "sig_url": "https://github.com/malpedia/signator-rules/archive/master.zip",
+        },
         "Yara Forge": {
             "sig_url": "https://github.com/YARAHQ/yara-forge"
             "/releases/latest/download/yara-forge-rules-full.zip",
