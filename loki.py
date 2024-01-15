@@ -412,14 +412,8 @@ class Loki:
 
         if match_type:
             reasons.append(
-                "%s Hash TYPE: %s HASH: %s SUBSCORE: %d DESC: %s"
-                % (
-                    match_level,
-                    match_type,
-                    match_hash,
-                    match_score,
-                    match_desc,
-                )
+                f"{match_level} Hash TYPE: {match_type} HASH: {match_hash}"
+                f" SUBSCORE: {match_score} DESC: {match_desc}"
             )
             total_score += match_score
 
@@ -465,9 +459,8 @@ class Loki:
             ):
                 # Message
                 message = (
-                    "Yara Rule MATCH: %s SUBSCORE: %s "
-                    "DESCRIPTION: %s REF: %s AUTHOR: %s"
-                    % (rule, score, description, reference, author)
+                    f"Yara Rule MATCH: {rule} SUBSCORE: {score} "
+                    f"DESCRIPTION: {description} REF: {reference} AUTHOR: {author}"
                 )
                 # Matches
                 if len(matched_strings) > 0:
@@ -654,9 +647,9 @@ class Loki:
                     logger.log(
                         "INFO",
                         "FileScan",
-                        "Skipping file due to file size: %s TYPE: %s SIZE: %s "
-                        "CURRENT SIZE LIMIT(kilobytes): %d"
-                        % (file_name_cleaned, file_type, file_size, file_size_limit),
+                        f"Skipping file due to file size: {file_name_cleaned}"
+                        f" TYPE: {file_type} SIZE: {file_size}"
+                        f" CURRENT SIZE LIMIT(kilobytes): {file_size_limit}",
                     )
 
                 if do_intense_check:
@@ -682,16 +675,10 @@ class Loki:
 
                 # Info Line -----------------------------------------------------------------------
                 file_info = (
-                    "FILE: %s SCORE: %s TYPE: %s SIZE: %s FIRST_BYTES: %s %s %s "
-                    % (
-                        file_path,
-                        total_score,
-                        file_type,
-                        file_size,
-                        first_bytes_string,
-                        hash_string,
-                        loki_get_age_string(file_path),
-                    )
+                    f"FILE: {file_path} SCORE: {total_score}"
+                    f" TYPE: {file_type} SIZE: {file_size}"
+                    f" FIRST_BYTES: {first_bytes_string} {hash_string}"
+                    f" {loki_get_age_string(file_path)} "
                 )
 
                 # Now print the total result
@@ -712,7 +699,7 @@ class Loki:
                 message_body = file_info
                 for i, r in enumerate(reasons):
                     if i < 2 or args.allreasons:
-                        message_body += "REASON_{0}: {1}".format(i + 1, r)
+                        message_body += f"REASON_{i + 1}: {r}"
 
                 logger.log(message_type, "FileScan", message_body)
 
@@ -832,9 +819,7 @@ class Loki:
                 string_value = str(string.instances[0]).replace("'", "\\")
                 if len(string_value) > 140:
                     string_value = string_value[:140] + " ... (truncated)"
-                matching_strings.append(
-                    "{0}: '{1}'".format(string.identifier, string_value)
-                )
+                matching_strings.append(f"{string.identifier}: '{string_value}'")
             return matching_strings
         except Exception:
             traceback.print_exc()
@@ -873,8 +858,8 @@ class Loki:
             tty = psutil.Process(process).terminal()
 
             process_info = (
-                "PID: %s NAME: %s OWNER: %s STATUS: %s BIN: %s CMD: %s PATH: %s TTY: %s"
-                % (str(pid), name, owner, status, bin, cmd.strip(), path, tty)
+                f"PID: {str(pid)} NAME: {name} OWNER: {owner} STATUS: {status}"
+                f" BIN: {bin} CMD: {cmd.strip()} PATH: {path} TTY: {tty}"
             )
 
             # Print info -------------------------------------------------------
@@ -889,8 +874,8 @@ class Loki:
                     logger.log(
                         "WARNING",
                         "ProcessScan",
-                        "Potential Process Masquerading PID: %s CMD: %s Check /proc/%s/maps"
-                        % (str(pid), cmd, str(pid)),
+                        f"Potential Process Masquerading PID: {str(pid)}"
+                        f" CMD: {cmd} Check /proc/{str(pid)}/maps",
                     )
 
             # File Name Checks -------------------------------------------------
@@ -923,8 +908,8 @@ class Loki:
                         logger.log(
                             "NOTICE",
                             "ProcessScan",
-                            "Process PID: %s NAME: %s More connections detected. Showing only %s"
-                            % (str(pid), name, conn_limit),
+                            f"Process PID: {str(pid)} NAME: {name} More connections detected."
+                            f" Showing only {conn_limit}",
                         )
                         break
                     ip = pconn.laddr.ip
@@ -936,15 +921,14 @@ class Loki:
                         logger.log(
                             "NOTICE",
                             "ProcessScan",
-                            "Process PID: %s NAME: %s CONNECTION: %s <=> %s %s (%s)"
-                            % (str(pid), name, ip, ext_ip, ext_port, status),
+                            f"Process PID: {str(pid)} NAME: {name}"
+                            f" CONNECTION: {ip} <=> {ext_ip} {ext_port} ({status})",
                         )
                     else:
                         logger.log(
                             "NOTICE",
                             "ProcessScan",
-                            "Process PID: %s NAME: %s CONNECTION: %s (%s)"
-                            % (str(pid), name, ip, status),
+                            f"Process PID: {str(pid)} NAME: {name} CONNECTION: {ip} ({status})",
                         )
 
     def check_process_connections(self, process):
@@ -1124,7 +1108,7 @@ class Loki:
                                             "NOTICE",
                                             "Init",
                                             "C2 server definition is "
-                                            "suspiciously short - will not add %s" % c2,
+                                            f"suspiciously short - will not add {c2}",
                                         )
                                         continue
 
@@ -1253,7 +1237,7 @@ class Loki:
                 logger.log(
                     "INFO",
                     "Init",
-                    "Processing YARA rules folder {0}".format(yara_rule_directory),
+                    f"Processing YARA rules folder {yara_rule_directory}",
                 )
                 for root, directories, files in os.walk(
                     yara_rule_directory,
@@ -1267,7 +1251,7 @@ class Loki:
 
                             if file in args.disable_yara_files.split(","):
                                 logger.log(
-                                    "NOTICE", "Init", "Disabled yara file: " + file
+                                    "NOTICE", "Init", f"Disabled yara file: {file}"
                                 )
                                 continue
 
@@ -1652,33 +1636,26 @@ class Loki:
                     logger.log(
                         "RESULT",
                         "Results",
-                        "Indicators detected! (Client: " + clientid + ")",
+                        f"Indicators detected! (Client: {clientid})",
                     )
                     client_socket.send("RESULT: Indicators detected!".encode())
                 elif threading.current_thread().message == "WARNING":
                     logger.log(
                         "RESULT",
                         "Results",
-                        "Suspicious objects detected! (Client: " + clientid + ")",
+                        f"Suspicious objects detected! (Client: {clientid})",
                     )
                     client_socket.send("RESULT: Suspicious objects detected!".encode())
                 else:
                     logger.log(
                         "RESULT",
                         "Results",
-                        "SYSTEM SEEMS TO BE CLEAN. (Client: " + clientid + ")",
+                        f"SYSTEM SEEMS TO BE CLEAN. (Client: {clientid})",
                     )
                     client_socket.send("RESULT: SYSTEM SEEMS TO BE CLEAN.".encode())
 
                 logger.log(
-                    "NOTICE",
-                    "Results",
-                    "Finished LOKI Scan CLIENT: %s SYSTEM: %s TIME: %s"
-                    % (
-                        clientid,
-                        os.uname().nodename,
-                        get_syslog_timestamp(),
-                    ),
+                    "NOTICE", "Results", f"Finished LOKI Scan CLIENT: {clientid}"
                 )
                 client_socket.close()
                 return False
@@ -1695,7 +1672,7 @@ class Loki:
         try:
             server.bind((args.listen_host, args.listen_port))
         except Exception as strerror:
-            logger.log("ERROR", "Init", "{0}".format(strerror))
+            logger.log("ERROR", "Init", strerror)
             server.close()
             sys.exit(1)
         save_pidfile()
@@ -1704,7 +1681,7 @@ class Loki:
         logger.log(
             "NOTICE",
             "Init",
-            "Listening on " + args.listen_host + ":" + str(args.listen_port),
+            f"Listening on {args.listen_host}:{args.listen_port}",
         )
         while True:
             client, addr = server.accept()
@@ -1833,9 +1810,7 @@ def get_platform() -> str:
         platform_pretty_name = platform.system()
 
     platform_machine = platform.machine()
-    platform_full = platform_pretty_name + " (" + platform_machine + ")"
-
-    return platform_full
+    return f"{platform_pretty_name} ({platform_machine})"
 
 
 def print_start_info() -> None:
