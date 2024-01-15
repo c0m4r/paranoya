@@ -38,7 +38,6 @@ as well as a daemon mode to accept scans in a client/server manner. It also incl
 #### Custom YARA rules
 
 [elastic/protections-artifacts](https://github.com/elastic/protections-artifacts) 
-| [Yara-Rules](https://github.com/Yara-Rules/rules) 
 | [PhishingKit-Yara-Rules](https://github.com/t4d/PhishingKit-Yara-Rules) 
 | [YARAHQ/yara-forge](https://github.com/YARAHQ/yara-forge)
 
