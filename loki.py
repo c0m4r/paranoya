@@ -114,7 +114,10 @@ class Loki:
     bar_iter = 0
     bar_iter_max = 10000
 
-    def __init__(self, intense_mode):
+    def __init__(self, intense_mode: bool) -> None:
+        """
+        init
+        """
         # Scan Mode
         self.intense_mode = intense_mode
 
@@ -1684,6 +1687,9 @@ class Loki:
                 return False
 
     def run_daemon(self):
+        """
+        Daemon mode
+        """
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
