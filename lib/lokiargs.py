@@ -104,12 +104,6 @@ parser.add_argument(
     help="Don't write a local log file",
     default=False,
 )
-parser.add_argument(
-    "--update",
-    action="store_true",
-    default=False,
-    help='Update the signatures from the "signature-base" sub repository',
-)
 parser.add_argument("--debug", action="store_true", default=False, help="Debug output")
 parser.add_argument(
     "--maxworkingset",

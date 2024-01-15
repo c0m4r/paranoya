@@ -1743,11 +1743,6 @@ if __name__ == "__main__":
     if args.version:
         sys.exit(0)
 
-    # Update
-    if args.update:
-        update_loki(sigs_only=False)
-        sys.exit(0)
-
     # Platform info
     try:
         for key, val in platform.freedesktop_os_release().items():
