@@ -141,9 +141,6 @@ class LOKIUpdater:
         "elastic": {
             "sig_url": "https://github.com/elastic/protections-artifacts/archive/master.zip",
         },
-        "Yara-Rules": {
-            "sig_url": "https://github.com/Yara-Rules/rules/archive/master.zip",
-        },
         "PhishingKit": {
             "sig_url": "https://github.com/t4d/PhishingKit-Yara-Rules/archive/master.zip",
         },
