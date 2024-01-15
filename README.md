@@ -39,6 +39,7 @@ as well as a daemon mode to accept scans in a client/server manner. It also incl
 
 [elastic/protections-artifacts](https://github.com/elastic/protections-artifacts) 
 | [PhishingKit-Yara-Rules](https://github.com/t4d/PhishingKit-Yara-Rules) 
+| [malpedia/signator-rules](https://github.com/malpedia/signator-rules) 
 | [YARAHQ/yara-forge](https://github.com/YARAHQ/yara-forge)
 
 #### Alpine Linux
