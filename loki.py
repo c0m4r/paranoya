@@ -560,11 +560,11 @@ class Loki:
                     loki_print_progress(c)
 
                 # Skip program directory
-                if self.app_path.lower() in file_path.lower():
+                if self.app_path.lower() in file_path.lower() and not args.force:
                     logger.log(
-                        "DEBUG",
+                        "NOTICE",
                         "FileScan",
-                        f"Skipping file in program directory FILE: {file_path_cleaned}",
+                        f"Skipping file in program directory: {file_path_cleaned}",
                     )
                     continue
 
