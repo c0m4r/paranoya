@@ -247,6 +247,12 @@ These additional custom YARA rules has been proven to work* with paranoya:
 
 \* That doesn't mean they will actually detect something; just that they are processed properly by the yara-python
 
+## Screenshots
+
+<div align="center">
+![paranoya-screenshot](https://github.com/c0m4r/paranoya/assets/6292788/24641b5d-7541-4bef-acd3-b671b1451767)
+</div>
+
 ## License
 
 ```
