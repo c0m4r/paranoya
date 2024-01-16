@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - chroot helper script
+- custom yara rules: malpedia/signator-rules
 
 ### Changed
 
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - removed invalid --update args from loki.py, use upgrader.py instead
+- custom Yara-Rules/rules, causing overflows
 
 ## [3.2.1] - 2024-01-13
 
