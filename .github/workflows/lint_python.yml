@@ -34,7 +34,7 @@ jobs:
       - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff safety
       - run: ruff .
       - run: black --diff .
-      - run: codespell --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*" --skip="./venv"
+      - run: codespell -L paranoya --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*" --skip="./venv"
       - run: pip install -r requirements.txt
       - run: mypy --install-types --non-interactive --strict --exclude 'lib64' . || true
       - run: pylama *.py lib/*.py || true
