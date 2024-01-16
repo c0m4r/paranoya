@@ -1,5 +1,7 @@
 <div align="center">
 
+![image](https://github.com/c0m4r/paranoya/assets/6292788/e3a7d425-ed46-4de7-8fdc-614bd8248432)
+
 ## paranoya: Simple IOC and YARA scanner for Linux®
 
 ![Python](https://img.shields.io/badge/made%20with-python-blue?logo=python&logoColor=ffffff)
