@@ -21,6 +21,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import argparse
 import codecs
 import datetime
 import ipaddress
@@ -88,27 +89,27 @@ class Loki:
     """
 
     # Signatures
-    yara_rules = []
-    filename_iocs = []
-    hashes_md5 = {}
-    hashes_sha1 = {}
-    hashes_sha256 = {}
-    hashes_scores = {}
-    false_hashes = {}
-    c2_server = {}
+    yara_rules: list[yara.Rules] = []
+    filename_iocs: list[dict] = []
+    hashes_md5: dict = {}
+    hashes_sha1: dict = {}
+    hashes_sha256: dict = {}
+    hashes_scores: dict = {}
+    false_hashes: dict = {}
+    c2_server: dict = {}
 
     # Yara rule directories
-    yara_rule_directories = []
+    yara_rule_directories: list = []
 
     # Excludes (list of regex that match within the whole path) (user-defined via excludes.cfg)
-    full_excludes = []
+    full_excludes: list = []
     # Platform specific excludes (match the beginning of the full path) (not user-defined)
-    start_excludes = []
+    start_excludes: set = set()
     # Excludes hash (md5, sha1 and sha256)
-    excludes_hash = []
+    excludes_hash: list = []
 
     # File type magics
-    filetype_magics = {}
+    filetype_magics: dict = {}
     max_filetype_magics = 0
 
     bar_iter = 0
@@ -868,7 +869,7 @@ class Loki:
             # Process Masquerading Detection -----------------------------------
 
             if re.search(r"\[", cmd):
-                maps = "/proc/%s/maps" % str(pid)
+                maps = f"/proc/{str(pid)}/maps"
                 maps = run(["/bin/cat", maps], encoding="utf-8", stdout=PIPE)
                 if maps.stdout.strip():
                     logger.log(
@@ -1672,7 +1673,7 @@ class Loki:
         try:
             server.bind((args.listen_host, args.listen_port))
         except Exception as strerror:
-            logger.log("ERROR", "Init", strerror)
+            logger.log("ERROR", "Init", str(strerror))
             server.close()
             sys.exit(1)
         save_pidfile()
@@ -1731,11 +1732,8 @@ def update_loki(sigs_only: bool) -> None:
 
     if sigs_only:
         p_args.append("--sigsonly")
-        p = Popen(p_args, shell=False)
-        p.communicate()
-    else:
-        p_args.append("--detached")
-        Popen(p_args, shell=False)
+        with Popen(p_args, shell=False) as p:
+            p.communicate()
 
 
 def walk_error(err) -> None:
@@ -1752,12 +1750,12 @@ def save_pidfile() -> None:
     """
     if args.d is True:
         if os.path.exists(args.pidfile):
-            fpid = open(args.pidfile, "r", encoding="utf-8")
-            loki_pid = int(fpid.read())
-            fpid.close()
-            if psutil.pid_exists(loki_pid):
-                print("LOKI daemon already running. Returning to Asgard.")
-                sys.exit(0)
+            with open(args.pidfile, "r", encoding="utf-8") as fpid:
+                loki_pid = int(fpid.read())
+                fpid.close()
+                if psutil.pid_exists(loki_pid):
+                    print("LOKI daemon already running. Returning to Asgard.")
+                    sys.exit(0)
         with open(args.pidfile, "w", encoding="utf-8") as fpid:
             fpid.write(str(os.getpid()))
             fpid.close()
@@ -1796,6 +1794,17 @@ def sigterm_handler(signal_name, frame) -> None:
     sys.exit(0)
 
 
+def signal_handlers() -> None:
+    """
+    Signal handlers
+    """
+    # Signal handler for CTRL+C
+    signal.signal(signal.SIGINT, sigint_handler)
+
+    # Signal handler for SIGTERM
+    signal.signal(signal.SIGTERM, sigterm_handler)
+
+
 def get_platform() -> str:
     """
     Get platform full name
@@ -1804,9 +1813,9 @@ def get_platform() -> str:
         for key, val in platform.freedesktop_os_release().items():
             if key == "PRETTY_NAME":
                 platform_pretty_name = val
-    except Exception as e:
+    except Exception as err:
         if args.debug:
-            print(e)
+            print(err)
         platform_pretty_name = platform.system()
 
     platform_machine = platform.machine()
@@ -1825,9 +1834,9 @@ def print_start_info() -> None:
     )
 
 
-def main():
+def read_args() -> "argparse.Namespace":
     """
-    main
+    read arguments
     """
     args_tmp = parser.parse_args()
 
@@ -1835,10 +1844,8 @@ def main():
         print("The --logfolder and -l directives are not compatible with --nolog")
         sys.exit(1)
 
-    filename = "loki_%s_%s.log" % (
-        os.uname().nodename,
-        datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
-    )
+    date_format = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"loki_{os.uname().nodename}_{date_format}.log"
     if args_tmp.logfolder and args_tmp.logfile:
         print(
             "Must specify either log folder with --logfolder, which uses the default filename, "
@@ -1856,16 +1863,12 @@ def main():
     return args_tmp
 
 
-# MAIN ################################################################
 if __name__ == "__main__":
-    # Signal handler for CTRL+C
-    signal.signal(signal.SIGINT, sigint_handler)
+    # Set signal handlers
+    signal_handlers()
 
-    # Signal handler for SIGTERM
-    signal.signal(signal.SIGTERM, sigterm_handler)
-
-    # Argument parsing
-    args = main()
+    # Read args
+    args = read_args()
 
     # Remove old log file
     if os.path.exists(args.logfile):
@@ -1884,6 +1887,7 @@ if __name__ == "__main__":
     if args.version:
         sys.exit(0)
 
+    # Print start info
     print_start_info()
 
     # Loki
@@ -1899,17 +1903,18 @@ if __name__ == "__main__":
             "to process memory and file objects.",
         )
 
-    # Scan Processes --------------------------------------------------
-    if not args.noprocscan and os.geteuid() == 0:
-        loki.scan_processes_linux()
-    else:
-        logger.log(
-            "NOTICE",
-            "Init",
-            "Skipping process memory check. User has no admin rights.",
-        )
+    # Process scanning
+    if not args.noprocscan:
+        if os.geteuid() == 0:
+            loki.scan_processes_linux()
+        else:
+            logger.log(
+                "NOTICE",
+                "Init",
+                "Skipping process memory check. User has no admin rights.",
+            )
 
-    # Scan Mode -------------------------------------------------------
+    # File scan mode
     if args.d:
         loki.run_daemon()
 
