@@ -1,6 +1,6 @@
 version: '3'
 services:
-  loki:
+  paranoya:
     build: .
     volumes:
       - /tmp:/tmp

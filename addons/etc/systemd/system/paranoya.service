@@ -1,0 +1,13 @@
+[Unit]
+Description=paranoya: Simple IOC And Yara Scanner
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/paranoya
+ExecStart=/opt/paranoya/bin/python3 paranoya.py --listen-host localhost --listen-port 1337 -d -s 20000 --noindicator --csv --nolog --intense --force
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,8 +1,8 @@
 """
-Loki (daemonized) lib/helpers.py
-https://github.com/c0m4r/Loki-daemonized
+paranoya helpers
+https://github.com/c0m4r/paranoya
 
-Loki (daemonized): Simple IOC and YARA Scanner for Linux®
+paranoya: Simple IOC and YARA scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
@@ -35,7 +35,7 @@ import traceback
 # Helper Functions -------------------------------------------------------------
 
 
-def loki_generate_hashes(filedata: bytes) -> tuple[str, str, str]:
+def paranoya_generate_hashes(filedata: bytes) -> tuple[str, str, str]:
     """
     generate hashes
     """
@@ -54,7 +54,7 @@ def loki_generate_hashes(filedata: bytes) -> tuple[str, str, str]:
         return "0", "0", "0"
 
 
-def loki_get_excluded_mountpoints() -> list[str]:
+def paranoya_get_excluded_mountpoints() -> list[str]:
     """
     get excluded mountpoints
     """
@@ -71,7 +71,7 @@ def loki_get_excluded_mountpoints() -> list[str]:
     return excludes
 
 
-def loki_print_progress(i: int) -> None:
+def paranoya_print_progress(i: int) -> None:
     """
     print progress indicator
     """
@@ -86,7 +86,7 @@ def loki_print_progress(i: int) -> None:
     sys.stdout.flush()
 
 
-def loki_transform_os(regex: str) -> str:
+def paranoya_transform_os(regex: str) -> str:
     """
     transform os specific characters
     """
@@ -95,7 +95,7 @@ def loki_transform_os(regex: str) -> str:
     return regex
 
 
-def loki_replace_env_vars(path: str) -> str:
+def paranoya_replace_env_vars(path: str) -> str:
     """
     replace os specific env vars
     """
@@ -125,7 +125,7 @@ def loki_replace_env_vars(path: str) -> str:
     return new_path
 
 
-def loki_get_file_type(
+def paranoya_get_file_type(
     file_path: str, filetype_sigs, max_filetype_magics, logger
 ) -> str:
     """
@@ -149,7 +149,7 @@ def loki_get_file_type(
         return "UNKNOWN"
 
 
-def loki_remove_non_ascii_drop(s) -> str:
+def paranoya_remove_non_ascii_drop(s) -> str:
     """
     remove non-ascii
     """
@@ -163,7 +163,7 @@ def loki_remove_non_ascii_drop(s) -> str:
     return nonascii
 
 
-def loki_get_age(file_path: str) -> tuple[float, float, float]:
+def paranoya_get_age(file_path: str) -> tuple[float, float, float]:
     """
     get age
     """
@@ -185,11 +185,11 @@ def loki_get_age(file_path: str) -> tuple[float, float, float]:
     return (ctime, mtime, atime)
 
 
-def loki_get_age_string(file_path: str) -> str:
+def paranoya_get_age_string(file_path: str) -> str:
     """
     get age string
     """
-    (ctime, mtime, atime) = loki_get_age(file_path)
+    (ctime, mtime, atime) = paranoya_get_age(file_path)
     timestring = ""
     try:
         timestring = (

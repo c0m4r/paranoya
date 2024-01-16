@@ -5,7 +5,7 @@ Arguments parser
 import argparse
 
 # Parse Arguments
-parser = argparse.ArgumentParser(description="Loki - Simple IOC Scanner")
+parser = argparse.ArgumentParser(description="paranoya: Simple IOC and YARA scanner")
 parser.add_argument("-p", help="Path to scan", metavar="path", default="/")
 parser.add_argument(
     "-s",
@@ -19,7 +19,7 @@ parser.add_argument("-w", help="Warning score", metavar="warning-level", default
 parser.add_argument("-n", help="Notice score", metavar="notice-level", default=40)
 parser.add_argument("-d", help="Run as a daemon", action="store_true", default=False)
 parser.add_argument(
-    "--pidfile", help="Pid file path (default: loki.pid)", default="loki.pid"
+    "--pidfile", help="Pid file path (default: paranoya.pid)", default="paranoya.pid"
 )
 parser.add_argument(
     "--listen-host",
@@ -140,13 +140,13 @@ parser.add_argument(
     "--force",
     action="store_true",
     help="Force the scan on a certain folder "
-    "(even if excluded with hard exclude in LOKI's code",
+    "(even if excluded with hard exclude in paranoya's code",
     default=False,
 )
 parser.add_argument(
     "--version",
     action="store_true",
-    help="Shows welcome text and version of loki, then exit",
+    help="Shows welcome text and version of paranoya, then exit",
     default=False,
 )
 parser.add_argument(
@@ -158,7 +158,7 @@ parser.add_argument(
 parser.add_argument(
     "--followlinks",
     action="store_true",
-    help="Force Loki to follow symlinks (be aware: may lead to RAM overflow)",
+    help="Force paranoya to follow symlinks (be aware: may lead to RAM overflow)",
     default=False,
 )
 parser.add_argument(

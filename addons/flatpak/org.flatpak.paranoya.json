@@ -1,9 +1,9 @@
 {
-    "id": "org.flatpak.Loki-daemonized",
+    "id": "org.flatpak.paranoya",
     "runtime": "org.freedesktop.Platform",
     "runtime-version": "23.08",
     "sdk": "org.freedesktop.Sdk",
-    "command": "loki.sh",
+    "command": "paranoya.sh",
     "finish-args": [
         "--share=network",
         "--filesystem=host"
@@ -11,7 +11,7 @@
     "modules": [
         "python3-requirements.json",
         {
-            "name": "Loki-daemonized",
+            "name": "paranoya",
             "buildsystem": "simple",
             "build-options": {
                 "build-args": [ "--share=network" ]
@@ -23,22 +23,22 @@
             "sources": [
                 {
                     "type": "git",
-                    "path": "Loki-daemonized",
+                    "path": "paranoya",
                     "branch": "main",
-                    "url": "https://github.com/c0m4r/Loki-daemonized.git"
+                    "url": "https://github.com/c0m4r/paranoya.git"
                 }
             ]
         },
         {
-            "name": "loki-wrapper",
+            "name": "paranoya-wrapper",
             "buildsystem": "simple",
             "build-commands": [
-                "install -D loki.sh /app/bin/loki.sh"
+                "install -D paranoya.sh /app/bin/paranoya.sh"
             ],
             "sources": [
                 {
                     "type": "file",
-                    "path": "loki.sh"
+                    "path": "paranoya.sh"
                 }
             ]
         }

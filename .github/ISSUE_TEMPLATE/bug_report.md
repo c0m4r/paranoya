@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem
  - Container: [e.g. none, docker, flatpak]
  - C library: [e.g. glibc / musl]
  - Terminal [e.g. xterm, terminator, gnome-terminal]
- - Loki version [e.g. 2.0.0]
+ - paranoya version [e.g. 4.0.0]
  - Additional info: [if applicable]
 
 **Additional context**

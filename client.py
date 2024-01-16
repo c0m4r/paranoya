@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-Loki (daemonized) client
-https://github.com/c0m4r/Loki-daemonized
+paranoya: client
+https://github.com/c0m4r/paranoya
 
-Loki (daemonized): Simple IOC and YARA Scanner for Linux®
+paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
@@ -31,7 +31,8 @@ import sys
 
 # Parse Arguments
 parser = argparse.ArgumentParser(
-    description="Loki - Client", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    description="paranoya client",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument("-p", help="Path to scan", metavar="PATH")
 parser.add_argument(

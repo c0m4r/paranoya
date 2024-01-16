@@ -8,9 +8,9 @@ echo 'Server = https://mirror.rackspace.com/archlinux/$repo/os/$arch' >> /etc/pa
 pacman -Syyu --noconfirm
 pacman -S bash gcc git python3 python-devtools python-pip --noconfirm
 cd /opt
-git clone https://github.com/c0m4r/Loki-daemonized.git
-cd Loki-daemonized
+git clone https://github.com/c0m4r/paranoya.git
+cd paranoya
 ./deploy.sh
-./loki.py -p ./test
+./paranoya.py -p ./test
 mkdir scan
 exit

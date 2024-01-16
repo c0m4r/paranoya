@@ -1,8 +1,8 @@
 """
-Loki (daemonized) lib/lokilogger.py
-https://github.com/c0m4r/Loki-daemonized
+paranoya logger
+https://github.com/c0m4r/paranoya
 
-Loki (daemonized): Simple IOC and YARA Scanner for Linux®
+paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
@@ -30,7 +30,7 @@ import re
 import sys
 import traceback
 
-from lib.lokivenv import venv_check
+from lib.paranoya_venv import venv_check
 
 # venv before loading custom modules
 venv_check("lib")
@@ -43,12 +43,12 @@ except Exception as e:
     print(e)
     sys.exit(0)
 
-__version__ = "3.2.2"
+__version__ = "4.0.0"
 
 
-class LokiLogger:
+class ParanoyaLogger:
     """
-    Loki logger
+    paranoya logger
     """
 
     STDOUT_CSV = 0
@@ -58,7 +58,7 @@ class LokiLogger:
     SYSLOG_LINE = 4
 
     no_log_file = False
-    log_file = "loki.log"
+    log_file = "paranoya.log"
     csv = False
     alerts = 0
     warnings = 0
@@ -235,7 +235,7 @@ class LokiLogger:
                 else:
                     logfile.write(
                         self.log_format(
-                            "{0} {1} LOKI: {2}: MODULE: {3} MESSAGE: {4}{5}",
+                            "{0} {1} PARANOYA: {2}: MODULE: {3} MESSAGE: {4}{5}",
                             get_syslog_timestamp(),
                             os.uname().nodename,
                             mes_type.title(),
@@ -258,16 +258,14 @@ class LokiLogger:
         self.log(
             "NOTICE",
             "Results",
-            "Results: {0} alerts, {1} warnings, {2} notices".format(
-                self.alerts, self.warnings, self.notices
-            ),
+            f"Results: {self.alerts} alerts, {self.warnings} warnings, {self.notices} notices",
         )
         if self.alerts:
             self.log("RESULT", "Results", "Indicators detected!")
             self.log(
                 "RESULT",
                 "Results",
-                "Loki recommends checking the elements on virustotal.com "
+                "paranoya recommends checking the elements on virustotal.com "
                 "or Google and triage with a professional tool like "
                 "THOR https://nextron-systems.com/thor in corporate networks.",
             )
@@ -276,7 +274,7 @@ class LokiLogger:
             self.log(
                 "RESULT",
                 "Results",
-                "Loki recommends a deeper analysis of the suspicious objects.",
+                "paranoya recommends a deeper analysis of the suspicious objects.",
             )
         else:
             self.log("RESULT", "Results", "SYSTEM SEEMS TO BE CLEAN.")
@@ -289,45 +287,24 @@ class LokiLogger:
         self.log(
             "NOTICE",
             "Results",
-            "Finished LOKI Scan SYSTEM: %s TIME: %s"
-            % (os.uname().nodename, get_syslog_timestamp()),
+            f"Finished PARANOYA Scan SYSTEM: {os.uname().nodename} TIME: {get_syslog_timestamp()}",
         )
 
     def print_welcome(self) -> None:
         """
         print welcome
         """
-        try:
-            termsize = os.get_terminal_size().columns
-        except Exception:
-            termsize = 80
         print(str(Style.BRIGHT))
-        if termsize > 80:
-            print(
-                rf"    {Fore.GREEN}__   ____  __ ______{Fore.RESET}     "
-                rf"{Fore.RED}__                         _            __{Fore.RESET}"
-            )
-            print(
-                rf"   {Fore.GREEN}/ /  / __ \/ //_/  _/{Fore.RESET} "
-                rf"{Fore.RED}___/ /__ ____ __ _  ___  ___  (_)__ ___ ___/ /{Fore.RESET}"
-            )
-            print(
-                rf"  {Fore.GREEN}/ /__/ /_/ / ,< _/ /{Fore.RESET}  "
-                rf"{Fore.RED}/ _  / _ `/ -_)  ' \/ _ \/ _ \/ /_ // -_) _  / {Fore.RESET}"
-            )
-            print(
-                rf" {Fore.GREEN}/____/\____/_/|_/___/{Fore.RESET}  "
-                rf"{Fore.RED}\_,_/\_,_/\__/_/_/_/\___/_//_/_//__/\__/\_,_/  {Fore.RESET}"
-            )
-        else:
-            print(r" Loki (daemonized)")
-        print(" YARA and IOC Scanner")
+        print(f"{Fore.CYAN} ._   _. ._ _. ._   _      _. ")
+        print(r" |_) (_| | (_| | | (_) \/ (_| ")
+        print(f" |                     /      {Fore.RESET}")
         print("")
         print(" Copyright (c) 2014-2023 Florian Roth")
-        print(" Copyright (c) 2023-2024 c0m4r")
-        print(f" version {__version__}\n")
-        print(" GNU General Public License v3.0\n")
-        print(" DISCLAIMER - USE AT YOUR OWN RISK & DON'T BE EVIL")
+        print(" Copyright (c) 2023-2024 c0m4r\n")
+        print(
+            f" Version: {Fore.CYAN}{__version__}{Fore.RESET}"
+            f" License: {Fore.CYAN}GNU GPL 3.0{Fore.RESET}"
+        )
         print(Back.RESET)
 
 

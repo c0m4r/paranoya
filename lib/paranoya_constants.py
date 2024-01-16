@@ -1,5 +1,5 @@
 """
-Loki constants
+paranoya constants
 """
 
 # Predefined Evil Extensions

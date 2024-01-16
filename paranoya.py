@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-Loki (daemonized)
-https://github.com/c0m4r/Loki-daemonized
+paranoya
+https://github.com/c0m4r/paranoya
 
-Loki (daemonized): Simple IOC and YARA Scanner for Linux®
+paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
@@ -42,28 +42,28 @@ from bisect import bisect_left
 from collections import Counter
 from subprocess import Popen, PIPE, run
 
-# LOKI modules
-from lib.lokiargs import parser
-from lib.lokilogger import LokiLogger, get_syslog_timestamp
-from lib.helpers import (
-    loki_generate_hashes,
-    loki_get_excluded_mountpoints,
-    loki_print_progress,
-    loki_transform_os,
-    loki_replace_env_vars,
-    loki_get_file_type,
-    loki_remove_non_ascii_drop,
-    loki_get_age_string,
+# paranoya modules
+from lib.paranoya_args import parser
+from lib.paranoya_logger import ParanoyaLogger, get_syslog_timestamp
+from lib.paranoya_helpers import (
+    paranoya_generate_hashes,
+    paranoya_get_excluded_mountpoints,
+    paranoya_print_progress,
+    paranoya_transform_os,
+    paranoya_replace_env_vars,
+    paranoya_get_file_type,
+    paranoya_remove_non_ascii_drop,
+    paranoya_get_age_string,
 )
 
-from lib.constants import (
+from lib.paranoya_constants import (
     EVIL_EXTENSIONS,
     SCRIPT_EXTENSIONS,
     SCRIPT_TYPES,
     HASH_WHITELIST,
 )
 
-from lib.lokivenv import venv_check
+from lib.paranoya_venv import venv_check
 
 # venv before loading custom modules
 venv_check(__file__)
@@ -86,9 +86,9 @@ def ioc_contains(sorted_list, value):
     return index != len(sorted_list) and sorted_list[index] == value
 
 
-class Loki:
+class Paranoya:
     """
-    Loki
+    paranoya
     """
 
     # Signatures
@@ -137,7 +137,7 @@ class Loki:
                 "The 'signature-base' subdirectory doesn't exist or is empty. "
                 "Trying to retrieve the signature database automatically.",
             )
-            update_loki(sigs_only=True)
+            update_paranoya(sigs_only=True)
 
         # Excludes
         self.initialize_excludes(
@@ -162,7 +162,7 @@ class Loki:
                 self.start_excludes = (
                     linux_path_skips_start
                     | set(["/media", "/volumes"])
-                    | set(loki_get_excluded_mountpoints())
+                    | set(paranoya_get_excluded_mountpoints())
                 )
 
         # Set IOC path
@@ -266,7 +266,7 @@ class Loki:
             files = [path]
             # Disable progress bar for single file scan
             args.progress = False
-            loki.scan_path_files(root, directories, files)
+            paranoya.scan_path_files(root, directories, files)
             return
 
         if args.progress and not args.silent and not args.noindicator:
@@ -329,7 +329,7 @@ class Loki:
                     new_directories.append(dirname)
             directories[:] = new_directories
 
-            loki.scan_path_files(root, directories, files, progress_bar)
+            paranoya.scan_path_files(root, directories, files, progress_bar)
 
     def perform_intense_check(
         self,
@@ -351,7 +351,7 @@ class Loki:
         # First bytes
         first_bytes_string = "%s / %s" % (
             file_data[:20].hex(),
-            loki_remove_non_ascii_drop(file_data[:20]),
+            paranoya_remove_non_ascii_drop(file_data[:20]),
         )
 
         # Hash Eval
@@ -362,7 +362,7 @@ class Loki:
         sha1 = 0
         sha256 = 0
 
-        md5, sha1, sha256 = loki_generate_hashes(file_data)
+        md5, sha1, sha256 = paranoya_generate_hashes(file_data)
         md5_num = int(md5, 16)
         sha1_num = int(sha1, 16)
         sha256_num = int(sha256, 16)
@@ -557,7 +557,7 @@ class Loki:
                 c += 1
 
                 if not args.noindicator:
-                    loki_print_progress(c)
+                    paranoya_print_progress(c)
 
                 # Skip program directory
                 if self.app_path.lower() in file_path.lower() and not args.force:
@@ -596,7 +596,7 @@ class Loki:
                 hash_string = ""
 
                 # Evaluate Type
-                file_type = loki_get_file_type(
+                file_type = paranoya_get_file_type(
                     file_path, self.filetype_magics, self.max_filetype_magics, logger
                 )
 
@@ -682,7 +682,7 @@ class Loki:
                     f"FILE: {file_path} SCORE: {total_score}"
                     f" TYPE: {file_type} SIZE: {file_size}"
                     f" FIRST_BYTES: {first_bytes_string} {hash_string}"
-                    f" {loki_get_age_string(file_path)} "
+                    f" {paranoya_get_age_string(file_path)} "
                 )
 
                 # Now print the total result
@@ -1116,7 +1116,7 @@ class Loki:
                                         )
                                         continue
 
-                                    # Add to the LOKI iocs
+                                    # Add to the paranoya iocs
                                     self.c2_server[c2.lower()] = last_comment
 
                                 except Exception:
@@ -1178,17 +1178,17 @@ class Loki:
                                     regex = line
 
                                 # Replace environment variables
-                                regex = loki_replace_env_vars(regex)
+                                regex = paranoya_replace_env_vars(regex)
 
                                 # OS specific transforms
-                                regex = loki_transform_os(regex)
+                                regex = paranoya_transform_os(regex)
 
                                 # If false positive definition exists
                                 regex_fp_comp = None
                                 if "regex_fp" in locals():
                                     # Replacements
-                                    regex_fp = loki_replace_env_vars(regex_fp)
-                                    regex_fp = loki_transform_os(regex_fp)
+                                    regex_fp = paranoya_replace_env_vars(regex_fp)
+                                    regex_fp = paranoya_transform_os(regex_fp)
                                     # String regex as key - value is compiled regex
                                     # of false positive values
                                     regex_fp_comp = re.compile(regex_fp)
@@ -1218,12 +1218,6 @@ class Loki:
                     "ERROR",
                     "Init",
                     f"Error reading files from IOC folder: {ioc_directory}",
-                )
-                logger.log(
-                    "ERROR",
-                    "Init",
-                    "Please make sure that you cloned the repo or downloaded the sub repository: "
-                    "See https://github.com/Neo23x0/Loki/issues/51",
                 )
             sys.exit(1)
 
@@ -1334,7 +1328,7 @@ class Loki:
                 )
                 sys.exit(1)
 
-            # Add as Lokis YARA rules
+            # Add as paranoya YARA rules
             self.yara_rules.append(compiled_rules)
 
         except Exception:
@@ -1659,7 +1653,7 @@ class Loki:
                     client_socket.send("RESULT: SYSTEM SEEMS TO BE CLEAN.".encode())
 
                 logger.log(
-                    "NOTICE", "Results", f"Finished LOKI Scan CLIENT: {clientid}"
+                    "NOTICE", "Results", f"Finished paranoya Scan CLIENT: {clientid}"
                 )
                 client_socket.close()
                 return False
@@ -1713,9 +1707,9 @@ def get_application_path():
             sys.exit(1)
 
 
-def update_loki(sigs_only: bool) -> None:
+def update_paranoya(sigs_only: bool) -> None:
     """
-    update loki
+    update paranoya
     """
     logger.log("INFO", "Update", "Starting separate updater process ...")
     p_args = []
@@ -1754,10 +1748,10 @@ def save_pidfile() -> None:
     if args.d is True:
         if os.path.exists(args.pidfile):
             with open(args.pidfile, "r", encoding="utf-8") as fpid:
-                loki_pid = int(fpid.read())
+                paranoya_pid = int(fpid.read())
                 fpid.close()
-                if psutil.pid_exists(loki_pid):
-                    print("LOKI daemon already running. Returning to Asgard.")
+                if psutil.pid_exists(paranoya_pid):
+                    print("paranoya daemon already running. Returning to Asgard.")
                     sys.exit(0)
         with open(args.pidfile, "w", encoding="utf-8") as fpid:
             fpid.write(str(os.getpid()))
@@ -1780,10 +1774,10 @@ def sigint_handler(signal_name, frame) -> None:
         logger.log(
             "INFO",
             "Init",
-            "LOKI's work has been interrupted by a human. Returning to Asgard.",
+            "paranoya's work has been interrupted by a human. Returning to Asgard.",
         )
     except Exception:
-        print("LOKI's work has been interrupted by a human. Returning to Asgard.")
+        print("paranoya's work has been interrupted by a human. Returning to Asgard.")
     remove_pidfile()
     sys.exit(0)
 
@@ -1793,7 +1787,7 @@ def sigterm_handler(signal_name, frame) -> None:
     SIGTERM handler
     """
     remove_pidfile()
-    print("LOKI's work has been interrupted by a SIGTERM. Returning to Asgard.")
+    print("paranoya's work has been interrupted by a SIGTERM. Returning to Asgard.")
     sys.exit(0)
 
 
@@ -1832,7 +1826,7 @@ def print_start_info() -> None:
     logger.log(
         "NOTICE",
         "Init",
-        f"Starting Loki (daemonized) VERSION: {logger.version} SYSTEM: {os.uname().nodename}"
+        f"Starting paranoya VERSION: {logger.version} SYSTEM: {os.uname().nodename}"
         f" TIME: {get_syslog_timestamp()} PLATFORM: {get_platform()}",
     )
 
@@ -1848,7 +1842,7 @@ def read_args() -> "argparse.Namespace":
         sys.exit(1)
 
     date_format = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"loki_{os.uname().nodename}_{date_format}.log"
+    filename = f"paranoya_{os.uname().nodename}_{date_format}.log"
     if args_tmp.logfolder and args_tmp.logfile:
         print(
             "Must specify either log folder with --logfolder, which uses the default filename, "
@@ -1878,7 +1872,7 @@ if __name__ == "__main__":
         os.remove(args.logfile)
 
     # Logger
-    logger = LokiLogger(
+    logger = ParanoyaLogger(
         args.nolog,
         args.logfile,
         args.csv,
@@ -1893,8 +1887,8 @@ if __name__ == "__main__":
     # Print start info
     print_start_info()
 
-    # Loki
-    loki = Loki(args.intense)
+    # paranoya
+    paranoya = Paranoya(args.intense)
 
     if os.geteuid() == 0:
         logger.log("INFO", "Init", "Current user is root - very good")
@@ -1909,7 +1903,7 @@ if __name__ == "__main__":
     # Process scanning
     if not args.noprocscan:
         if os.geteuid() == 0:
-            loki.scan_processes_linux()
+            paranoya.scan_processes_linux()
         else:
             logger.log(
                 "NOTICE",
@@ -1919,9 +1913,9 @@ if __name__ == "__main__":
 
     # File scan mode
     if args.d:
-        loki.run_daemon()
+        paranoya.run_daemon()
 
     if not args.d and not args.nofilescan:
-        loki.scan_path(args.p)
+        paranoya.scan_path(args.p)
 
     logger.print_results()

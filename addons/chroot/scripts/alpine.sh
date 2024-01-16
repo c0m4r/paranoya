@@ -5,9 +5,9 @@ apk add bash gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-
 apk add shadow
 usermod -s /bin/bash root
 cd opt
-git clone https://github.com/c0m4r/Loki-daemonized.git
-cd Loki-daemonized
+git clone https://github.com/c0m4r/paranoya.git
+cd paranoya
 ./deploy.sh
-./loki.py -p ./test
+./paranoya.py -p ./test
 mkdir scan
 exit

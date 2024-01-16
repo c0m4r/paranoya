@@ -3,10 +3,10 @@ set -e
 
 ###########################################################################
 #                                                                         #
-# Loki (daemonized) build script                                          #
-# https://github.com/c0m4r/Loki-daemonized                                #
+# paranoya: build script                                                  #
+# https://github.com/c0m4r/paranoya                                       #
 #                                                                         #
-# Loki (daemonized): Simple IOC and YARA Scanner for Linux®               #
+# paranoya: Simple IOC and YARA Scanner for Linux®                        #
 # Copyright (c) 2015-2023 Florian Roth                                    #
 # Copyright (c) 2023-2024 c0m4r                                           #
 #                                                                         #
@@ -57,8 +57,8 @@ case $1 in
         shift
         ;;
     -h|--help)
-        print "Loki (daemonized) build script"
-        echo "https://github.com/c0m4r/Loki-daemonized"
+        print "paranoya: build script"
+        echo "https://github.com/c0m4r/paranoya"
         echo ""
         echo "Usage: ./build.sh [options]"
         echo ""
@@ -80,7 +80,7 @@ done
 
 # Check version
 VERSION=$(
-    grep ^__version lib/lokilogger.py \
+    grep ^__version lib/paranoya_logger.py \
     | grep -oP "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
 )
 
@@ -90,12 +90,12 @@ if [[ -e /lib/ld-musl-aarch64.so.1 ]]; then
 fi
 
 # Build
-print "Loki (daemonized) build script"
-echo "https://github.com/c0m4r/Loki-daemonized"
+print "paranoya: build script"
+echo "https://github.com/c0m4r/paranoya"
 echo "Copyright (c) 2014-2023 Florian Roth"
 echo "Copyright (c) 2023-2024 c0m4r"
 echo "GNU General Public License v3.0"
-print "Building Loki (daemonized)"
+print "Building paranoya"
 echo "${VERSION}-$(arch) 🚀"
 
 print "Build (1/8): venv"
@@ -124,8 +124,8 @@ sed -i \
     ./*.py lib/*.py
 
 # PyInstaller
-print "Build (5/8): pyinstaller loki"
-pyinstaller -F loki.py
+print "Build (5/8): pyinstaller paranoya"
+pyinstaller -F paranoya.py
 
 print "Build (6/8): pyinstaller upgrader"
 pyinstaller -F upgrader.py
@@ -144,7 +144,7 @@ sed -i \
 # Create packages
 print "Build (8/8): packaging"
 
-rm -rf Loki-daemonized*"$(arch)"*
+rm -rf paranoya*"$(arch)"*
 cp -r config dist/
 cp README.md dist/
 cp LICENSE dist/
@@ -176,13 +176,13 @@ if [[ "${WITH_TEST}" ]]; then
     cp -r test dist/
 fi
 
-mv dist Loki-daemonized-"${VERSION}"-"$(arch)"
+mv dist paranoya-"${VERSION}"-"$(arch)"
 if command -v zip &>/dev/null ; then
-    zip -r -9 -T Loki-daemonized-"${VERSION}"-"$(arch)".zip Loki-daemonized-"${VERSION}"-"$(arch)"
+    zip -r -9 -T paranoya-"${VERSION}"-"$(arch)".zip paranoya-"${VERSION}"-"$(arch)"
 fi
 if command -v tar &>/dev/null && command -v gzip &>/dev/null ; then
-    tar -I "gzip -9" -cvf Loki-daemonized-"${VERSION}"-"$(arch)".tar.gz Loki-daemonized-"${VERSION}"-"$(arch)"
+    tar -I "gzip -9" -cvf paranoya-"${VERSION}"-"$(arch)".tar.gz paranoya-"${VERSION}"-"$(arch)"
 fi
-mv Loki-daemonized-"${VERSION}"-"$(arch)" dist
+mv paranoya-"${VERSION}"-"$(arch)" dist
 
 print "Build complete 🎉"

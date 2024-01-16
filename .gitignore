@@ -16,7 +16,7 @@
 /lib/__pycache__
 /lib/python3*
 /lib64
-/loki.pid
+/paranoya.pid
 /okrutnik.sh
 /pyvenv.cfg
 /venv

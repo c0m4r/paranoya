@@ -24,12 +24,12 @@ jobs:
           chmod +x okrutnik.sh
           ./okrutnik.sh --install -r requirements.txt
       - run: ./okrutnik.sh lib/*.py || true
-      - run: ./okrutnik.sh --stop lib/constants.py
-      - run: ./okrutnik.sh --stop lib/lokiargs.py
-      - run: ./okrutnik.sh --stop lib/lokivenv.py
+      - run: ./okrutnik.sh --stop lib/paranoya_constants.py
+      - run: ./okrutnik.sh --stop lib/paranoya_args.py
+      - run: ./okrutnik.sh --stop lib/paranoya_venv.py
       - run: ./okrutnik.sh --stop upgrader.py
       - run: ./okrutnik.sh --stop client.py
-      - run: ./okrutnik.sh loki.py || true
+      - run: ./okrutnik.sh paranoya.py || true
       - run: pip install --upgrade pip setuptools wheel
       - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff safety
       - run: ruff .
@@ -41,11 +41,11 @@ jobs:
       - run: pylint *.py lib/*.py || true
       - run: pyright . || true
       - run: safety check --ignore 62044
-      - run: ./loki.py -d &
+      - run: ./paranoya.py -d &
       - run: sleep 5
       - run: ./client.py -p LICENSE
       - run: ./client.py -p ./test
-      - run: kill -TERM $(cat loki.pid)
-      - run: ./loki.py --noprocs --noindicator --dontwait --debug -p ./test
-      - run: ./loki.py --noprocs --noindicator --dontwait --debug --intense -p ./test
-      - run: ./loki.py --noprocs --noindicator --dontwait --debug --csv -p ./test
+      - run: kill -TERM $(cat paranoya.pid)
+      - run: ./paranoya.py --noprocs --noindicator --dontwait --debug -p ./test
+      - run: ./paranoya.py --noprocs --noindicator --dontwait --debug --intense -p ./test
+      - run: ./paranoya.py --noprocs --noindicator --dontwait --debug --csv -p ./test

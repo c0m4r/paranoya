@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-Loki (daemonized) upgrader
-https://github.com/c0m4r/Loki-daemonized
+paranoya upgrader
+https://github.com/c0m4r/paranoya
 
-Loki (daemonized): Simple IOC and YARA Scanner for Linux®
+paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
@@ -41,8 +41,8 @@ from types import FrameType
 from typing import IO
 from zipfile import ZipFile
 
-# Loki modules
-from lib.lokivenv import venv_check
+# paranoya modules
+from lib.paranoya_venv import venv_check
 
 # venv before loading custom modules
 venv_check(__file__)
@@ -91,7 +91,7 @@ def log(log_type: str, module: str, message: str) -> None:
 
 def needs_update(sig_url: str) -> bool:
     """
-    Check if Loki needs update
+    Check if paranoya needs update
     """
     try:
         if not os.path.exists("./signature-base"):
@@ -130,9 +130,9 @@ def needs_update(sig_url: str) -> bool:
         return True
 
 
-class LOKIUpdater:
+class ParanoyaUpdater:
     """
-    Loki updater
+    paranoya upgrader
     """
 
     UPDATE_URL_SIGS: list[str] = [
@@ -156,8 +156,8 @@ class LOKIUpdater:
         },
     }
 
-    UPDATE_URL_LOKI: str = (
-        "https://api.github.com/repos/c0m4r/Loki-daemonized/releases/latest"
+    UPDATE_URL_PARANOYA: str = (
+        "https://api.github.com/repos/c0m4r/paranoya/releases/latest"
     )
 
     def __init__(
@@ -342,11 +342,11 @@ class LOKIUpdater:
             else:
                 log("INFO", "Upgrader", f"{cache_file_name} exists, skipping {sig_url}")
 
-    def get_loki_zip_file_url(self) -> str:
+    def get_paranoya_zip_file_url(self) -> str:
         """
-        Get latest Loki zipfile download url from github api
+        Get latest paranoya zipfile download url from github api
         """
-        response_info = requests.get(url=self.UPDATE_URL_LOKI, timeout=30)
+        response_info = requests.get(url=self.UPDATE_URL_PARANOYA, timeout=30)
         data = response_info.json()
         if "zipball_url" in data:
             return str(data["zipball_url"])
@@ -376,24 +376,24 @@ class LOKIUpdater:
             if self.debug:
                 trace()
 
-    def download_loki(self) -> requests.models.Response:
+    def download_paranoya(self) -> requests.models.Response:
         """
-        Download Loki
+        Download paranoya
         """
         # Downloading the info for latest release
         try:
             log(
                 "INFO",
                 "Upgrader",
-                f"Checking location of latest release {self.UPDATE_URL_LOKI} ...",
+                f"Checking location of latest release {self.UPDATE_URL_PARANOYA} ...",
             )
             # Get download URL
-            zip_url = self.get_loki_zip_file_url()
+            zip_url = self.get_paranoya_zip_file_url()
             if not zip_url:
                 log(
                     "ERROR",
                     "Upgrader",
-                    "Error downloading the loki update - check your Internet connection",
+                    "Error downloading the paranoya update - check your Internet connection",
                 )
                 sys.exit(1)
             else:
@@ -406,13 +406,13 @@ class LOKIUpdater:
             log(
                 "ERROR",
                 "Upgrader",
-                "Error downloading the loki update - check your Internet connection",
+                "Error downloading the paranoya update - check your Internet connection",
             )
             sys.exit(1)
 
-    def make_dir_loki(self, target_file: str) -> None:
+    def make_dir_paranoya(self, target_file: str) -> None:
         """
-        Make dirs for loki
+        Make dirs for paranoya
         """
         try:
             # Create file if not present
@@ -428,9 +428,9 @@ class LOKIUpdater:
                 )
                 trace()
 
-    def extract_loki(self, response_zip: requests.models.Response) -> None:
+    def extract_paranoya(self, response_zip: requests.models.Response) -> None:
         """
-        Extract Loki
+        Extract paranoya
         """
         # Read ZIP file
         try:
@@ -444,7 +444,7 @@ class LOKIUpdater:
 
                         log("INFO", "Upgrader", f"Extracting {target_file} ...")
 
-                        self.make_dir_loki(target_file)
+                        self.make_dir_paranoya(target_file)
 
                         self.create_target_file(target_file, source)
 
@@ -458,13 +458,13 @@ class LOKIUpdater:
             )
             sys.exit(1)
 
-    def update_loki(self) -> bool:
+    def update_paranoya(self) -> bool:
         """
-        Update Loki
+        Update paranoya
         """
         try:
-            response_zip = self.download_loki()
-            self.extract_loki(response_zip)
+            response_zip = self.download_paranoya()
+            self.extract_paranoya(response_zip)
         except Exception:
             if self.debug:
                 trace()
@@ -503,7 +503,7 @@ if __name__ == "__main__":
     signal(SIGTERM, sig_handler)
 
     # Parse Arguments
-    parser = argparse.ArgumentParser(description="Loki - Upgrader")
+    parser = argparse.ArgumentParser(description="paranoya upgrader")
     parser.add_argument(
         "--sigsonly",
         action="store_true",
@@ -531,12 +531,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Update LOKI
-    updater = LOKIUpdater(args.debug, get_application_path())
+    # Update paranoya
+    updater = ParanoyaUpdater(args.debug, get_application_path())
 
     if not args.sigsonly:
-        log("INFO", "Upgrader", "Updating LOKI ...")
-        updater.update_loki()
+        log("INFO", "Upgrader", "Updating paranoya ...")
+        updater.update_paranoya()
     if not args.progonly:
         log("INFO", "Upgrader", "Updating Signatures ...")
         updater.update_signatures(args.force, args.debug)

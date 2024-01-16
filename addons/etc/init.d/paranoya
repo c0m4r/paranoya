@@ -1,0 +1,40 @@
+#!/sbin/openrc-run
+description="paranoya: Simple IOC And Yara Scanner"
+extra_commands=""
+extra_started_commands="update"
+
+workdir=/opt/paranoya
+pidfile=${workdir}/paranoya.pid
+command=/opt/paranoya/bin/python3
+command_args="paranoya.py -s 20000 -d --noprocscan --noindicator --intense --csv --nolog --force"
+
+depend() {
+	need net
+	use dns logger netmount
+}
+
+start() {
+	ebegin "Starting paranoya daemon"
+	cd $workdir
+	source bin/activate
+	$command $command_args | logger -t paranoya &
+}
+
+stop() {
+	ebegin "Stopping paranoya daemon"
+	kill -TERM $(cat $pidfile) &> /dev/null &
+}
+
+restart() {
+	stop
+	start
+}
+
+update() {
+	cd $workdir
+	stop
+	. bin/activate
+	./upgrader.py --sigsonly
+	deactivate
+	start
+}

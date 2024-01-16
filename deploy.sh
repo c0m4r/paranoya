@@ -3,10 +3,10 @@ set -e
 
 ###########################################################################
 #                                                                         #
-# Loki (daemonized) deployment script                                     #
-# https://github.com/c0m4r/Loki-daemonized                                #
+# paranoya deployment script                                              #
+# https://github.com/c0m4r/paranoya                                       #
 #                                                                         #
-# Loki (daemonized): Simple IOC and YARA Scanner for Linux®               #
+# paranoya: Simple IOC and YARA Scanner for Linux®                        #
 # Copyright (c) 2015-2023 Florian Roth                                    #
 # Copyright (c) 2023-2024 c0m4r                                           #
 #                                                                         #

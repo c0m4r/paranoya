@@ -3,10 +3,10 @@ set -e
 
 ###########################################################################
 #                                                                         #
-# Loki (daemonized) chroot script                                         #
-# https://github.com/c0m4r/Loki-daemonized                                #
+# paranoya chroot script                                                  #
+# https://github.com/c0m4r/paranoya                                       #
 #                                                                         #
-# Loki (daemonized): Simple IOC and YARA Scanner for Linux®               #
+# paranoya: Simple IOC and YARA Scanner for Linux®                        #
 # Copyright (c) 2015-2023 Florian Roth                                    #
 # Copyright (c) 2023-2024 c0m4r                                           #
 #                                                                         #
@@ -94,9 +94,8 @@ example_usage() {
     echo ""
     echo "# sudo mount -o bind /home ${1}/mnt"
     echo "# sudo chroot ${1} /bin/bash"
-    echo ""
-    echo "# cd opt/Loki-daemonized"
-    echo "# ./loki.py --noprocscan -p /mnt"
+    echo "# cd opt/paranoya"
+    echo "# ./paranoya.py --noprocscan -p /mnt"
 }
 
 # define get command
