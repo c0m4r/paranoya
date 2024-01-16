@@ -250,7 +250,9 @@ These additional custom YARA rules has been proven to work* with paranoya:
 ## Screenshots
 
 <div align="center">
+
 ![paranoya-screenshot](https://github.com/c0m4r/paranoya/assets/6292788/24641b5d-7541-4bef-acd3-b671b1451767)
+
 </div>
 
 ## License
