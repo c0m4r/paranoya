@@ -1,6 +1,6 @@
 <div align="center">
 
-![image](https://github.com/c0m4r/paranoya/assets/6292788/e3a7d425-ed46-4de7-8fdc-614bd8248432)
+![paranoya](https://github.com/c0m4r/paranoya/assets/6292788/ba51b76d-49b4-42b7-9786-a92e6eef0060)
 
 ## paranoya: Simple IOC and YARA scanner for Linux®
 
