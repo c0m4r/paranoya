@@ -239,7 +239,7 @@ Example usage of the custom ruleset:
 ./loki.py --intense --progress -p ./sample/webshell/ --custom signature-custom/yara/protections-artifacts-main/
 ```
 
-These additional custom YARA rules has been prooven to work* with Loki:
+These additional custom YARA rules has been proven to work* with Loki:
 
 * [SupportIntelligence/Icewater](https://github.com/SupportIntelligence/Icewater)
 * [intezer/yara-rules](https://github.com/intezer/yara-rules)
