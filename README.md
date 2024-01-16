@@ -86,7 +86,8 @@ cd paranoya
 
 #### Docker
 
-Now available on the [Docker Hub](https://hub.docker.com/r/c0m4r/paranoya).
+Now available on the [Docker Hub](https://hub.docker.com/r/c0m4r/paranoya) 
+and [Github Packages](https://github.com/c0m4r/paranoya/pkgs/container/paranoya).
 
 ```
 docker run --name paranoya -v /tmp:/tmp -p 127.0.0.1:1337:1337 -d c0m4r/paranoya
