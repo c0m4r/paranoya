@@ -1,13 +1,11 @@
 <div align="center">
 
-![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-header.png)
-
-## Loki (daemonized) - Simple IOC and YARA scanner for Linux®
+## paranoya: Simple IOC and YARA scanner for Linux®
 
 ![Python](https://img.shields.io/badge/made%20with-python-blue?logo=python&logoColor=ffffff)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Test](https://github.com/c0m4r/Loki-daemonized/workflows/lint_python/badge.svg)](https://github.com/c0m4r/Loki-daemonized/actions)
-[![CodeFactor](https://www.codefactor.io/repository/github/c0m4r/loki-daemonized/badge)](https://www.codefactor.io/repository/github/c0m4r/loki-daemonized)
+[![Test](https://github.com/c0m4r/paranoya/workflows/lint_python/badge.svg)](https://github.com/c0m4r/paranoya/actions)
+[![CodeFactor](https://www.codefactor.io/repository/github/c0m4r/paranoya/badge)](https://www.codefactor.io/repository/github/c0m4r/paranoya)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
@@ -78,18 +76,18 @@ dnf install bash gcc git openssl-devel python3 python3-devel python3-pip
 #### Manual
 
 ```
-git clone https://github.com/c0m4r/Loki-daemonized.git
-cd Loki-daemonized
+git clone https://github.com/c0m4r/paranoya.git
+cd paranoya
 ./deploy.sh
-./loki.py --nolog --intense -p ./test
+./paranoya.py --nolog --intense -p ./test
 ```
 
 #### Docker
 
-Now available on the [Docker Hub](https://hub.docker.com/r/c0m4r/loki-daemonized).
+Now available on the [Docker Hub](https://hub.docker.com/r/c0m4r/paranoya).
 
 ```
-docker run --name loki -v /tmp:/tmp -p 127.0.0.1:1337:1337 -d c0m4r/loki-daemonized
+docker run --name paranoya -v /tmp:/tmp -p 127.0.0.1:1337:1337 -d c0m4r/paranoya
 ```
 
 You can also build the image yourself. This repo comes with predefined Docker files. 
@@ -97,8 +95,8 @@ The default one is based on an [official Python image](https://hub.docker.com/_/
 so running it should be as simple as:
 
 ```
-git clone https://github.com/c0m4r/Loki-daemonized.git
-cd Loki-daemonized/addons/docker/default
+git clone https://github.com/c0m4r/paranoya.git
+cd paranoya/addons/docker/default
 docker compose up -d
 ```
 
@@ -113,30 +111,30 @@ There are other [Dockerfiles](/addons/docker) available, based on different Linu
 DIY flatpak-builder files are available [here](/addons/flatpak).
 
 ```
-git clone https://github.com/c0m4r/Loki-daemonized.git
-cd Loki-daemonized/addons/flatpak
+git clone https://github.com/c0m4r/paranoya.git
+cd paranoya/addons/flatpak
 ./build.sh
 ```
 
-Once it's ready, you can run Loki, passing the arguments you need.
+Once it's ready, you can run paranoya, passing the arguments you need.
 
 ```
-flatpak run org.flatpak.Loki-daemonized --intense -p ./test
+flatpak run org.flatpak.paranoya --intense -p ./test
 ```
 
 Keep in mind that even though there is `--filesystem=host` set, 
 some of the directories are [blacklisted](https://docs.flatpak.org/en/latest/sandbox-permissions.html#filesystem-access) 
-under Flatpak Sandbox, preventing Loki from scanning them.
+under Flatpak Sandbox, preventing paranoya from scanning them.
 
 In order to scan one of them, use an override. An example for /tmp dir:
 
 ```
-flatpak override --user --filesystem=/tmp org.flatpak.Loki-daemonized
+flatpak override --user --filesystem=/tmp org.flatpak.paranoya
 ```
 
 #### Compiled
 
-For the binary version of Loki-daemonized and its tools, use ./build.sh script.
+For the binary version of paranoya and its tools, use ./build.sh script.
 
 However, when possible, you should use bare python under venv, 
 as it will allow you to get the latest versions of python modules and keep them up-to-date, 
@@ -144,11 +142,11 @@ as well as view and verify the source code.
 
 #### Chroot
 
-See: [Loki‐daemonized in chroot](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-in-chroot)
+See: [paranoya in chroot](https://github.com/c0m4r/paranoya/wiki/paranoya-in-chroot)
 
 #### Android
 
-See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wiki/Loki%E2%80%90daemonized-on-Android)
+See: [paranoya on Android](https://github.com/c0m4r/paranoya/wiki/paranoya-on-Android)
 
 ## Daemonized usage
 
@@ -157,7 +155,7 @@ See: [Loki‐daemonized on Android](https://github.com/c0m4r/Loki-daemonized/wik
 Start as a daemon and bind on the default localhost:1337
 
 ```
-./loki.py -d -s 20000 --noindicator --csv --nolog --intense
+./paranoya.py -d -s 20000 --noindicator --csv --nolog --intense
 ```
 
 You can also change default bind address/port with `--listen-host` 
@@ -194,7 +192,7 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
 * A single file scan if a given path is a file
 * Daemon mode `-d` with listening socket `--listen-host 127.0.0.1` `--listen-port 1337`
   accepting scans requested from client.py
-  * PID file `loki.pid` is created in the program directory if running in daemon mode,
+  * PID file `paranoya.pid` is created in the program directory if running in daemon mode,
     you change its path with `--pidfile /path/to/pidfile`
   * Optional auth key `--auth somethingRandomHere` in daemon mode
     (just a dumb string authorization, can be intercepted and read from the process list)
@@ -206,21 +204,17 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
   * Process connections: for now, it only shows detected connections per process
   * Process Masquerading Detection: reports non-empty /proc/PID/maps of processes that uses square brackets in their cmdlines
 * Progress bar (experimental) can be enabled with --progress
-* Force Loki to follow symlinks (be aware: may lead to RAM overflow) with --followlinks
+* Force paranoya to follow symlinks (be aware: may lead to RAM overflow) with --followlinks
 * Custom yara rules sources
   * Some additional YARA rule sources have been added and you can also choose your own
   * Custom yara ruleset dir can be set with --custom signature-custom/yara/name
   * To avoid conflicts between rules, it's recommended to use only one source at a time
 
-## Screenshot
-
-![/addons/img/loki-daemonized-screen3.png](/addons/img/loki-daemonized-screen-3.1.0.png)
-
 ## Usage
 
 Run a program with --help to view usage information.
 
-See: [Usage](https://github.com/c0m4r/Loki-daemonized/wiki/Usage)
+See: [Usage](https://github.com/c0m4r/paranoya/wiki/Usage)
 
 ## Custom signatures
 
@@ -236,10 +230,10 @@ It will process all the .yar and .yara stored in that directory; don't point to 
 Example usage of the custom ruleset:
 
 ```
-./loki.py --intense --progress -p ./sample/webshell/ --custom signature-custom/yara/protections-artifacts-main/
+./paranoya.py --intense --progress -p ./sample/webshell/ --custom signature-custom/yara/protections-artifacts-main/
 ```
 
-These additional custom YARA rules has been proven to work* with Loki:
+These additional custom YARA rules has been proven to work* with paranoya:
 
 * [SupportIntelligence/Icewater](https://github.com/SupportIntelligence/Icewater)
 * [intezer/yara-rules](https://github.com/intezer/yara-rules)
@@ -256,7 +250,7 @@ These additional custom YARA rules has been proven to work* with Loki:
 ## License
 
 ```
-Loki (daemonized): Simple IOC and YARA Scanner for Linux®
+paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
