@@ -86,7 +86,7 @@ cd Loki-daemonized
 
 #### Docker
 
-Now available on the [Docker hub](https://hub.docker.com/r/c0m4r/loki-daemonized).
+Now available on the [Docker Hub](https://hub.docker.com/r/c0m4r/loki-daemonized).
 
 ```
 docker run --name loki -v /tmp:/tmp -p 127.0.0.1:1337:1337 -d c0m4r/loki-daemonized
