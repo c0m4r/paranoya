@@ -2,7 +2,7 @@
 
 ![/addons/img/loki-daemonized-icon.png](/addons/img/loki-daemonized-header.png)
 
-## Loki (daemonized) - Simple IOC and YARA scanner for Linux
+## Loki (daemonized) - Simple IOC and YARA scanner for Linux®
 
 ![Python](https://img.shields.io/badge/made%20with-python-blue?logo=python&logoColor=ffffff)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -256,7 +256,7 @@ These additional custom YARA rules has been proven to work* with Loki:
 ## License
 
 ```
-Loki (daemonized): Simple IOC and YARA Scanner for Linux
+Loki (daemonized): Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
 Copyright (c) 2023-2024 c0m4r
 
@@ -272,6 +272,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.
 ```
 
 ## Funding
