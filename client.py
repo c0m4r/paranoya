@@ -29,8 +29,12 @@ import os
 import socket
 import sys
 
-def parse_arguments() -> None:
-    # Parse Arguments
+
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse arguments
+    returns: args
+    """
     parser = argparse.ArgumentParser(
         description="paranoya client",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -59,6 +63,7 @@ def parse_arguments() -> None:
     )
 
     return parser.parse_args()
+
 
 args = parse_arguments()
 
