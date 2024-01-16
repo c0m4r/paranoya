@@ -6,7 +6,7 @@ set -e
 # Loki (daemonized) chroot script                                         #
 # https://github.com/c0m4r/Loki-daemonized                                #
 #                                                                         #
-# Loki (daemonized): Simple IOC and YARA Scanner                          #
+# Loki (daemonized): Simple IOC and YARA Scanner for Linux®               #
 # Copyright (c) 2015-2023 Florian Roth                                    #
 # Copyright (c) 2023-2024 c0m4r                                           #
 #                                                                         #
@@ -22,6 +22,9 @@ set -e
 #                                                                         #
 # You should have received a copy of the GNU General Public License       #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.  #
+#                                                                         #
+# Linux® is the registered trademark of Linus Torvalds                    #
+# in the U.S. and other countries.                                        #
 #                                                                         #
 ###########################################################################
 
