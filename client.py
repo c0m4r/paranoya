@@ -29,35 +29,38 @@ import os
 import socket
 import sys
 
-# Parse Arguments
-parser = argparse.ArgumentParser(
-    description="paranoya client",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-)
-parser.add_argument("-p", help="Path to scan", metavar="PATH")
-parser.add_argument(
-    "--host",
-    help="Target daemon host",
-    default="localhost",
-)
-parser.add_argument(
-    "--port",
-    help="Target daemon port",
-    default=1337,
-)
-parser.add_argument(
-    "--auth",
-    metavar="AUTHKEY",
-    help="Pass authkey if it is required",
-)
-parser.add_argument(
-    "--check",
-    action="store_true",
-    help="Check if path exists before it is sent",
-    default=False,
-)
+def parse_arguments() -> None:
+    # Parse Arguments
+    parser = argparse.ArgumentParser(
+        description="paranoya client",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("-p", help="Path to scan", metavar="PATH")
+    parser.add_argument(
+        "--host",
+        help="Target daemon host",
+        default="localhost",
+    )
+    parser.add_argument(
+        "--port",
+        help="Target daemon port",
+        default=1337,
+    )
+    parser.add_argument(
+        "--auth",
+        metavar="AUTHKEY",
+        help="Pass authkey if it is required",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Check if path exists before it is sent",
+        default=False,
+    )
 
-args = parser.parse_args()
+    return parser.parse_args()
+
+args = parse_arguments()
 
 if not args.p:
     print("Missing -p path")
