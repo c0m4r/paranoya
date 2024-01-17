@@ -151,6 +151,10 @@ See: [paranoya in chroot](https://github.com/c0m4r/paranoya/wiki/paranoya-in-chr
 
 See: [paranoya on Android](https://github.com/c0m4r/paranoya/wiki/paranoya-on-Android)
 
+#### FreeBSD
+
+See: [paranoya-on-FreeBSD](https://github.com/c0m4r/paranoya/wiki/paranoya-on-FreeBSD)
+
 ## Daemonized usage
 
 #### Server
