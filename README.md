@@ -153,7 +153,7 @@ See: [paranoya on Android](https://github.com/c0m4r/paranoya/wiki/paranoya-on-An
 
 #### FreeBSD
 
-See: [paranoya-on-FreeBSD](https://github.com/c0m4r/paranoya/wiki/paranoya-on-FreeBSD)
+See: [paranoya on FreeBSD](https://github.com/c0m4r/paranoya/wiki/paranoya-on-FreeBSD)
 
 ## Daemonized usage
 
