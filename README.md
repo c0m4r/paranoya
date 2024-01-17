@@ -137,7 +137,7 @@ flatpak override --user --filesystem=/tmp org.flatpak.paranoya
 
 #### Compiled
 
-For the binary version of paranoya and its tools, use ./build.sh script.
+For the binary version of paranoya and its tools, use the `./build.sh` script.
 
 However, when possible, you should use bare python under venv, 
 as it will allow you to get the latest versions of python modules and keep them up-to-date, 
