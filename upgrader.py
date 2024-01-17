@@ -488,7 +488,7 @@ def get_application_path() -> str:
         return ""
 
 
-def sig_handler(signal_name: int, frame: FrameType | None) -> None:
+def sig_handler(signal_name: int, frame: FrameType) -> None:
     """
     signal handler
     """
