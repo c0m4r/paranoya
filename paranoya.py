@@ -36,11 +36,13 @@ import stat
 import sys
 import threading
 import traceback
-import signal
+from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 
 from bisect import bisect_left
 from collections import Counter
 from subprocess import Popen, PIPE, run
+from types import FrameType
+from typing import Optional
 
 # paranoya modules
 from lib.paranoya_args import parser
@@ -76,6 +78,8 @@ try:
 except Exception as e:
     print(e)
     sys.exit(0)
+
+signal(SIGPIPE, SIG_DFL)
 
 
 def ioc_contains(sorted_list, value):
@@ -1766,7 +1770,7 @@ def remove_pidfile() -> None:
         os.remove(args.pidfile)
 
 
-def sigint_handler(signal_name, frame) -> None:
+def sigint_handler(signal_name: int, frame: Optional[FrameType]) -> None:
     """
     SIGINT handler
     """
@@ -1779,15 +1783,19 @@ def sigint_handler(signal_name, frame) -> None:
     except Exception:
         print("paranoya's work has been interrupted by a human. Returning to Asgard.")
     remove_pidfile()
+    if args.debug:
+        print(signal_name, frame)
     sys.exit(0)
 
 
-def sigterm_handler(signal_name, frame) -> None:
+def sigterm_handler(signal_name: int, frame: Optional[FrameType]) -> None:
     """
     SIGTERM handler
     """
     remove_pidfile()
     print("paranoya's work has been interrupted by a SIGTERM. Returning to Asgard.")
+    if args.debug:
+        print(signal_name, frame)
     sys.exit(0)
 
 
@@ -1796,10 +1804,10 @@ def signal_handlers() -> None:
     Signal handlers
     """
     # Signal handler for CTRL+C
-    signal.signal(signal.SIGINT, sigint_handler)
+    signal(SIGINT, sigint_handler)
 
     # Signal handler for SIGTERM
-    signal.signal(signal.SIGTERM, sigterm_handler)
+    signal(SIGTERM, sigterm_handler)
 
 
 def get_platform() -> str:

@@ -38,7 +38,7 @@ from urllib.parse import urlparse
 from shutil import copyfileobj
 from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 from types import FrameType
-from typing import IO
+from typing import IO, Optional
 from zipfile import ZipFile
 
 # paranoya modules
@@ -488,7 +488,7 @@ def get_application_path() -> str:
         return ""
 
 
-def sig_handler(signal_name: int, frame: FrameType) -> None:
+def sig_handler(signal_name: int, frame: Optional[FrameType]) -> None:
     """
     signal handler
     """
