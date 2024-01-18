@@ -66,7 +66,7 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 #### Rocky Linux / AlmaLinux
 
 ```
-dnf install bash gcc git openssl-devel python3 python3-devel python3-pip
+dnf -y install bash gcc git openssl-devel python3 python3-devel python3-pip
 ```
 
 #### Void Linux
