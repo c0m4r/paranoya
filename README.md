@@ -56,12 +56,6 @@ apk add bash gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-
 pacman -S bash gcc git python3 python-devtools python-pip
 ```
 
-#### Void Linux
-
-```
-xbps-install -Sy bash gcc git openssl-devel python3 python3-devel
-```
-
 #### Debian / Ubuntu / Linux Mint / Kali Linux
 
 ```
@@ -73,6 +67,12 @@ update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 ```
 dnf install bash gcc git openssl-devel python3 python3-devel python3-pip
+```
+
+#### Void Linux
+
+```
+xbps-install -Sy bash gcc git openssl-devel python3 python3-devel
 ```
 
 ## Installation
