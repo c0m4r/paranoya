@@ -60,7 +60,7 @@ pacman -S bash gcc git python3 python-devtools python-pip
 xbps-install -Sy bash gcc git openssl-devel python3 python3-devel
 ```
 
-#### Debian / Ubuntu / Linux Mint
+#### Debian / Ubuntu / Linux Mint / Kali Linux
 
 ```
 apt -y install gcc git libssl-dev python3 python3-dev python3-venv
