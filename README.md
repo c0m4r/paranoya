@@ -9,6 +9,8 @@
 [![Test](https://github.com/c0m4r/paranoya/workflows/lint_python/badge.svg)](https://github.com/c0m4r/paranoya/actions)
 [![CodeFactor](https://www.codefactor.io/repository/github/c0m4r/paranoya/badge)](https://www.codefactor.io/repository/github/c0m4r/paranoya)
 
+![ezgif-3-f4f8cc1b30](https://github.com/c0m4r/paranoya/assets/6292788/929b9b57-f219-4be9-9ddb-519d80ae32a0)
+
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/c0m4r/paranoya)
@@ -253,14 +255,6 @@ These additional custom YARA rules has been proven to work* with paranoya:
 * [tenable/yara-rules](https://github.com/tenable/yara-rules)
 
 \* That doesn't mean they will actually detect something; just that they are processed properly by the yara-python
-
-## Screenshots
-
-<div align="center">
-
-![paranoya-screenshot](https://github.com/c0m4r/paranoya/assets/6292788/24641b5d-7541-4bef-acd3-b671b1451767)
-
-</div>
 
 ## License
 
