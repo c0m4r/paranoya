@@ -37,6 +37,15 @@ print() {
     echo -e "${ORANGE}${1}${ENDCOLOR}"
 }
 
+# Check arch
+check_arch() {
+    if command -v arch ; then
+        ARCH=$(arch)
+    else
+        ARCH=$(cat /proc/sys/kernel/arch)
+    fi
+}
+
 # Parse args
 while [[ $# -gt 0 ]]; do
 case $1 in
@@ -90,13 +99,14 @@ if [[ -e /lib/ld-musl-aarch64.so.1 ]]; then
 fi
 
 # Build
+check_arch
 print "paranoya: build script"
 echo "https://github.com/c0m4r/paranoya"
 echo "Copyright (c) 2014-2023 Florian Roth"
 echo "Copyright (c) 2023-2024 c0m4r"
 echo "GNU General Public License v3.0"
 print "Building paranoya"
-echo "${VERSION}-$(arch) 🚀"
+echo "${VERSION}-${ARCH} 🚀"
 
 print "Build (1/8): venv"
 if [[ ! -e venv/pyvenv.cfg ]]; then
@@ -144,7 +154,7 @@ sed -i \
 # Create packages
 print "Build (8/8): packaging"
 
-rm -rf paranoya*"$(arch)"*
+rm -rf paranoya*"${ARCH}"*
 cp -r config dist/
 cp README.md dist/
 cp LICENSE dist/
@@ -176,13 +186,13 @@ if [[ "${WITH_TEST}" ]]; then
     cp -r test dist/
 fi
 
-mv dist paranoya-"${VERSION}"-"$(arch)"
+mv dist paranoya-"${VERSION}"-"${ARCH}"
 if command -v zip &>/dev/null ; then
-    zip -r -9 -T paranoya-"${VERSION}"-"$(arch)".zip paranoya-"${VERSION}"-"$(arch)"
+    zip -r -9 -T paranoya-"${VERSION}"-"${ARCH}".zip paranoya-"${VERSION}"-"${ARCH}"
 fi
 if command -v tar &>/dev/null && command -v gzip &>/dev/null ; then
-    tar -I "gzip -9" -cvf paranoya-"${VERSION}"-"$(arch)".tar.gz paranoya-"${VERSION}"-"$(arch)"
+    tar -I "gzip -9" -cvf paranoya-"${VERSION}"-"${ARCH}".tar.gz paranoya-"${VERSION}"-"${ARCH}"
 fi
-mv paranoya-"${VERSION}"-"$(arch)" dist
+mv paranoya-"${VERSION}"-"${ARCH}" dist
 
 print "Build complete 🎉"
