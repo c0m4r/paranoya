@@ -5,8 +5,8 @@ extra_started_commands="update"
 
 workdir=/opt/paranoya
 pidfile=${workdir}/paranoya.pid
-command=/opt/paranoya/bin/python3
-command_args="paranoya.py -s 20000 -d --noprocscan --noindicator --intense --csv --nolog --force"
+command=${workdir}/paranoya.py
+command_args="-s 20000 -d --noprocscan --noindicator --intense --csv --nolog --force"
 
 depend() {
 	need net
@@ -16,7 +16,6 @@ depend() {
 start() {
 	ebegin "Starting paranoya daemon"
 	cd $workdir
-	source bin/activate
 	$command $command_args | logger -t paranoya &
 }
 
@@ -33,8 +32,6 @@ restart() {
 update() {
 	cd $workdir
 	stop
-	. bin/activate
 	./upgrader.py --sigsonly
-	deactivate
 	start
 }
