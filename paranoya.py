@@ -36,10 +36,10 @@ import stat
 import sys
 import threading
 import traceback
-from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
-
 from bisect import bisect_left
 from collections import Counter
+from multiprocessing import Process
+from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 from subprocess import Popen, PIPE, run
 from types import FrameType
 from typing import Optional
@@ -333,7 +333,19 @@ class Paranoya:
                     new_directories.append(dirname)
             directories[:] = new_directories
 
-            paranoya.scan_path_files(root, directories, files, progress_bar)
+            if args.multicore:
+                proc = Process(
+                    target=paranoya.scan_path_files,
+                    args=(
+                        root,
+                        directories,
+                        files,
+                        progress_bar,
+                    ),
+                )
+                proc.start()
+            else:
+                paranoya.scan_path_files(root, directories, files, progress_bar)
 
     def perform_intense_check(
         self,
@@ -1918,6 +1930,11 @@ if __name__ == "__main__":
                 "Init",
                 "Skipping process memory check. User has no admin rights.",
             )
+
+    if args.multicore:
+        args.progress = False
+        logger.log("NOTICE", "Init", "Multicore processing enabled (experimental)")
+        logger.log("NOTICE", "Init", "Progress will be unavailable")
 
     # File scan mode
     if args.d:

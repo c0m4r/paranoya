@@ -156,6 +156,12 @@ parser.add_argument(
     default=False,
 )
 parser.add_argument(
+    "--multicore",
+    action="store_true",
+    help="Force paranoya to use all CPU cores (experimental)",
+    default=False,
+)
+parser.add_argument(
     "--followlinks",
     action="store_true",
     help="Force paranoya to follow symlinks (be aware: may lead to RAM overflow)",
