@@ -70,7 +70,7 @@ print() {
 hint_deps() {
     if [[ $? -gt 0 ]] && [[ "${PYTHON_BIN}" ]]; then
         print "Something went wrong"
-        echo "Make sure you have all the depndencies installed:"
+        echo "Make sure you have all the dependencies installed:"
 
         if [[ -e /etc/alpine-release ]] || [[ -e /etc/apk/repositories ]]; then
             echo "# apk add bash gcc git linux-headers musl-dev openssl-dev python3 python3-dev py3-pip"
