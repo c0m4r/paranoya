@@ -42,7 +42,7 @@ jobs:
       - run: pyright . || true
       - run: safety check --ignore 62044
       - run: ./paranoya.py -d &
-      - run: sleep 5
+      - run: sleep 6
       - run: ./client.py -p LICENSE
       - run: ./client.py -p ./test
       - run: kill -TERM $(cat paranoya.pid)
