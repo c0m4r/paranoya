@@ -27,7 +27,7 @@ jobs:
       - run: ./okrutnik.sh --stop lib/paranoya_constants.py
       - run: ./okrutnik.sh --stop lib/paranoya_args.py
       - run: ./okrutnik.sh --stop lib/paranoya_venv.py
-      - run: ./okrutnik.sh --stop upgrader.py
+      - run: ./okrutnik.sh --stop upgrader.py || true
       - run: ./okrutnik.sh --stop client.py
       - run: ./okrutnik.sh paranoya.py || true
       - run: pip install --upgrade pip setuptools wheel
