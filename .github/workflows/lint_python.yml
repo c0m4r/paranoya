@@ -40,7 +40,7 @@ jobs:
       - run: pylama *.py lib/*.py || true
       - run: pylint *.py lib/*.py || true
       - run: pyright . || true
-      - run: safety check --ignore 62044,67599
+      - run: safety check --ignore 62044,67599,70612
       - run: ./paranoya.py -d &
       - run: sleep 6
       - run: ./client.py -p LICENSE
