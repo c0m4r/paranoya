@@ -919,7 +919,7 @@ class Paranoya:
 
             # Process connections ----------------------------------------------
             if not args.nolisten:
-                connections = psutil.Process(pid).connections()
+                connections = psutil.Process(pid).net_connections()
                 conn_count = 0
                 conn_limit = 20
                 for pconn in connections:
