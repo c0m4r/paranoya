@@ -43,7 +43,7 @@ except Exception as e:
     print(e)
     sys.exit(0)
 
-__version__ = "4.0.0"
+__version__ = "4.1.0"
 
 
 class ParanoyaLogger:
