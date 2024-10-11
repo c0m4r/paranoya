@@ -32,7 +32,7 @@ jobs:
       - run: ./okrutnik.sh paranoya.py || true
       - run: pip install --upgrade pip setuptools wheel
       - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff safety
-      - run: ruff .
+      - run: ruff check .
       - run: black --diff .
       - run: codespell -L paranoya --skip="./.git/*" --skip="./signature-base" --skip="./lib/python3*" --skip="./venv"
       - run: pip install -r requirements.txt
