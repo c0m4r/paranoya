@@ -31,7 +31,6 @@ import sys
 import time
 import traceback
 
-
 # Helper Functions -------------------------------------------------------------
 
 
@@ -185,7 +184,7 @@ def paranoya_get_age_string(file_path: str) -> str:
     """
     get age string
     """
-    (ctime, mtime, atime) = paranoya_get_age(file_path)
+    ctime, mtime, atime = paranoya_get_age(file_path)
     timestring = ""
     try:
         timestring = (

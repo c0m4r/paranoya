@@ -310,6 +310,7 @@ class Paranoya:
 
         if args.multicore:
             import concurrent.futures
+
             executor = concurrent.futures.ThreadPoolExecutor()
             futures = []
 
@@ -340,12 +341,17 @@ class Paranoya:
             directories[:] = new_directories
 
             if args.multicore:
-                futures.append(executor.submit(self.scan_path_files, root, directories, files, progress_bar))
+                futures.append(
+                    executor.submit(
+                        self.scan_path_files, root, directories, files, progress_bar
+                    )
+                )
             else:
                 self.scan_path_files(root, directories, files, progress_bar)
 
         if args.multicore:
             import concurrent.futures
+
             for future in concurrent.futures.as_completed(futures):
                 try:
                     future.result()
@@ -1454,7 +1460,7 @@ class Paranoya:
                     ):
                         continue
 
-                    (sig_raw, description) = line.rstrip("\n").split(";")
+                    sig_raw, description = line.rstrip("\n").split(";")
                     sig = re.sub(r" ", "", sig_raw)
 
                     if len(sig) > self.max_filetype_magics:
@@ -1703,7 +1709,7 @@ class Paranoya:
             "Init",
             f"Listening on {args.listen_host}:{args.listen_port}",
         )
-        
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             while True:
                 client, addr = server.accept()

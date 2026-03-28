@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 Linux® is the registered trademark of Linus Torvalds
 in the U.S. and other countries.
 """
+
 import argparse
 import glob
 import hashlib
