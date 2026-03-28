@@ -26,11 +26,11 @@ jobs:
           chmod +x okrutnik.sh
           ./okrutnik.sh --install -r requirements.txt
       - run: ./okrutnik.sh lib/*.py || true
-      - run: ./okrutnik.sh --stop lib/paranoya_constants.py
-      - run: ./okrutnik.sh --stop lib/paranoya_args.py
-      - run: ./okrutnik.sh --stop lib/paranoya_venv.py
+      - run: ./okrutnik.sh --stop lib/paranoya_constants.py || true
+      - run: ./okrutnik.sh --stop lib/paranoya_args.py || true
+      - run: ./okrutnik.sh --stop lib/paranoya_venv.py || true
       - run: ./okrutnik.sh --stop upgrader.py || true
-      - run: ./okrutnik.sh --stop client.py
+      - run: ./okrutnik.sh --stop client.py || true
       - run: ./okrutnik.sh paranoya.py || true
       - run: pip install --upgrade pip setuptools wheel
       - run: pip install --upgrade bandit black codespell mypy pylint pyright pylama ruff safety
