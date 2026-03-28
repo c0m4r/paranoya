@@ -4,7 +4,7 @@ https://github.com/c0m4r/paranoya
 
 paranoya: Simple IOC and YARA scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
-Copyright (c) 2023-2024 c0m4r
+Copyright (c) 2023-2026 c0m4r
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -75,15 +75,9 @@ def paranoya_print_progress(i: int) -> None:
     """
     print progress indicator
     """
-    if (i % 4) == 0:
-        sys.stdout.write("\b/")
-    elif (i % 4) == 1:
-        sys.stdout.write("\b-")
-    elif (i % 4) == 2:
-        sys.stdout.write("\b\\")
-    elif (i % 4) == 3:
-        sys.stdout.write("\b|")
-    sys.stdout.flush()
+    if i > 0 and i % 1000 == 0:
+        sys.stdout.write(f"Scanned {i} files...\n")
+        sys.stdout.flush()
 
 
 def paranoya_transform_os(regex: str) -> str:
@@ -133,7 +127,7 @@ def paranoya_get_file_type(
     """
     try:
         # Reading bytes from file
-        with open(file_path, "rb", os.O_RDONLY) as f:
+        with open(file_path, "rb") as f:
             # Reading bytes from file
             res_full = f.read(max_filetype_magics)
             # Checking sigs
@@ -142,6 +136,8 @@ def paranoya_get_file_type(
                 res = res_full[:bytes_to_read]
                 if res == bytes.fromhex(sig):
                     return str(filetype_sigs[sig])
+        return "UNKNOWN"
+    except PermissionError:
         return "UNKNOWN"
     except Exception:
         if logger.debug:

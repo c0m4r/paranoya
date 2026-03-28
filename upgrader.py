@@ -5,7 +5,7 @@ https://github.com/c0m4r/paranoya
 
 paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
-Copyright (c) 2023-2024 c0m4r
+Copyright (c) 2023-2026 c0m4r
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

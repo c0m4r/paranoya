@@ -5,7 +5,7 @@ https://github.com/c0m4r/paranoya
 
 paranoya: Simple IOC and YARA Scanner for Linux®
 Copyright (c) 2015-2023 Florian Roth
-Copyright (c) 2023-2024 c0m4r
+Copyright (c) 2023-2026 c0m4r
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import threading
 import traceback
 from bisect import bisect_left
 from collections import Counter
+import concurrent.futures
 from multiprocessing import Process
 from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 from subprocess import Popen, PIPE, run
@@ -270,7 +271,7 @@ class Paranoya:
             files = [path]
             # Disable progress bar for single file scan
             args.progress = False
-            paranoya.scan_path_files(root, directories, files)
+            self.scan_path_files(root, directories, files)
             return
 
         if args.progress and not args.silent and not args.noindicator:
@@ -307,6 +308,11 @@ class Paranoya:
         else:
             progress_bar = None
 
+        if args.multicore:
+            import concurrent.futures
+            executor = concurrent.futures.ThreadPoolExecutor()
+            futures = []
+
         for root, directories, files in os.walk(
             path, onerror=walk_error, followlinks=args.followlinks
         ):
@@ -334,18 +340,18 @@ class Paranoya:
             directories[:] = new_directories
 
             if args.multicore:
-                proc = Process(
-                    target=paranoya.scan_path_files,
-                    args=(
-                        root,
-                        directories,
-                        files,
-                        progress_bar,
-                    ),
-                )
-                proc.start()
+                futures.append(executor.submit(self.scan_path_files, root, directories, files, progress_bar))
             else:
-                paranoya.scan_path_files(root, directories, files, progress_bar)
+                self.scan_path_files(root, directories, files, progress_bar)
+
+        if args.multicore:
+            import concurrent.futures
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    future.result()
+                except Exception as exc:
+                    logger.log("ERROR", "FileScan", f"Thread error: {exc}")
+            executor.shutdown()
 
     def perform_intense_check(
         self,
@@ -1091,7 +1097,7 @@ class Paranoya:
             for ioc_filename in os.listdir(ioc_directory):
                 try:
                     if "c2" in ioc_filename:
-                        with codecs.open(
+                        with open(
                             os.path.join(ioc_directory, ioc_filename),
                             "r",
                             encoding="utf-8",
@@ -1154,7 +1160,7 @@ class Paranoya:
         try:
             for ioc_filename in os.listdir(ioc_directory):
                 if "filename" in ioc_filename:
-                    with codecs.open(
+                    with open(
                         os.path.join(ioc_directory, ioc_filename), "r", encoding="utf-8"
                     ) as file:
                         lines = file.readlines()
@@ -1362,7 +1368,7 @@ class Paranoya:
                 if "hash" in ioc_filename:
                     if false_positive and "falsepositive" not in ioc_filename:
                         continue
-                    with codecs.open(
+                    with open(
                         os.path.join(ioc_directory, ioc_filename), "r", encoding="utf-8"
                     ) as file:
                         lines = file.readlines()
@@ -1525,8 +1531,7 @@ class Paranoya:
             logger.log(
                 "DEBUG", "FileScan", f"Cannot open file {file_path} (access denied)"
             )
-        finally:
-            return file_data
+        return file_data
 
     def script_stats_analysis(self, data):
         """
@@ -1588,7 +1593,8 @@ class Paranoya:
         size = 2048
         while True:
             try:
-                clientid = threading.current_thread().name
+                clientid = f"{address[0]}:{address[1]}"
+                threading.current_thread().name = clientid
                 threading.current_thread().message = ""
                 data = client_socket.recv(size)
                 scan_path = data.decode().split(" ")[0]
@@ -1697,13 +1703,11 @@ class Paranoya:
             "Init",
             f"Listening on {args.listen_host}:{args.listen_port}",
         )
-        while True:
-            client, addr = server.accept()
-            threading.Thread(
-                target=self.handle_client,
-                args=(client, addr),
-                name=str(addr[0]) + ":" + str(addr[1]),
-            ).start()
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            while True:
+                client, addr = server.accept()
+                executor.submit(self.handle_client, client, addr)
 
 
 def get_application_path():
@@ -1797,7 +1801,7 @@ def sigint_handler(signal_name: int, frame: Optional[FrameType]) -> None:
     remove_pidfile()
     if args.debug:
         print(signal_name, frame)
-    sys.exit(0)
+    os._exit(0)
 
 
 def sigterm_handler(signal_name: int, frame: Optional[FrameType]) -> None:
@@ -1808,7 +1812,7 @@ def sigterm_handler(signal_name: int, frame: Optional[FrameType]) -> None:
     print("paranoya's work has been interrupted by a SIGTERM. Returning to Asgard.")
     if args.debug:
         print(signal_name, frame)
-    sys.exit(0)
+    os._exit(0)
 
 
 def signal_handlers() -> None:
