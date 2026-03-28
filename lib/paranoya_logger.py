@@ -23,7 +23,6 @@ Linux® is the registered trademark of Linus Torvalds
 in the U.S. and other countries.
 """
 
-import codecs
 import datetime
 import os
 import re
@@ -219,7 +218,7 @@ class ParanoyaLogger:
         """
         try:
             # Write to file
-            with codecs.open(self.log_file, "a", encoding="utf-8") as logfile:
+            with open(self.log_file, "a", encoding="utf-8") as logfile:
                 if self.csv:
                     logfile.write(
                         self.log_format(

@@ -25,7 +25,6 @@ in the U.S. and other countries.
 """
 
 import argparse
-import codecs
 import datetime
 import ipaddress
 import os
@@ -39,7 +38,6 @@ import traceback
 from bisect import bisect_left
 from collections import Counter
 import concurrent.futures
-from multiprocessing import Process
 from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 from subprocess import Popen, PIPE, run
 from types import FrameType
