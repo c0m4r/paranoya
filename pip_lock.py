@@ -101,7 +101,7 @@ def main() -> None:
         elapsed = time.monotonic() - t0
 
         if not hashes:
-            print(f"-> 0 hashes [error]")
+            print("-> 0 hashes [error]")
             total_errors += 1
             lines.append(original_line)
             continue
