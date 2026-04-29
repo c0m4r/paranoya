@@ -1,13 +1,11 @@
-certifi==2025.10.5
-charset-normalizer==3.4.4
+certifi==2026.2.25
+charset-normalizer==3.4.7
 colorama==0.4.6
 idna==3.11
 progressbar2==4.5.0
-psutil==7.1.1
+psutil==7.2.2
 python-utils==3.9.1
-requests==2.33.0
-setuptools==80.9.0
+requests==2.33.1
 typing_extensions==4.15.0
 urllib3==2.6.3
-wheel==0.46.2
 yara-python==4.5.4

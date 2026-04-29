@@ -1,5 +1,5 @@
-colorama
-progressbar2
-psutil
-requests
-yara-python
+colorama==0.4.6
+progressbar2==4.5.0
+psutil==7.2.2
+requests==2.33.1
+yara-python==4.5.4

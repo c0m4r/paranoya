@@ -116,13 +116,13 @@ fi
 source venv/bin/activate
 
 print "Build (2/8): upgrade tools"
-pip install pyinstaller black ruff
+pip install --uploaded-prior-to="$(date +\%Y-\%m-\%d -d "14days ago")" pyinstaller black ruff
 
 print "Build (3/8): formatting"
 black --quiet ./*.py ./lib/*.py
 
 print "Build (4/8): linting"
-ruff -v ./*.py ./lib/*.py
+ruff check -v ./*.py ./lib/*.py
 
 rm -rf build/
 rm -rf dist/

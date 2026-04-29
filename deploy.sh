@@ -97,10 +97,12 @@ deploy() {
     print "Creating venv, this might take a while..."
     $PYTHON_BIN -m venv venv
     . venv/bin/activate
-    print "Upgrading pip and tools"
-    $PYTHON_BIN -m pip install --upgrade pip setuptools wheel || true
+    print "Upgrading pip"
+    $PYTHON_BIN -m pip install pip==26.1
+    print "Installing setuptools and wheel"
+    $PYTHON_BIN -m pip install --uploaded-prior-to="$(date +\%Y-\%m-\%d -d "14days ago")" setuptools wheel || true
     print "Installing pip modules"
-    $PYTHON_BIN -m pip install -r requirements.txt
+    $PYTHON_BIN -m pip install --uploaded-prior-to="$(date +\%Y-\%m-\%d -d "14days ago")" --require-hashes -r requirements.lock.txt
 }
 
 trap hint_deps EXIT
