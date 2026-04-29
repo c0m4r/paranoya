@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM alpine:3.21
 WORKDIR /paranoya
 RUN apk add --no-cache bash gcc git musl-dev linux-headers openssl-dev python3 python3-dev py3-pip wget \
   && adduser -D paranoya \
