@@ -100,9 +100,9 @@ deploy() {
     print "Upgrading pip"
     $PYTHON_BIN -m pip install pip==26.1.1
     print "Installing setuptools and wheel"
-    $PYTHON_BIN -m pip install --uploaded-prior-to=P14D setuptools wheel || true
+    $PYTHON_BIN -m pip install --uploaded-prior-to=P10D setuptools wheel || true
     print "Installing pip modules"
-    $PYTHON_BIN -m pip install --uploaded-prior-to=P14D --require-hashes -r requirements.lock.txt
+    $PYTHON_BIN -m pip install --uploaded-prior-to=P10D --require-hashes -r requirements.lock.txt
 }
 
 trap hint_deps EXIT
