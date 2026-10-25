@@ -1,13 +1,10 @@
 FROM ghcr.io/void-linux/void-glibc:20260401R1
-RUN xbps-install -Su && xbps-install -Sy bash curl gcc git openssl-devel python3 python3-devel python3-pip python3-virtualenv wget
+RUN xbps-install -Su && xbps-install -Sy bash curl gcc git openssl-devel python3 python3-devel wget
+COPY --from=ghcr.io/astral-sh/uv:0.13.0@sha256:cdc6093146eb3ff6a40107b38f008b789e050e77ad87865e381d9917da55a168 /uv /usr/local/bin/uv
+ENV UV_NO_CACHE=1
 WORKDIR /opt
 RUN git clone https://github.com/c0m4r/paranoya.git .
 EXPOSE 1337
-RUN python3 -m venv .
-SHELL ["/bin/bash", "-c"]
-RUN source bin/activate
-RUN ./bin/pip3 install --no-cache-dir --upgrade pip==26.1
-RUN ./bin/pip3 install --no-cache-dir --uploaded-prior-to=P14D --upgrade setuptools wheel
-RUN ./bin/pip3 install --no-cache-dir --uploaded-prior-to=P14D --require-hashes -r requirements.lock.txt
-RUN ./upgrader.py --sigsonly
-CMD [ "/bin/bash", "-c", "source bin/activate && python3 paranoya.py -d --listen-host 0.0.0.0 --nolog --intense --csv"]
+RUN uv sync --locked
+RUN .venv/bin/python upgrader.py --sigsonly
+CMD [ ".venv/bin/python", "paranoya.py", "-d", "--listen-host", "0.0.0.0", "--nolog", "--intense", "--csv"]

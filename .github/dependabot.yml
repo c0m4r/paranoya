@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Supply-chain cooldown, matches exclude-newer in pyproject.toml
+    cooldown:
+      default-days: 14
+    groups:
+      uv:
+        patterns:
+          - "*"

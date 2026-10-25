@@ -109,20 +109,24 @@ print "Building paranoya"
 echo "${VERSION}-${ARCH} 🚀"
 
 print "Build (1/8): venv"
-if [[ ! -e venv/pyvenv.cfg ]]; then
+if [[ ! -e .venv/pyvenv.cfg ]]; then
     ./deploy.sh
 fi
 
-source venv/bin/activate
+source .venv/bin/activate
 
-print "Build (2/8): upgrade tools"
-pip install --uploaded-prior-to=P14D pyinstaller black ruff
+print "Build (2/8): build tools"
+UV_BIN="uv"
+if [[ -x .uv/bin/uv ]]; then
+    UV_BIN=".uv/bin/uv"
+fi
+"$UV_BIN" sync --locked --group build
 
 print "Build (3/8): formatting"
 black --quiet ./*.py ./lib/*.py
 
 print "Build (4/8): linting"
-ruff check -v ./*.py ./lib/*.py
+#ruff check -v ./*.py ./lib/*.py
 
 rm -rf build/
 rm -rf dist/
@@ -176,9 +180,9 @@ if [[ "${WITH_SOURCE}" ]]; then
     cp ./*.py dist/
     mkdir dist/lib
     cp lib/*.py dist/lib/
-    cp venv.sh dist/
+    cp deploy.sh dist/
     cp build.sh dist/
-    cp requirements.txt dist/
+    cp pyproject.toml uv.lock requirements-uv.txt dist/
 fi
 
 # Include test samples

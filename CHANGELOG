@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- switched to uv: pyproject.toml + hash-pinned uv.lock, 14-day supply-chain cooldown (exclude-newer)
+- upgrader: downloads only over HTTPS from GitHub (checked on every redirect), with size limits
+- upgrader: archives are validated before extraction (path traversal, absolute paths, symlinks, zip bombs) and files are written atomically without following symlinks
+- upgrader: fixed path traversal in the program update (e.g. `x//etc/file` was written to `/etc/file`)
+- YARA `include` directives are disabled when compiling rules
+
+### Changed
+
+- venv moved from venv/ to .venv/, deploy and build scripts use uv sync --locked
+- deploy.sh installs the hash-pinned uv from requirements-uv.txt into .uv/ with pip when uv is missing or too old
+- Dockerfiles use a digest-pinned uv image
+- upgrader cache files moved to cache/ (existing ones are migrated)
+- upgrader writes signatures and updates relative to the application path instead of the current directory
+- upgrader continues with the remaining sources when one fails, and exits with 1
+
+### Fixed
+
+- upgrader no longer reports signatures as up to date after a failed download, nor re-downloads them on every run after the first upstream change
+
+### Removed
+
+- requirements*.txt, pip_lock.py and pip_check.py (superseded by uv.lock and uv tree --outdated)
+
 ## [4.2.0] - 2026-04-29
 
 ### Security

@@ -30,17 +30,18 @@ import hashlib
 import os
 import platform
 import re
+import stat
 import sys
+import tempfile
 
 from io import BytesIO
 from os.path import exists
 from traceback import print_exc as trace
-from urllib.parse import urlparse
-from shutil import copyfileobj
+from urllib.parse import urljoin, urlparse
 from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 from types import FrameType
 from typing import IO, Optional
-from zipfile import ZipFile
+from zipfile import ZipFile, ZipInfo
 
 # paranoya modules
 from lib.paranoya_venv import venv_check
@@ -63,6 +64,21 @@ SYSTEM = platform.system()
 
 # Arch
 ARCH = platform.machine()
+
+# Cache dir (relative to the application path)
+CACHE_DIR = "cache"
+
+# Downloads are only accepted over HTTPS from GitHub
+ALLOWED_HOSTS = ("github.com", "api.github.com", "codeload.github.com")
+ALLOWED_HOST_SUFFIXES = (".githubusercontent.com",)
+MAX_REDIRECTS = 5
+
+# Archive limits (current archives are < 5 MiB, the largest rule file ~20 MiB)
+MAX_DOWNLOAD_SIZE = 128 * 1024 * 1024
+MAX_MEMBERS = 50_000
+MAX_MEMBER_SIZE = 64 * 1024 * 1024
+MAX_TOTAL_SIZE = 1024 * 1024 * 1024
+MAX_RATIO = 100
 
 
 def color_chooser(log_type: str) -> str:
@@ -90,45 +106,175 @@ def log(log_type: str, module: str, message: str) -> None:
     print(f"[ {log_type_colored} ]", f"{module}:", message)
 
 
-def needs_update(sig_url: str) -> bool:
+class UnsafeDownloadError(Exception):
     """
-    Check if paranoya needs update
+    Download or archive failed a safety check
+    """
+
+
+def check_url(url: str) -> None:
+    """
+    Only allow HTTPS downloads from GitHub
+    """
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme != "https" or not (
+        host in ALLOWED_HOSTS or host.endswith(ALLOWED_HOST_SUFFIXES)
+    ):
+        raise UnsafeDownloadError(f"refusing to download from {url}")
+
+
+def safe_download(url: str) -> bytes:
+    """
+    Download a file from an allowed host (checked on every redirect),
+    with a size limit
+    """
+    for _ in range(MAX_REDIRECTS + 1):
+        check_url(url)
+        with requests.get(
+            url, timeout=30, stream=True, allow_redirects=False
+        ) as response:
+            if response.is_redirect:
+                url = urljoin(url, response.headers["Location"])
+                continue
+            response.raise_for_status()
+            if int(response.headers.get("Content-Length", 0)) > MAX_DOWNLOAD_SIZE:
+                raise UnsafeDownloadError(f"{url} is larger than {MAX_DOWNLOAD_SIZE}")
+            data = bytearray()
+            for chunk in response.iter_content(chunk_size=65536):
+                data += chunk
+                if len(data) > MAX_DOWNLOAD_SIZE:
+                    raise UnsafeDownloadError(
+                        f"{url} is larger than {MAX_DOWNLOAD_SIZE}"
+                    )
+            return bytes(data)
+    raise UnsafeDownloadError(f"too many redirects for {url}")
+
+
+def member_path(info: ZipInfo) -> str:
+    """
+    Validate a ZIP member name and return it as a relative path
+    """
+    name = info.filename
+    parts = name.rstrip("/").split("/")
+    if "\\" in name or any(part in ("", ".", "..") for part in parts):
+        raise UnsafeDownloadError(f"unsafe path in archive: {name!r}")
+    return "/".join(parts)
+
+
+def is_regular_file(info: ZipInfo) -> bool:
+    """
+    Skip directories, symlinks, special files and encrypted members
+    """
+    mode = info.external_attr >> 16
+    return (
+        not info.is_dir()
+        and (not mode or stat.S_ISREG(mode))
+        and not info.flag_bits & 0x1
+    )
+
+
+def check_archive(zip_file: ZipFile, members: list[ZipInfo]) -> None:
+    """
+    Check the whole archive before extracting anything (paths, zip bombs)
+    """
+    infos = zip_file.infolist()
+    if len(infos) > MAX_MEMBERS:
+        raise UnsafeDownloadError(f"too many files in archive: {len(infos)}")
+    for info in infos:
+        member_path(info)
+    total = 0
+    for info in members:
+        if info.file_size > MAX_MEMBER_SIZE:
+            raise UnsafeDownloadError(f"file too large: {info.filename}")
+        if (
+            info.file_size > 1024 * 1024
+            and info.file_size > info.compress_size * MAX_RATIO
+        ):
+            raise UnsafeDownloadError(f"suspicious compression ratio: {info.filename}")
+        total += info.file_size
+    if total > MAX_TOTAL_SIZE:
+        raise UnsafeDownloadError(f"archive too large when extracted: {total}")
+
+
+def safe_write(base_dir: str, rel_path: str, source: IO[bytes], mode: int) -> None:
+    """
+    Atomically write a file inside base_dir, refusing to escape it
+    (also through symlinked dirs) and replacing symlinks instead of following them
+    """
+    base = os.path.realpath(base_dir)
+    target = os.path.normpath(os.path.join(base, rel_path))
+    parent = os.path.dirname(target)
+    if target == base or os.path.commonpath([base, os.path.realpath(parent)]) != base:
+        raise UnsafeDownloadError(f"{rel_path} escapes {base}")
+    os.makedirs(parent, exist_ok=True)
+    if os.path.isfile(target) and not os.path.islink(target):
+        mode = stat.S_IMODE(os.stat(target).st_mode)
+    fd, tmp = tempfile.mkstemp(dir=parent, prefix=".upgrader-")
+    try:
+        with os.fdopen(fd, "wb") as target_file:
+            written = 0
+            while chunk := source.read(65536):
+                written += len(chunk)
+                if written > MAX_MEMBER_SIZE:
+                    raise UnsafeDownloadError(f"file too large: {rel_path}")
+                target_file.write(chunk)
+        os.chmod(tmp, (mode & 0o755) | 0o644)
+        os.replace(tmp, target)
+    except BaseException:
+        os.unlink(tmp)
+        raise
+
+
+def extract_members(
+    zip_file: ZipFile, plan: list[tuple[ZipInfo, str]], base_dir: str, verbose: bool
+) -> None:
+    """
+    Validate the archive, then extract (member, relative target path) pairs
+    """
+    check_archive(zip_file, [info for info, _ in plan])
+    for info, rel_path in plan:
+        if verbose:
+            log("INFO", "Upgrader", f"Extracting {rel_path} ...")
+        with zip_file.open(info) as source:
+            safe_write(base_dir, rel_path, source, (info.external_attr >> 16) or 0o644)
+
+
+def cache_name(sig_url: str) -> str:
+    """
+    Cache file name for a signature repository URL
+    """
+    return "_".join(urlparse(sig_url).path.split("/")[:-2]) + ".cache"
+
+
+def needs_update(sig_url: str, cache_file: str) -> tuple[bool, str]:
+    """
+    Check if signatures need an update, returns (changed, latest commit sha)
     """
     try:
-        if not os.path.exists("./signature-base"):
-            for filename in glob.glob("./_*.cache"):
-                os.remove(filename)
         o = urlparse(sig_url)
         path = o.path.split("/")
         branch = path[4].split(".")[0]
-        path.pop(len(path) - 1)
-        path.pop(len(path) - 1)
         url = (
             o.scheme
             + "://api."
             + o.netloc
             + "/repos"
-            + "/".join(path)
+            + "/".join(path[:-2])
             + "/commits/"
             + branch
         )
         response_info = requests.get(url=url, timeout=30)
-        j = response_info.json()
-        sha = j["sha"]
-        cache = "_".join(path) + ".cache"
-        changed = False
-        if exists(cache):
-            with open(cache, "r", encoding="utf-8") as file:
-                old_sha = file.read().rstrip()
-            if sha != old_sha:
-                changed = True
-        else:
-            with open(cache, "w", encoding="utf-8") as file:
-                file.write(sha)
-                changed = True
-        return changed
+        sha = str(response_info.json()["sha"])
+        if not re.fullmatch("[0-9a-f]{40}", sha):
+            return True, ""
     except Exception:
-        return True
+        return True, ""
+    if exists(cache_file):
+        with open(cache_file, "r", encoding="utf-8") as file:
+            old_sha = file.read().rstrip()
+        return sha != old_sha, sha
+    return True, sha
 
 
 class ParanoyaUpdater:
@@ -168,6 +314,26 @@ class ParanoyaUpdater:
     ) -> None:
         self.debug = debug
         self.application_path = application_path
+        self.failed = False
+        self.cache_dir = os.path.join(application_path, CACHE_DIR)
+        os.makedirs(self.cache_dir, exist_ok=True)
+
+        # Move cache files left by older versions
+        for old_cache in glob.glob(
+            os.path.join(glob.escape(application_path), "_*.cache")
+        ):
+            os.replace(
+                old_cache, os.path.join(self.cache_dir, os.path.basename(old_cache))
+            )
+
+    def fail(self, sig_url: str, error: Exception) -> None:
+        """
+        Log a failed signature update and carry on with the next one
+        """
+        self.failed = True
+        if self.debug:
+            trace()
+        log("ERROR", "Upgrader", f"Cannot update signatures from {sig_url}: {error}")
 
     def make_sigdirs(self, sig_dir: str) -> None:
         """
@@ -179,140 +345,105 @@ class ParanoyaUpdater:
                 os.makedirs(full_out_dir)
                 log("DEBUG", "makedir", full_out_dir)
 
-    def get_target_file(self, zip_file_path: str, sig_dir: str, sig_name: str) -> str:
+    def get_target_file(self, zip_file_path: str, sig_name: str) -> str:
         """
-        Get target file
+        Get target file, relative to the signature dir
         """
         if "/iocs/" in zip_file_path and zip_file_path.endswith(".txt"):
-            target_file = os.path.join(sig_dir, "iocs", sig_name)
+            target_file = os.path.join("iocs", sig_name)
         elif "/yara/" in zip_file_path and zip_file_path.endswith(".yar"):
-            target_file = os.path.join(sig_dir, "yara", sig_name)
+            target_file = os.path.join("yara", sig_name)
         elif "/misc/" in zip_file_path and zip_file_path.endswith(".txt"):
-            target_file = os.path.join(sig_dir, "misc", sig_name)
+            target_file = os.path.join("misc", sig_name)
         elif zip_file_path.endswith(".yara"):
-            target_file = os.path.join(sig_dir, "yara", sig_name)
+            target_file = os.path.join("yara", sig_name)
         else:
             target_file = ""
         return target_file
 
-    def get_response(self, sig_url: str) -> requests.models.Response:
+    def get_response(self, sig_url: str) -> bytes:
         """
-        Get response from signature URL
+        Download signature archive
         """
-        # Downloading current repository
-        try:
-            log("INFO", "Upgrader", f"Downloading {sig_url} ...")
-            return requests.get(url=sig_url, timeout=30)
-        except Exception:
-            if self.debug:
-                trace()
-            log(
-                "ERROR",
-                "Upgrader",
-                "Error downloading the signature database "
-                "- check your Internet connection",
-            )
-            sys.exit(1)
-        return ""
+        log("INFO", "Upgrader", f"Downloading {sig_url} ...")
+        return safe_download(sig_url)
 
-    def extract_signatures(
-        self, response: requests.models.Response, debug: bool, sig_dir: str
-    ) -> None:
+    def extract_signatures(self, data: bytes, debug: bool, sig_dir: str) -> None:
         """
         Extract signatures from zip
         """
-        with ZipFile(BytesIO(response.content)) as zip_update:
-            for zip_file_path in zip_update.namelist():
+        with ZipFile(BytesIO(data)) as zip_update:
+            plan = []
+            for info in zip_update.infolist():
+                if not is_regular_file(info):
+                    continue
+                zip_file_path = member_path(info)
                 sig_name = os.path.basename(zip_file_path)
-                if zip_file_path.endswith("/"):
-                    continue
+                target_file = self.get_target_file(zip_file_path, sig_name)
+                if target_file:
+                    plan.append((info, target_file))
 
-                # Extract the rules
-                if debug:
-                    log(
-                        "DEBUG",
-                        "Upgrader",
-                        f"Extracting {zip_file_path} ...",
-                    )
+            new_files = [
+                target_file
+                for _, target_file in plan
+                if not os.path.exists(os.path.join(sig_dir, target_file))
+            ]
+            extract_members(zip_update, plan, sig_dir, debug)
 
-                target_file = self.get_target_file(zip_file_path, sig_dir, sig_name)
-
-                if not target_file:
-                    continue
-
-                # New file
-                if not os.path.exists(target_file):
-                    log(
-                        "INFO",
-                        "Upgrader",
-                        f"New signature file: {sig_name}",
-                    )
-
-                # Extract file
-                source = zip_update.open(zip_file_path)
-                target = open(target_file, "wb")
-                with source, target:
-                    copyfileobj(source, target)
-                target.close()
-                source.close()
+        for target_file in new_files:
+            log(
+                "INFO",
+                "Upgrader",
+                f"New signature file: {os.path.basename(target_file)}",
+            )
 
     def update_signatures_base(self, debug: bool, sig_url: str) -> None:
         """
         Update signature rules
         """
         # Downloading current repository
-        response = self.get_response(sig_url)
+        data = self.get_response(sig_url)
 
-        # Preparations
-        try:
-            sig_dir = os.path.join(
-                self.application_path, os.path.abspath("signature-base/")
-            )
-            self.make_sigdirs(sig_dir)
-        except Exception:
-            if self.debug:
-                trace()
-            log(
-                "ERROR",
-                "Upgrader",
-                "Error while creating the signature-base directories",
-            )
-            sys.exit(1)
+        sig_dir = os.path.join(self.application_path, "signature-base")
+        self.make_sigdirs(sig_dir)
 
         # Read ZIP file and extract
-        try:
-            self.extract_signatures(response, debug, sig_dir)
-        except Exception:
-            if self.debug:
-                trace()
-            log(
-                "ERROR",
-                "Upgrader",
-                "Error while extracting the signature files from the download package",
-            )
-            sys.exit(1)
+        self.extract_signatures(data, debug, sig_dir)
 
     def update_signatures(self, force: bool, debug: bool) -> None:
         """
         Update signatures
         """
+        if not os.path.exists(os.path.join(self.application_path, "signature-base")):
+            for filename in glob.glob(
+                os.path.join(glob.escape(self.cache_dir), "_*.cache")
+            ):
+                os.remove(filename)
+
         for sig_url in self.UPDATE_URL_SIGS:
-            if needs_update(sig_url) or force:
-                try:
-                    self.update_signatures_base(debug, sig_url)
-                except Exception:
-                    if self.debug:
-                        trace()
-            else:
+            cache_file = os.path.join(self.cache_dir, cache_name(sig_url))
+            changed, sha = needs_update(sig_url, cache_file)
+            if not changed and not force:
                 log("INFO", "Upgrader", f"{sig_url} is up to date.")
+                continue
+            try:
+                self.update_signatures_base(debug, sig_url)
+            except Exception as e:
+                self.fail(sig_url, e)
+                continue
+            # Remember the commit only once it has been extracted successfully
+            if sha:
+                with open(cache_file, "w", encoding="utf-8") as file:
+                    file.write(sha)
 
     def update_standalone_signatures(self, force: bool) -> None:
         """
         update standalone signatures
         """
-        out_dir = "signature-custom/yara"
+        out_dir = os.path.join(self.application_path, "signature-custom", "yara")
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
+            force = True
 
         for key, val in self.UPDATE_URL_SIGS_STANDALONE.items():
             sig_name = key
@@ -320,28 +451,35 @@ class ParanoyaUpdater:
 
             sig_url_hash = hashlib.md5(sig_url.encode("utf-8")).hexdigest()  # nosec
             sig_name_strip = re.sub("[^A-Za-z0-9]+", "", sig_name)
-            cache_file_name = f"_{sig_name_strip}_{sig_url_hash}.cache"
+            cache_file_name = os.path.join(
+                self.cache_dir, f"_{sig_name_strip}_{sig_url_hash}.cache"
+            )
 
-            if not os.path.exists(cache_file_name) or force:
-                log(
-                    "INFO",
-                    "Upgrader",
-                    f"Extracting {sig_name} from {sig_url} to {out_dir}",
-                )
-
-                with ZipFile(
-                    BytesIO(
-                        requests.get(sig_url, allow_redirects=True, timeout=30).content
-                    )
-                ) as zip_update:
-                    for zip_file_path in zip_update.namelist():
-                        if zip_file_path.endswith((".yar", ".yara")):
-                            zip_update.extract(zip_file_path, out_dir)
-
-                with open(cache_file_name, "w", encoding="utf-8") as cache_file:
-                    cache_file.close()
-            else:
+            if os.path.exists(cache_file_name) and not force:
                 log("INFO", "Upgrader", f"{cache_file_name} exists, skipping {sig_url}")
+                continue
+
+            log(
+                "INFO",
+                "Upgrader",
+                f"Extracting {sig_name} from {sig_url} to {out_dir}",
+            )
+
+            try:
+                with ZipFile(BytesIO(safe_download(sig_url))) as zip_update:
+                    plan = [
+                        (info, member_path(info))
+                        for info in zip_update.infolist()
+                        if is_regular_file(info)
+                        and info.filename.endswith((".yar", ".yara"))
+                    ]
+                    extract_members(zip_update, plan, out_dir, self.debug)
+            except Exception as e:
+                self.fail(sig_url, e)
+                continue
+
+            with open(cache_file_name, "w", encoding="utf-8") as cache_file:
+                cache_file.close()
 
     def get_paranoya_zip_file_url(self) -> str:
         """
@@ -356,28 +494,7 @@ class ParanoyaUpdater:
             sys.exit(1)
         return ""
 
-    def create_target_file(self, target_file: str, source: IO[bytes]) -> None:
-        """
-        Create target file
-        """
-        try:
-            # Create target file
-            target = open(target_file, "wb")
-            with source, target:
-                copyfileobj(source, target)
-                if self.debug:
-                    log(
-                        "DEBUG",
-                        "Upgrader",
-                        f"Successfully extracted '{target_file}'",
-                    )
-            target.close()
-        except Exception:
-            log("ERROR", "Upgrader", f"Cannot extract '{target_file}'")
-            if self.debug:
-                trace()
-
-    def download_paranoya(self) -> requests.models.Response:
+    def download_paranoya(self) -> bytes:
         """
         Download paranoya
         """
@@ -399,8 +516,10 @@ class ParanoyaUpdater:
                 sys.exit(1)
             else:
                 log("INFO", "Upgrader", f"Downloading latest release {zip_url} ...")
-                rq = requests.get(url=zip_url, timeout=30)
-                return rq
+                return safe_download(zip_url)
+        except UnsafeDownloadError as e:
+            log("ERROR", "Upgrader", f"Rejected paranoya update: {e}")
+            sys.exit(1)
         except Exception:
             if self.debug:
                 trace()
@@ -411,44 +530,30 @@ class ParanoyaUpdater:
             )
             sys.exit(1)
 
-    def make_dir_paranoya(self, target_file: str) -> None:
-        """
-        Make dirs for paranoya
-        """
-        try:
-            # Create file if not present
-            if not os.path.exists(os.path.dirname(target_file)):
-                if os.path.dirname(target_file) != "":
-                    os.makedirs(os.path.dirname(target_file))
-        except Exception:
-            if self.debug:
-                log(
-                    "DEBUG",
-                    "Upgrader",
-                    f"Cannot create dir name '{os.path.dirname(target_file)}'",
-                )
-                trace()
-
-    def extract_paranoya(self, response_zip: requests.models.Response) -> None:
+    def extract_paranoya(self, data: bytes) -> None:
         """
         Extract paranoya
         """
         # Read ZIP file
         try:
-            with ZipFile(BytesIO(response_zip.content)) as zip_update:
-                for zip_file_path in zip_update.namelist():
-                    if zip_file_path.endswith("/") or "/config/" in zip_file_path:
+            with ZipFile(BytesIO(data)) as zip_update:
+                plan = []
+                for info in zip_update.infolist():
+                    if not is_regular_file(info):
                         continue
+                    zip_file_path = member_path(info)
+                    if "/config/" in zip_file_path:
+                        continue
+                    # Strip the top level dir of the GitHub zipball
+                    target_file = "/".join(zip_file_path.split("/")[1:])
+                    if target_file:
+                        plan.append((info, target_file))
 
-                    with zip_update.open(zip_file_path) as source:
-                        target_file = "/".join(zip_file_path.split("/")[1:])
+                extract_members(zip_update, plan, self.application_path, True)
 
-                        log("INFO", "Upgrader", f"Extracting {target_file} ...")
-
-                        self.make_dir_paranoya(target_file)
-
-                        self.create_target_file(target_file, source)
-
+        except UnsafeDownloadError as e:
+            log("ERROR", "Upgrader", f"Rejected paranoya update: {e}")
+            sys.exit(1)
         except Exception:
             if self.debug:
                 trace()
@@ -464,8 +569,7 @@ class ParanoyaUpdater:
         Update paranoya
         """
         try:
-            response_zip = self.download_paranoya()
-            self.extract_paranoya(response_zip)
+            self.extract_paranoya(self.download_paranoya())
         except Exception:
             if self.debug:
                 trace()
@@ -542,6 +646,10 @@ if __name__ == "__main__":
         log("INFO", "Upgrader", "Updating Signatures ...")
         updater.update_signatures(args.force, args.debug)
         updater.update_standalone_signatures(args.force)
+
+    if updater.failed:
+        log("ERROR", "Upgrader", "Update finished with errors")
+        sys.exit(1)
 
     log("INFO", "Upgrader", "Update complete")
 

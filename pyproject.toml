@@ -1,0 +1,52 @@
+[project]
+name = "paranoya"
+version = "4.2.0"
+description = "Simple IOC and YARA Scanner for Linux"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.10"
+dependencies = [
+    "colorama>=0.4.6",
+    "progressbar2>=4.5.0",
+    "psutil>=7.2.2",
+    "requests>=2.33.1",
+    "yara-python>=4.5.4",
+]
+
+[dependency-groups]
+build = [
+    "black",
+    "pyinstaller",
+    "ruff",
+]
+lint = [
+    "bandit",
+    "black",
+    "codespell",
+    "mypy",
+    "pylama",
+    "pylint",
+    "pyright",
+    "ruff",
+    "types-colorama",
+    "types-psutil",
+    "types-requests",
+]
+
+[tool.uv]
+# Not an installable package, just a set of scripts with locked dependencies
+package = false
+# `uv sync` installs runtime dependencies only, groups are opt-in (--group)
+default-groups = []
+# Supply-chain cooldown: ignore any distribution uploaded in the last 14 days
+# (applies to resolution, build dependencies and tools alike)
+exclude-newer = "14 days"
+# Use the system interpreter only (lib/paranoya_venv.py loads .venv
+# site-packages into the system python), never download Python builds
+python-preference = "only-system"
+python-downloads = "never"
+# Refuse to run with uv versions older than the features used here
+required-version = ">=0.9.17"
+
+[tool.uv.pip]
+require-hashes = true

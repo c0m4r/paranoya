@@ -23,7 +23,7 @@ def venv_check(paranoya_script_name: str) -> None:
     """
     python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
     paranoya_base_path = os.path.dirname(os.path.realpath(paranoya_script_name))
-    paranoya_venv_path = f"{paranoya_base_path}/venv"
+    paranoya_venv_path = f"{paranoya_base_path}/.venv"
     paranoya_venv_site = (
         f"{paranoya_venv_path}/lib/python{python_version}/site-packages"
     )

@@ -44,6 +44,18 @@ as well as a daemon mode to accept scans in a client/server manner. It also incl
 | [malpedia/signator-rules](https://github.com/malpedia/signator-rules) 
 | [YARAHQ/yara-forge](https://github.com/YARAHQ/yara-forge)
 
+#### uv
+
+Python dependencies are managed with [uv](https://docs.astral.sh/uv/) (>= 0.9.17)
+and pinned with hashes in `uv.lock`. If uv is missing (or too old), `deploy.sh`
+installs the hash-pinned version from `requirements-uv.txt` into `.uv/` using pip,
+so only python3 with pip and venv is required. You can also install it with your package manager
+(e.g. `pacman -S uv`, `xbps-install -S uv`, `apk add uv` on Alpine >= 3.23)
+or follow the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+
+As a supply-chain safeguard, uv ignores any package release uploaded
+in the last 14 days (`exclude-newer` in `pyproject.toml`).
+
 #### Alpine Linux
 
 ```
@@ -84,6 +96,14 @@ git clone https://github.com/c0m4r/paranoya.git
 cd paranoya
 ./deploy.sh
 ./paranoya.py --nolog --intense -p ./test
+```
+
+To update the dependencies (respecting the 14-day cooldown):
+
+```
+uv tree --outdated --depth 1
+uv lock --upgrade
+uv sync --locked
 ```
 
 #### Docker

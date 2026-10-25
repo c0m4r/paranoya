@@ -1303,6 +1303,7 @@ class Paranoya:
                                 compiled_rules = yara.compile(
                                     source=yara_rule_data,
                                     externals=externals,
+                                    includes=False,
                                 )
                                 logger.log(
                                     "DEBUG", "Init", f"Initializing Yara rule {file}"
@@ -1342,6 +1343,7 @@ class Paranoya:
                 compiled_rules = yara.compile(
                     source=yara_rules,
                     externals=externals,
+                    includes=False,
                 )
                 logger.log("INFO", "Init", f"Initialized {rule_count} Yara rules")
             except Exception:

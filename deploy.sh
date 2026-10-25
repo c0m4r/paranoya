@@ -61,6 +61,51 @@ find_python() {
     fi
 }
 
+# Version compare function, true if $1 >= $2
+version_ge() {
+    local -a a b
+    local i x y
+    IFS=. read -ra a <<< "$1"
+    IFS=. read -ra b <<< "$2"
+    for i in 0 1 2; do
+        x=${a[i]%%[^0-9]*}
+        y=${b[i]%%[^0-9]*}
+        (( ${x:-0} > ${y:-0} )) && return 0
+        (( ${x:-0} < ${y:-0} )) && return 1
+    done
+    return 0
+}
+
+# uv finder function
+# Uses uv from PATH if recent enough, otherwise installs the hash-pinned
+# uv from requirements-uv.txt into .uv/ with pip (wheels only)
+find_uv() {
+    local required pinned version
+    required=$(sed -n 's/^required-version = ">=\([0-9.]*\)".*/\1/p' pyproject.toml)
+    pinned=$(sed -n 's/^uv==\([0-9.]*\).*/\1/p' requirements-uv.txt)
+
+    if command -v uv &>/dev/null ; then
+        version=$(uv --version | awk '{print $2}')
+        if version_ge "$version" "$required"; then
+            UV_BIN="uv"
+            return
+        fi
+        print "uv ${version} found, but >= ${required} is required"
+    fi
+
+    if [[ -x .uv/bin/uv ]] && [[ $(.uv/bin/uv --version | awk '{print $2}') == "$pinned" ]]; then
+        UV_BIN=".uv/bin/uv"
+        return
+    fi
+
+    print "Installing uv ${pinned} into .uv (hash-pinned)"
+    rm -rf .uv
+    $PYTHON_BIN -m venv .uv
+    .uv/bin/python -m pip install --disable-pip-version-check --no-deps \
+        --only-binary :all: --require-hashes -r requirements-uv.txt
+    UV_BIN=".uv/bin/uv"
+}
+
 # Color print function
 print() {
     echo -e "${ORANGE}${1}${ENDCOLOR}"
@@ -92,25 +137,20 @@ hint_deps() {
 }
 
 # Deploy function
+# Installs exactly what uv.lock pins (hash-verified), see [tool.uv] in pyproject.toml
 deploy() {
     find_python
-    print "Creating venv, this might take a while..."
-    $PYTHON_BIN -m venv venv
-    . venv/bin/activate
-    print "Upgrading pip"
-    $PYTHON_BIN -m pip install pip==26.1.1
-    print "Installing setuptools and wheel"
-    $PYTHON_BIN -m pip install --uploaded-prior-to=P10D setuptools wheel || true
-    print "Installing pip modules"
-    $PYTHON_BIN -m pip install --uploaded-prior-to=P10D --require-hashes -r requirements.lock.txt
+    find_uv
+    print "Syncing .venv from uv.lock, this might take a while..."
+    "$UV_BIN" sync --locked --python "$(command -v $PYTHON_BIN)" "$@"
 }
 
 trap hint_deps EXIT
 
-if [ ! -e venv/pyvenv.cfg ]; then
+if [ ! -e .venv/pyvenv.cfg ]; then
     deploy
 elif [ "$1" == "--force" ]; then
-    deploy
+    deploy --reinstall
 else
-    print "Already installed, use --force to recreate venv."
+    print "Already installed, use --force to reinstall .venv."
 fi

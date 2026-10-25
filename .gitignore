@@ -2,7 +2,7 @@
 /.pytest_cache
 /.ruff_cache
 /__pycache__
-/*.cache
+/cache
 /*.log
 /*.tar.gz
 /*.spec
@@ -19,6 +19,8 @@
 /paranoya.pid
 /okrutnik.sh
 /pyvenv.cfg
+/.uv
+/.venv
 /venv
 /signature-base
 /signature-custom

@@ -2,6 +2,7 @@
 set -e
 
 VENV_PATH=".tmp_venv"
+REQ_FILE=".tmp_requirements.txt"
 
 # https://github.com/flatpak/flatpak-builder-tools
 FPG="https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/de56f4702638739f930f4afa648686f12ac4d724/pip/flatpak-pip-generator"
@@ -13,8 +14,12 @@ if [[ ! -e flatpak-pip-generator ]]; then
     chmod +x flatpak-pip-generator
 fi
 
+# Pinned runtime dependencies from uv.lock
+uv export --locked --no-dev --no-hashes --no-header --no-annotate \
+    --project ../.. --format requirements-txt -o "${REQ_FILE}"
+
 python -m venv "${VENV_PATH}"
 source "${VENV_PATH}"/bin/activate
-pip install requirements-parser
-./flatpak-pip-generator -r ../../requirements.txt
-rm -r ${VENV_PATH}
+pip install --uploaded-prior-to=P14D requirements-parser
+./flatpak-pip-generator -r "${REQ_FILE}"
+rm -r ${VENV_PATH} "${REQ_FILE}"
