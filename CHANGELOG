@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - log lines, message counters and progress output are no longer garbled or miscounted when several threads or daemon clients log at the same time
 - daemon mode reported a clean system when a scan's last finding was a notice, even after alerts, and ignored findings made by `--multicore` threads
 - a single-file scan in daemon mode no longer disables the progress bar for all later scans
+- with `--progress`, files created after the initial file count were silently skipped instead of scanned
+- the progress bar is finished after a scan, so it shows its final state and later output no longer starts on the bar's line
+- the progress bar total counts the files the scan walks, without the directories skipped by the fixed excludes, and the count is skipped for nonexistent or excluded paths
+- the "Scanned N files" indicator is no longer printed alongside the progress bar
 - the "Scanned N files" indicator counted files per directory instead of per scan
 - the YARA `filename` external contained the whole path for single-file scans
 

@@ -120,13 +120,27 @@ class ScanState:
 
     def file_checked(self) -> None:
         """
-        advance the progress indicator
+        advance the progress indicator, which the progress bar replaces
         """
         with self.lock:
             self.files_checked += 1
-            if not args.noindicator:
+            # The indicator prints every 1000 files, only lock the output then
+            if (
+                self.progress_bar is None
+                and not args.noindicator
+                and self.files_checked % 1000 == 0
+            ):
                 with logger.lock:
                     paranoya_print_progress(self.files_checked)
+
+    def finish(self) -> None:
+        """
+        finish the progress bar, draws its final state and releases stdout
+        """
+        if self.progress_bar is None:
+            return
+        with logger.lock:
+            self.progress_bar.finish()
 
     def add_finding(self, message_type: str) -> None:
         """
@@ -284,26 +298,23 @@ class Paranoya:
             )
         )
 
-    def file_list_gen(self, path):
+    def count_files(self, path: str) -> int:
         """
-        file list gen
+        count the files the scan of path will walk, stops after bar_iter_max
         """
-        matches = []
-        flg_iter = 0
+        files_count = 0
         logger.log("INFO", "Init", "Processing files to scan, this might take a while.")
-        for root, _, filenames in os.walk(path, followlinks=args.followlinks):
-            for filename in filenames:
-                matches.append(os.path.join(root, filename))
-                flg_iter += 1
-                if flg_iter > self.bar_iter_max:
-                    logger.log(
-                        "INFO",
-                        "Init",
-                        "File list too large, progress will be unavailable",
-                    )
-                    return matches
+        for _ in self.walk_files(path, quiet=True):
+            files_count += 1
+            if files_count > self.bar_iter_max:
+                logger.log(
+                    "INFO",
+                    "Init",
+                    "File list too large, progress will be unavailable",
+                )
+                return files_count
         logger.log("INFO", "Init", "Processing done")
-        return matches
+        return files_count
 
     def scan_path(self, path: str) -> Counter[str]:
         """
@@ -314,10 +325,6 @@ class Paranoya:
             scan = ScanState()
             self.scan_path_files([path], scan)
             return scan.findings
-
-        if args.progress and not args.silent and not args.noindicator:
-            files_all = self.file_list_gen(path)
-            files_all_len = len(files_all)
 
         # Check if path exists
         if not os.path.exists(path):
@@ -338,22 +345,30 @@ class Paranoya:
                 return Counter()
 
         if args.progress and not args.silent and not args.noindicator:
-            if files_all_len <= self.bar_iter_max:
+            files_count = self.count_files(path)
+            # max_error=False: files created since the count must not raise
+            # in scan_path_files(), which would skip them
+            if files_count <= self.bar_iter_max:
                 progress_bar = progressbar.ProgressBar(
-                    max_value=files_all_len, redirect_stdout=True
+                    max_value=files_count, max_error=False, redirect_stdout=True
                 )
             else:
                 progress_bar = progressbar.ProgressBar(
-                    max_value=progressbar.UnknownLength, redirect_stdout=True
+                    max_value=progressbar.UnknownLength,
+                    max_error=False,
+                    redirect_stdout=True,
                 )
         else:
             progress_bar = None
 
         scan = ScanState(progress_bar)
-        if args.threads > 1:
-            self.scan_path_threaded(path, scan)
-        else:
-            self.scan_path_files(self.walk_files(path), scan)
+        try:
+            if args.threads > 1:
+                self.scan_path_threaded(path, scan)
+            else:
+                self.scan_path_files(self.walk_files(path), scan)
+        finally:
+            scan.finish()
         return scan.findings
 
     def scan_path_threaded(self, path: str, scan: ScanState) -> None:
@@ -401,12 +416,13 @@ class Paranoya:
             for _ in iter(jobs.get, None):
                 pass
 
-    def walk_files(self, path: str) -> Iterator[str]:
+    def walk_files(self, path: str, quiet: bool = False) -> Iterator[str]:
         """
         walk path and yield its files, skipping platform specific excludes
+        quiet: don't report skipped directories and walk errors
         """
         for root, directories, files in os.walk(
-            path, onerror=walk_error, followlinks=args.followlinks
+            path, onerror=None if quiet else walk_error, followlinks=args.followlinks
         ):
             # Skip paths that start with ..
             new_directories = []
@@ -419,12 +435,13 @@ class Paranoya:
                 # Platform specific excludes
                 for skip in self.start_excludes:
                     if complete_path.startswith(skip):
-                        logger.log(
-                            "INFO",
-                            "FileScan",
-                            f"Skipping {skip} directory [fixed excludes] "
-                            "(try using --force or --alldrives)",
-                        )
+                        if not quiet:
+                            logger.log(
+                                "INFO",
+                                "FileScan",
+                                f"Skipping {skip} directory [fixed excludes] "
+                                "(try using --force or --alldrives)",
+                            )
                         skip_it = True
 
                 if not skip_it:
