@@ -158,8 +158,15 @@ parser.add_argument(
 parser.add_argument(
     "--multicore",
     action="store_true",
-    help="Force paranoya to use all CPU cores (experimental)",
+    help="Scan files with one thread per available CPU core",
     default=False,
+)
+parser.add_argument(
+    "--threads",
+    type=int,
+    help="Number of threads scanning files (default: 1, with --multicore: one per CPU core)",
+    metavar="number",
+    default=None,
 )
 parser.add_argument(
     "--followlinks",

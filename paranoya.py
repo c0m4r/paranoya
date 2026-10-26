@@ -29,6 +29,7 @@ import datetime
 import ipaddress
 import os
 import platform
+import queue
 import re
 import socket
 import stat
@@ -37,6 +38,7 @@ import threading
 import traceback
 from bisect import bisect_left
 from collections import Counter
+from collections.abc import Iterable, Iterator
 import concurrent.futures
 from signal import signal, SIGPIPE, SIG_DFL, SIGTERM, SIGINT
 from subprocess import Popen, PIPE, run
@@ -89,6 +91,51 @@ def ioc_contains(sorted_list, value):
     return index != len(sorted_list) and sorted_list[index] == value
 
 
+class ScanState:
+    """
+    state of a single path scan, shared by the threads scanning its files
+    """
+
+    def __init__(self, progress_bar: progressbar.ProgressBar | None = None) -> None:
+        self.lock = threading.Lock()
+        self.progress_bar = progress_bar
+        # Files taken from the directory walk (progress bar)
+        self.files_walked = 0
+        # Files that passed the excludes (progress indicator)
+        self.files_checked = 0
+        # Number of findings per message type (NOTICE, WARNING, ALERT)
+        self.findings: Counter[str] = Counter()
+        # Set when a worker thread exits in debug mode, stops the scan
+        self.aborted = threading.Event()
+
+    def file_walked(self) -> None:
+        """
+        advance the progress bar
+        """
+        if self.progress_bar is None:
+            return
+        with self.lock, logger.lock:
+            self.files_walked += 1
+            self.progress_bar.update(self.files_walked)
+
+    def file_checked(self) -> None:
+        """
+        advance the progress indicator
+        """
+        with self.lock:
+            self.files_checked += 1
+            if not args.noindicator:
+                with logger.lock:
+                    paranoya_print_progress(self.files_checked)
+
+    def add_finding(self, message_type: str) -> None:
+        """
+        count a finding
+        """
+        with self.lock:
+            self.findings[message_type] += 1
+
+
 class Paranoya:
     """
     paranoya
@@ -118,7 +165,6 @@ class Paranoya:
     filetype_magics: dict = {}
     max_filetype_magics = 0
 
-    bar_iter = 0
     bar_iter_max = 10000
 
     def __init__(self, intense_mode: bool) -> None:
@@ -259,18 +305,15 @@ class Paranoya:
         logger.log("INFO", "Init", "Processing done")
         return matches
 
-    def scan_path(self, path):
+    def scan_path(self, path: str) -> Counter[str]:
         """
-        scan path
+        scan path, returns the number of findings per message type
         """
         if os.path.isfile(path):
-            root = ""
-            directories = ""
-            files = [path]
-            # Disable progress bar for single file scan
-            args.progress = False
-            self.scan_path_files(root, directories, files)
-            return
+            # Single file scan, without progress bar
+            scan = ScanState()
+            self.scan_path_files([path], scan)
+            return scan.findings
 
         if args.progress and not args.silent and not args.noindicator:
             files_all = self.file_list_gen(path)
@@ -279,7 +322,7 @@ class Paranoya:
         # Check if path exists
         if not os.path.exists(path):
             logger.log("ERROR", "FileScan", f"None Existing Scanning Path {path} ...  ")
-            return
+            return Counter()
 
         # Startup
         logger.log("INFO", "FileScan", f"Scanning Path {path} ...  ")
@@ -292,7 +335,7 @@ class Paranoya:
                     f"Skipping {skip} directory [fixed excludes]"
                     " (try using --force or --alldrives)",
                 )
-                return
+                return Counter()
 
         if args.progress and not args.silent and not args.noindicator:
             if files_all_len <= self.bar_iter_max:
@@ -306,12 +349,62 @@ class Paranoya:
         else:
             progress_bar = None
 
-        if args.multicore:
-            import concurrent.futures
+        scan = ScanState(progress_bar)
+        if args.threads > 1:
+            self.scan_path_threaded(path, scan)
+        else:
+            self.scan_path_files(self.walk_files(path), scan)
+        return scan.findings
 
-            executor = concurrent.futures.ThreadPoolExecutor()
-            futures = []
+    def scan_path_threaded(self, path: str, scan: ScanState) -> None:
+        """
+        scan path with a pool of worker threads
 
+        The directory walk runs in the calling thread and hands single files to
+        the workers through a bounded queue, which keeps the memory use flat.
+        File reads, hashing and YARA matching release the GIL, so the workers
+        scan in parallel.
+        """
+        jobs: queue.Queue[str | None] = queue.Queue(maxsize=args.threads * 64)
+        workers = [
+            threading.Thread(target=self.scan_worker, args=(jobs, scan), daemon=True)
+            for _ in range(args.threads)
+        ]
+        for worker in workers:
+            worker.start()
+
+        try:
+            for file_path in self.walk_files(path):
+                if scan.aborted.is_set():
+                    break
+                jobs.put(file_path)
+        finally:
+            # One stop marker per worker, queued behind the remaining files
+            for _ in workers:
+                jobs.put(None)
+            for worker in workers:
+                worker.join()
+
+        if scan.aborted.is_set():
+            sys.exit(1)
+
+    def scan_worker(self, jobs: queue.Queue[str | None], scan: ScanState) -> None:
+        """
+        scan worker thread, scans the queued files until it gets a stop marker
+        """
+        try:
+            self.scan_path_files(iter(jobs.get, None), scan)
+        except BaseException:
+            # sys.exit() in debug mode: stop the walk, but keep emptying the queue
+            # so it never blocks, scan_path_threaded() exits afterwards
+            scan.aborted.set()
+            for _ in iter(jobs.get, None):
+                pass
+
+    def walk_files(self, path: str) -> Iterator[str]:
+        """
+        walk path and yield its files, skipping platform specific excludes
+        """
         for root, directories, files in os.walk(
             path, onerror=walk_error, followlinks=args.followlinks
         ):
@@ -338,24 +431,8 @@ class Paranoya:
                     new_directories.append(dirname)
             directories[:] = new_directories
 
-            if args.multicore:
-                futures.append(
-                    executor.submit(
-                        self.scan_path_files, root, directories, files, progress_bar
-                    )
-                )
-            else:
-                self.scan_path_files(root, directories, files, progress_bar)
-
-        if args.multicore:
-            import concurrent.futures
-
-            for future in concurrent.futures.as_completed(futures):
-                try:
-                    future.result()
-                except Exception as exc:
-                    logger.log("ERROR", "FileScan", f"Thread error: {exc}")
-            executor.shutdown()
+            for filename in files:
+                yield os.path.join(root, filename)
 
     def perform_intense_check(
         self,
@@ -517,27 +594,21 @@ class Paranoya:
                 f"Cannot YARA scan file: {file_path_cleaned}",
             )
 
-    def scan_path_files(self, root, directories, files, progress_bar=None):
+    def scan_path_files(self, file_paths: Iterable[str], scan: ScanState) -> None:
         """
         scan path files
         """
-        # Counter
-        c = 0
-
         # Loop through files
-        for filename in files:
+        for file_path in file_paths:
             try:
-                if args.progress and not args.silent and not args.noindicator:
-                    self.bar_iter += 1
-                    progress_bar.update(self.bar_iter)
+                scan.file_walked()
                 # Findings
                 reasons = []
                 # Total Score
                 total_score = 0
 
                 # Get the file and path
-                file_path = os.path.join(root, filename)
-                fpath = os.path.split(file_path)[0]
+                fpath, filename = os.path.split(file_path)
                 # Clean the values for YARA matching
                 # > due to errors when Unicode characters are passed to the match function as
                 #   external variables
@@ -580,10 +651,7 @@ class Paranoya:
                     continue
 
                 # Counter
-                c += 1
-
-                if not args.noindicator:
-                    paranoya_print_progress(c)
+                scan.file_checked()
 
                 # Skip program directory
                 if self.app_path.lower() in file_path.lower() and not args.force:
@@ -714,13 +782,10 @@ class Paranoya:
                 # Now print the total result
                 if total_score >= args.a:
                     message_type = "ALERT"
-                    threading.current_thread().message = "ALERT"
                 elif total_score >= args.w:
                     message_type = "WARNING"
-                    threading.current_thread().message = "WARNING"
                 elif total_score >= args.n:
                     message_type = "NOTICE"
-                    threading.current_thread().message = "NOTICE"
 
                 if total_score < args.n:
                     continue
@@ -732,6 +797,7 @@ class Paranoya:
                         message_body += f"REASON_{i + 1}: {r}"
 
                 logger.log(message_type, "FileScan", message_body)
+                scan.add_finding(message_type)
 
             except Exception:
                 if logger.debug:
@@ -1601,7 +1667,6 @@ class Paranoya:
             try:
                 clientid = f"{address[0]}:{address[1]}"
                 threading.current_thread().name = clientid
-                threading.current_thread().message = ""
                 data = client_socket.recv(size)
                 scan_path = data.decode().split(" ")[0]
                 if args.auth:
@@ -1655,17 +1720,17 @@ class Paranoya:
                     + ":"
                     + str(address[1]),
                 )
-                self.scan_path(scan_path.strip())
+                findings = self.scan_path(scan_path.strip())
 
                 # Result
-                if threading.current_thread().message == "ALERT":
+                if findings["ALERT"]:
                     logger.log(
                         "RESULT",
                         "Results",
                         f"Indicators detected! (Client: {clientid})",
                     )
                     client_socket.send("RESULT: Indicators detected!".encode())
-                elif threading.current_thread().message == "WARNING":
+                elif findings["WARNING"]:
                     logger.log(
                         "RESULT",
                         "Results",
@@ -1887,6 +1952,12 @@ def read_args() -> "argparse.Namespace":
 
     args_tmp.excludeprocess = [x.lower() for x in args_tmp.excludeprocess]
 
+    if args_tmp.threads is None:
+        args_tmp.threads = len(os.sched_getaffinity(0)) if args_tmp.multicore else 1
+    elif args_tmp.threads < 1:
+        print("The number of --threads must be at least 1")
+        sys.exit(1)
+
     return args_tmp
 
 
@@ -1941,10 +2012,8 @@ if __name__ == "__main__":
                 "Skipping process memory check. User has no admin rights.",
             )
 
-    if args.multicore:
-        args.progress = False
-        logger.log("NOTICE", "Init", "Multicore processing enabled (experimental)")
-        logger.log("NOTICE", "Init", "Progress will be unavailable")
+    if args.threads > 1:
+        logger.log("INFO", "Init", f"Scanning files with {args.threads} threads")
 
     # File scan mode
     if args.d:

@@ -27,6 +27,7 @@ import datetime
 import os
 import re
 import sys
+import threading
 import traceback
 
 from lib.paranoya_venv import venv_check
@@ -82,6 +83,9 @@ class ParanoyaLogger:
         self.silent = silent
         self.debug = debug
 
+        # Serializes the counters and the console / log file output between threads
+        self.lock = threading.RLock()
+
         # Colorization
         init()
 
@@ -96,32 +100,33 @@ class ParanoyaLogger:
         if not self.debug and mes_type == "DEBUG":
             return
 
-        # Counter
-        if mes_type == "ALERT":
-            self.alerts += 1
-        if mes_type == "WARNING":
-            self.warnings += 1
-        if mes_type == "NOTICE":
-            self.notices += 1
-        self.messagecount += 1
+        with self.lock:
+            # Counter
+            if mes_type == "ALERT":
+                self.alerts += 1
+            if mes_type == "WARNING":
+                self.warnings += 1
+            if mes_type == "NOTICE":
+                self.notices += 1
+            self.messagecount += 1
 
-        if self.silent:
-            if mes_type not in ("ALERT", "WARNING"):
-                return
+            if self.silent:
+                if mes_type not in ("ALERT", "WARNING"):
+                    return
 
-        # to file
-        if not self.no_log_file:
-            self.log_to_file(message, mes_type, module)
+            # to file
+            if not self.no_log_file:
+                self.log_to_file(message, mes_type, module)
 
-        # to stdout
-        try:
-            self.log_to_stdout(message, mes_type)
-        except Exception:
-            print(
-                "Cannot print certain characters to command line, "
-                "see log file for full unicode encoded log line"
-            )
-            self.log_to_stdout(message, mes_type)
+            # to stdout
+            try:
+                self.log_to_stdout(message, mes_type)
+            except Exception:
+                print(
+                    "Cannot print certain characters to command line, "
+                    "see log file for full unicode encoded log line"
+                )
+                self.log_to_stdout(message, mes_type)
 
     def log_format(self, message: str, *args: str) -> str:
         """

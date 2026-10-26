@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `--threads N` sets the number of threads scanning files (default 1, `--multicore` uses one per available CPU core)
+
+### Changed
+
+- multithreaded scanning is no longer experimental: single files (instead of whole directories) are handed to a fixed pool of worker threads through a bounded queue, so it scales within a single directory and memory use stays flat
+- the progress bar works with multithreaded scanning
+
+### Fixed
+
+- log lines, message counters and progress output are no longer garbled or miscounted when several threads or daemon clients log at the same time
+- daemon mode reported a clean system when a scan's last finding was a notice, even after alerts, and ignored findings made by `--multicore` threads
+- a single-file scan in daemon mode no longer disables the progress bar for all later scans
+- the "Scanned N files" indicator counted files per directory instead of per scan
+- the YARA `filename` external contained the whole path for single-file scans
+
 ## [4.3.0] - 2026-10-25
 
 ### Security

@@ -233,6 +233,7 @@ In `--auth` mode it will respond with `authorization required` if authkey was no
   * Process connections: for now, it only shows detected connections per process
   * Process Masquerading Detection: reports non-empty /proc/PID/maps of processes that uses square brackets in their cmdlines
 * Progress bar (experimental) can be enabled with --progress
+* Multithreaded file scanning with `--threads N`, or `--multicore` for one thread per available CPU core
 * Force paranoya to follow symlinks (be aware: may lead to RAM overflow) with --followlinks
 * Custom yara rules sources
   * Some additional YARA rule sources have been added and you can also choose your own
