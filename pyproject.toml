@@ -41,6 +41,14 @@ default-groups = []
 # Supply-chain cooldown: ignore any distribution uploaded in the last 14 days
 # (applies to resolution, build dependencies and tools alike)
 exclude-newer = "14 days"
+# Cooldown exemptions for required security bumps, cut off right after the
+# wanted release; drop them once it falls outside the 14-day window
+exclude-newer-package = { setuptools = "2026-10-19T20:15:00Z", certifi = "2026-10-19T00:00:00Z" }
+# Minimum versions of transitive dependencies
+constraint-dependencies = [
+    "certifi>=2026.10.18",
+    "setuptools>=84.1.0",
+]
 # Use the system interpreter only (lib/paranoya_venv.py loads .venv
 # site-packages into the system python), never download Python builds
 python-preference = "only-system"
