@@ -742,7 +742,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 build = [
     { name = "black" },
-    { name = "pyinstaller" },
+    { name = "pyinstaller", specifier = ">=6.0" },
     { name = "ruff" },
 ]
 lint = [

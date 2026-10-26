@@ -16,7 +16,8 @@ dependencies = [
 [dependency-groups]
 build = [
     "black",
-    "pyinstaller",
+    # Floor keeps the resolver from backtracking to Python 2 era sdists
+    "pyinstaller>=6.0",
     "ruff",
 ]
 lint = [
@@ -43,6 +44,7 @@ default-groups = []
 exclude-newer = "14 days"
 # Cooldown exemptions for required security bumps, cut off right after the
 # wanted release; drop them once it falls outside the 14-day window
+# (keep cooldown.exclude in .github/dependabot.yml in sync)
 exclude-newer-package = { setuptools = "2026-10-19T20:15:00Z", certifi = "2026-10-19T00:00:00Z" }
 # Minimum versions of transitive dependencies
 constraint-dependencies = [
