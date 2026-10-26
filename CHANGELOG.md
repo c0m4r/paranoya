@@ -1,0 +1,308 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.4.0] - 2026-10-25
+
+### Added
+
+- `--threads N` sets the number of threads scanning files (default 1, `--multicore` uses one per available CPU core)
+
+### Changed
+
+- multithreaded scanning is no longer experimental: single files (instead of whole directories) are handed to a fixed pool of worker threads through a bounded queue, so it scales within a single directory and memory use stays flat
+- the progress bar works with multithreaded scanning
+
+### Fixed
+
+- log lines, message counters and progress output are no longer garbled or miscounted when several threads or daemon clients log at the same time
+- daemon mode reported a clean system when a scan's last finding was a notice, even after alerts, and ignored findings made by `--multicore` threads
+- a single-file scan in daemon mode no longer disables the progress bar for all later scans
+- with `--progress`, files created after the initial file count were silently skipped instead of scanned
+- the progress bar is finished after a scan, so it shows its final state and later output no longer starts on the bar's line
+- the progress bar total counts the files the scan walks, without the directories skipped by the fixed excludes, and the count is skipped for nonexistent or excluded paths
+- the "Scanned N files" indicator is no longer printed alongside the progress bar
+- the "Scanned N files" indicator counted files per directory instead of per scan
+- the YARA `filename` external contained the whole path for single-file scans
+
+## [4.3.0] - 2026-10-25
+
+### Security
+
+- switched to uv: pyproject.toml + hash-pinned uv.lock, 14-day supply-chain cooldown (exclude-newer)
+- upgrader: downloads only over HTTPS from GitHub (checked on every redirect), with size limits
+- upgrader: archives are validated before extraction (path traversal, absolute paths, symlinks, zip bombs) and files are written atomically without following symlinks
+- upgrader: fixed path traversal in the program update (e.g. `x//etc/file` was written to `/etc/file`)
+- YARA `include` directives are disabled when compiling rules
+
+### Changed
+
+- venv moved from venv/ to .venv/, deploy and build scripts use uv sync --locked
+- deploy.sh installs the hash-pinned uv from requirements-uv.txt into .uv/ with pip when uv is missing or too old
+- Dockerfiles use a digest-pinned uv image
+- upgrader cache files moved to cache/ (existing ones are migrated)
+- upgrader writes signatures and updates relative to the application path instead of the current directory
+- upgrader continues with the remaining sources when one fails, and exits with 1
+
+### Fixed
+
+- upgrader no longer reports signatures as up to date after a failed download, nor re-downloads them on every run after the first upstream change
+
+### Removed
+
+- requirements*.txt, pip_lock.py and pip_check.py (superseded by uv.lock and uv tree --outdated)
+
+## [4.2.0] - 2026-04-29
+
+### Security
+
+- dependency pinning, hashes, updated deploy and build scripts
+
+## [4.1.0] - 2026-03-28
+
+### Added
+
+- added multicore arg for experimental multiprocessing
+
+### Changed
+
+- change deprecated psutil process connections function
+
+### Fixed
+
+- deprecated codecs.open() replaced with open()
+- spinner blocking terminal output
+
+## [4.0.0] - 2024-01-16
+
+### Added
+
+- addons: docker hub Dockerfile
+
+### Changed
+
+- [breaking] project renaming, please welcome: paranoya
+- be verbose about skipping files in program directory
+
+
+## [3.2.2] - 2024-01-16
+
+### Added
+
+- chroot helper script
+- custom yara rules: malpedia/signator-rules
+
+### Changed
+
+- code refactoring
+
+### Removed
+
+- removed invalid --update args from loki.py, use upgrader.py instead
+- custom Yara-Rules/rules, causing overflows
+
+## [3.2.1] - 2024-01-13
+
+### Added
+
+- flatpak gen_python3-requirements.sh helper script
+
+### Changed
+
+- docker deploy.sh script
+
+### Fixed
+
+- flatpak files regression
+
+## [3.2.0] - 2024-01-13
+
+### Added
+
+- progress bar can be enabled with --progress (experimental)
+- lib/lokiargs.py
+- lib/constants.py
+- lib/lokivenv.py
+- new option: --followlinks allow to force Loki to follow symlinks
+- new option: --custom allows the use of custom yara rulesets
+- custom yara rules sources
+
+### Changed
+
+- code refactoring
+
+### Removed
+
+- removed obsolete pyinstaller options from the build.sh
+- lib/venv.py
+
+### Fixed
+
+- obsolete python2 options
+
+## [3.1.1] - 2024-01-11
+
+### Fixed
+
+- build script regression
+
+## [3.1.0] - 2024-01-11
+
+### Added
+
+- deployment script deploy.sh which installs deps and venv
+- venv autosetup and detection
+- upgrader script signal handling
+- custom modules import validation
+- new local module: lib/venv.py
+
+### Changed
+
+- loki no longer changes background inside the terminal
+
+### Fixed
+
+- stripping empty space in cmdline
+- cache files preventing upgrade if signature-base is not present
+
+### Removed
+
+- venv.sh replaced with deploy.sh
+
+## [3.0.0] - 2024-01-10
+
+### Added
+
+- build.sh improvements and new options
+
+### Changed
+
+- [breaking] --onlyrelevant replaced with --silent
+- [breaking] loki.py has been converted to Linux new lines ending
+- updated docker files
+- updated openrc/init script
+- minified/stripped yara test sample
+
+### Fixed
+
+- upgrader handling github rate limits
+
+## [2.0.0] - 2024-01-09
+
+### Added
+
+- new dependency: requests
+- docker files improvements
+
+### Changed
+
+- [breaking] loki-client.py renamed to client.py
+- [breaking] loki-upgrader.py renamed to upgrader.py
+- [breaking] --log-file arg replaced with --logfile
+- [breaking] upgrader --clean arg replaced with --force
+- heavy refactoring of the upgrader, helpers and lokilogger lib files
+- initial refactoring of the loki.py
+- netaddr replaced with ipaddress
+- updated requirements.txt
+- updated docker files
+- updated flatpak files
+- urllib.request.urlopen replaced with requests
+- build.sh updated
+- upgrader now works independently of lib files
+- improved welcome message
+
+### Removed
+
+- [breaking] syslog and remote logging due to the obsolete dependency
+- removed dep: netaddr
+- removed dep: rfc5424-logging-handler
+
+### Security
+
+- removed shell subprocess calls
+
+### Fixed
+
+- packages generated by build.sh not including lib
+- upgrader not handling pipes properly
+
+## [1.0.3] - 2024-01-06
+
+### Added
+
+- added handling ascii welcome for smaller terminals
+- binary upgrader handling
+- pyinstaller build bash script
+- venv setup bash script
+- added certifi and ssl context for upgrader
+
+### Changed
+
+- change upgrader log name to loki-upgrader.log
+- loki-client.py now has argparse, check --help for usage
+
+### Removed
+
+- removed obsolete python2 modules imports
+
+### Fixed
+
+- incorrect version number
+
+## [1.0.2] - 2024-01-05
+
+### Changed
+
+- improved pidfile and socket error handling
+- get rid of wildcard imports
+
+### Fixed
+
+- missing module name
+- fixed upgrader clean mode
+
+## [1.0.1] - 2024-01-05
+
+### Fixed
+
+- missing module name
+
+## [1.0.0] - 2024-01-04
+
+### Changed
+
+- code refactoring and cleanup
+- dropping support for non-linux platforms
+- loki-upgrader program updates now uses Loki-daemonized repo
+- loki_client.py renamed to loki-client.py to match loki-upgrader.py convention
+- docker, flatpak, init files and img moved to ./addons/
+- example excludes disabled by default
+
+### Removed
+
+- removed any non-linux code
+- removed non-linux deps
+- removed patch file as it no longer makes sense due to the depth of changes
+- future module no longer used, removed from requirements.txt
+
+## [0.51.0-d2] - 2024-01-04
+
+### Added
+
+- added missing exceptions
+- added stripping socket data
+- flatpak builder files
+
+## [0.51.0-d1] - 2024-01-03
+
+### Added
+
+- first release
+- focuses on Linux
+- single file scan if given path is a file
+- daemon mode
+- exclude files by hash
+- initial implementation of process scanning under Linux
